@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import { config } from './config';
 import weatherRoutes from './routes/weather';
+import tripRoutes from './routes/trip';
 
 const app = express();
 
@@ -22,6 +23,7 @@ app.get('/health', (_req, res) => {
 
 // API routes
 app.use('/api/weather', weatherRoutes);
+app.use('/api/trip', tripRoutes);
 
 // Error handling
 app.use(

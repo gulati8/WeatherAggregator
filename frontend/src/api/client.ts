@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { UnifiedWeatherData } from '../types/weather';
+import { Trip, TripInput, TripLegInput, TripWeatherResponse } from '../types/trip';
 
 const api = axios.create({
   baseURL: '/api',
@@ -47,6 +48,28 @@ export const weatherApi = {
   // Health check
   healthCheck: async (): Promise<{ status: string; timestamp: string }> => {
     const response = await api.get('/health');
+    return response.data;
+  },
+};
+
+// Convert Trip to TripInput for API
+const tripToInput = (trip: Trip): TripInput => ({
+  tripId: trip.tripId,
+  name: trip.name,
+  legs: trip.legs.map((leg): TripLegInput => ({
+    legId: leg.legId,
+    departureAirport: leg.departureAirport,
+    arrivalAirport: leg.arrivalAirport,
+    departureTime: leg.departureTime.toISOString(),
+    estimatedFlightMinutes: leg.estimatedFlightMinutes,
+  })),
+});
+
+export const tripApi = {
+  // Get weather for a multi-leg trip
+  getTripWeather: async (trip: Trip): Promise<TripWeatherResponse> => {
+    const input = tripToInput(trip);
+    const response = await api.post<TripWeatherResponse>('/trip', input);
     return response.data;
   },
 };

@@ -25,10 +25,32 @@ function App() {
                 Weather Aggregator
               </span>
             </Link>
-            <nav className="flex items-center gap-4">
-              <span className="text-sm text-gray-500">
-                Flight Planning Weather
-              </span>
+            <nav className="flex items-center gap-6">
+              <Link
+                to="/"
+                className="text-sm text-gray-600 hover:text-blue-600 transition-colors"
+              >
+                Single Airport
+              </Link>
+              <Link
+                to="/trip"
+                className="text-sm text-gray-600 hover:text-blue-600 transition-colors flex items-center gap-1"
+              >
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
+                  />
+                </svg>
+                Trip Planner
+              </Link>
             </nav>
           </div>
         </div>
