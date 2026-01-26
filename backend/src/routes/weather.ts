@@ -11,18 +11,44 @@ const validateIcao = (icao: string): boolean => {
 };
 
 // GET /api/weather/:icao - Get aggregated weather for an airport
+// Optional query params:
+//   - refresh: 'true' to bypass cache
+//   - time: ISO 8601 datetime string for target time (e.g., '2026-01-27T14:00:00Z')
 router.get(
   '/:icao',
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { icao } = req.params;
       const refresh = req.query.refresh === 'true';
+      const timeParam = req.query.time as string | undefined;
 
       if (!validateIcao(icao)) {
         return res.status(400).json({
           error: 'Invalid ICAO code',
           message: 'ICAO code must be exactly 4 letters (e.g., KJFK, KLAX)',
         });
+      }
+
+      // Parse and validate target time if provided
+      let targetTime: Date | undefined;
+      if (timeParam) {
+        targetTime = new Date(timeParam);
+        if (isNaN(targetTime.getTime())) {
+          return res.status(400).json({
+            error: 'Invalid time format',
+            message: 'Time must be a valid ISO 8601 datetime string (e.g., 2026-01-27T14:00:00Z)',
+          });
+        }
+
+        // Validate time is within reasonable range (not more than 7 days ahead)
+        const now = new Date();
+        const maxFuture = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+        if (targetTime > maxFuture) {
+          return res.status(400).json({
+            error: 'Time too far in future',
+            message: 'Target time cannot be more than 7 days ahead',
+          });
+        }
       }
 
       // Clear cache if refresh requested
@@ -32,7 +58,7 @@ router.get(
         cacheService.del(`taf:${icao.toUpperCase()}`);
       }
 
-      const weather = await weatherAggregator.getAggregatedWeather(icao);
+      const weather = await weatherAggregator.getAggregatedWeather(icao, targetTime);
       res.json(weather);
     } catch (error) {
       next(error);

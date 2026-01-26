@@ -12,6 +12,7 @@ import {
   FlightCategory,
   WeatherAlert,
   WeatherSourceId,
+  TargetTimeSnapshot,
 } from '../types/weather';
 import {
   aviationWeatherService,
@@ -25,13 +26,18 @@ import { part135Checker } from './part135-checker';
 import { cacheService } from './cache';
 
 class WeatherAggregator {
-  async getAggregatedWeather(icao: string): Promise<UnifiedWeatherData> {
+  async getAggregatedWeather(icao: string, targetTime?: Date): Promise<UnifiedWeatherData> {
     const normalizedIcao = icao.toUpperCase();
+    const cacheKey = targetTime
+      ? `${normalizedIcao}:${targetTime.toISOString()}`
+      : normalizedIcao;
 
-    // Check cache first
-    const cached = cacheService.getWeather<UnifiedWeatherData>(normalizedIcao);
-    if (cached) {
-      return cached;
+    // Check cache first (only for non-target-time requests to keep cache simple)
+    if (!targetTime) {
+      const cached = cacheService.getWeather<UnifiedWeatherData>(normalizedIcao);
+      if (cached) {
+        return cached;
+      }
     }
 
     // Fetch from all sources in parallel
@@ -63,8 +69,17 @@ class WeatherAggregator {
     // Analyze consensus
     const consensus = this.analyzeConsensus(current, sources);
 
-    // Check Part 135 status
-    const part135Status = part135Checker.checkStatus(current);
+    // Build target time snapshot if requested
+    let atTargetTime: TargetTimeSnapshot | undefined;
+    if (targetTime) {
+      atTargetTime = this.buildTargetTimeSnapshot(targetTime, forecast, current);
+    }
+
+    // Check Part 135 status (use target time conditions if available)
+    const conditionsForPart135 = atTargetTime
+      ? this.forecastToCurrentConditions(atTargetTime.conditions, current)
+      : current;
+    const part135Status = part135Checker.checkStatus(conditionsForPart135);
 
     // Build weather alerts
     const weatherAlerts = this.buildAlerts(alerts);
@@ -72,18 +87,126 @@ class WeatherAggregator {
     const result: UnifiedWeatherData = {
       airport,
       timestamp: new Date().toISOString(),
+      targetTime: targetTime?.toISOString(),
       sources,
       current,
       forecast,
+      atTargetTime,
       consensus,
       part135Status,
       alerts: weatherAlerts,
     };
 
-    // Cache the result
-    cacheService.setWeather(normalizedIcao, result);
+    // Cache the result (only non-target-time requests)
+    if (!targetTime) {
+      cacheService.setWeather(normalizedIcao, result);
+    }
 
     return result;
+  }
+
+  private buildTargetTimeSnapshot(
+    targetTime: Date,
+    forecast: ForecastPeriod[],
+    current: CurrentConditions
+  ): TargetTimeSnapshot {
+    const now = new Date();
+    const hoursAhead = (targetTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+    const isCurrentObservation = Math.abs(hoursAhead) < 1;
+
+    // Find the forecast period that contains the target time
+    let targetPeriod = forecast.find((p) => {
+      const from = new Date(p.validFrom);
+      const to = new Date(p.validTo);
+      return targetTime >= from && targetTime < to;
+    });
+
+    // If no exact match, find the closest period
+    if (!targetPeriod && forecast.length > 0) {
+      targetPeriod = forecast.reduce((closest, period) => {
+        const periodMid = new Date(
+          (new Date(period.validFrom).getTime() + new Date(period.validTo).getTime()) / 2
+        );
+        const closestMid = new Date(
+          (new Date(closest.validFrom).getTime() + new Date(closest.validTo).getTime()) / 2
+        );
+        return Math.abs(periodMid.getTime() - targetTime.getTime()) <
+          Math.abs(closestMid.getTime() - targetTime.getTime())
+          ? period
+          : closest;
+      });
+    }
+
+    // If still no period, create a placeholder from current conditions
+    if (!targetPeriod) {
+      targetPeriod = {
+        validFrom: targetTime.toISOString(),
+        validTo: new Date(targetTime.getTime() + 3600000).toISOString(),
+        type: 'BASE',
+        temperature: current.temperature,
+        windDirection: current.windDirection,
+        windSpeed: current.windSpeed,
+        windGust: current.windGust,
+        visibility: current.visibility,
+        ceiling: current.ceiling,
+        precipitationProbability: { value: 0, bySource: {}, confidence: 'low' },
+        cloudLayers: current.cloudLayers,
+        weatherPhenomena: current.weatherPhenomena,
+        flightCategory: current.flightCategory,
+      };
+    }
+
+    // Get surrounding periods (±3 hours)
+    const threeHoursBefore = new Date(targetTime.getTime() - 3 * 60 * 60 * 1000);
+    const threeHoursAfter = new Date(targetTime.getTime() + 3 * 60 * 60 * 1000);
+    const surroundingPeriods = forecast.filter((p) => {
+      const from = new Date(p.validFrom);
+      return from >= threeHoursBefore && from <= threeHoursAfter;
+    });
+
+    // Determine confidence based on hours ahead
+    let confidence: 'high' | 'medium' | 'low';
+    if (hoursAhead < 0) {
+      confidence = 'low'; // Past time, using stale forecast
+    } else if (hoursAhead <= 6) {
+      confidence = 'high';
+    } else if (hoursAhead <= 24) {
+      confidence = 'medium';
+    } else {
+      confidence = 'low';
+    }
+
+    return {
+      targetTime: targetTime.toISOString(),
+      conditions: targetPeriod,
+      isCurrentObservation,
+      forecastHoursAhead: Math.max(0, hoursAhead),
+      confidence,
+      surroundingPeriods,
+    };
+  }
+
+  private forecastToCurrentConditions(
+    period: ForecastPeriod,
+    current: CurrentConditions
+  ): CurrentConditions {
+    // Convert a forecast period to CurrentConditions format for Part 135 checking
+    return {
+      observationTime: period.validFrom,
+      rawMetar: current.rawMetar,
+      temperature: period.temperature,
+      dewpoint: current.dewpoint,
+      humidity: current.humidity,
+      pressure: current.pressure,
+      windDirection: period.windDirection,
+      windSpeed: period.windSpeed,
+      windGust: period.windGust,
+      visibility: period.visibility,
+      ceiling: period.ceiling,
+      cloudLayers: period.cloudLayers,
+      weatherPhenomena: period.weatherPhenomena,
+      flightCategory: period.flightCategory,
+    };
   }
 
   private async fetchOpenMeteo(

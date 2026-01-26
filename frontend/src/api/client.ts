@@ -13,10 +13,25 @@ export interface RawWeatherData {
   timestamp: string;
 }
 
+export interface GetWeatherOptions {
+  refresh?: boolean;
+  targetTime?: Date;
+}
+
 export const weatherApi = {
   // Get aggregated weather for an airport
-  getWeather: async (icao: string, refresh = false): Promise<UnifiedWeatherData> => {
-    const params = refresh ? { refresh: 'true' } : {};
+  // Optional targetTime for flight planning at a specific time
+  getWeather: async (
+    icao: string,
+    options: GetWeatherOptions = {}
+  ): Promise<UnifiedWeatherData> => {
+    const params: Record<string, string> = {};
+    if (options.refresh) {
+      params.refresh = 'true';
+    }
+    if (options.targetTime) {
+      params.time = options.targetTime.toISOString();
+    }
     const response = await api.get<UnifiedWeatherData>(`/weather/${icao}`, {
       params,
     });

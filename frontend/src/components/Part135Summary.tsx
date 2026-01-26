@@ -4,9 +4,10 @@ import { formatCeiling, formatVisibility } from '../utils/formatters';
 
 interface Part135SummaryProps {
   status: Part135Status;
+  isForTargetTime?: boolean;
 }
 
-function Part135Summary({ status }: Part135SummaryProps) {
+function Part135Summary({ status, isForTargetTime }: Part135SummaryProps) {
   const getMinimumStatusStyle = (statusValue: 'above' | 'at' | 'below') => {
     switch (statusValue) {
       case 'above':
@@ -56,9 +57,16 @@ function Part135Summary({ status }: Part135SummaryProps) {
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-semibold text-gray-900">
-          Part 135 Status
-        </h2>
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900">
+            Part 135 Status
+          </h2>
+          {isForTargetTime && (
+            <span className="text-xs text-blue-600 font-medium">
+              At departure time
+            </span>
+          )}
+        </div>
         <FlightCategoryBadge category={status.flightCategory} size="md" />
       </div>
 

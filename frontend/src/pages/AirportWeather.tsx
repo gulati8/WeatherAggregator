@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useWeather, useFavorites, useRecentSearches } from '../hooks/useWeather';
 import AirportSearch from '../components/AirportSearch';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -10,13 +10,24 @@ import Part135Summary from '../components/Part135Summary';
 import ForecastTimeline from '../components/ForecastTimeline';
 import WeatherChart from '../components/WeatherChart';
 import AlertDisplay from '../components/AlertDisplay';
+import TargetTimeDisplay from '../components/TargetTimeDisplay';
 import { formatRelativeTime } from '../utils/formatters';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 
 function AirportWeather() {
   const { icao } = useParams<{ icao: string }>();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { data, loading, error, refresh } = useWeather(icao);
+
+  // Parse target time from URL
+  const targetTime = useMemo(() => {
+    const timeParam = searchParams.get('time');
+    if (!timeParam) return null;
+    const date = new Date(timeParam);
+    return isNaN(date.getTime()) ? null : date;
+  }, [searchParams]);
+
+  const { data, loading, error, refresh } = useWeather(icao, targetTime);
   const { isFavorite, addFavorite, removeFavorite } = useFavorites();
   const { addRecent } = useRecentSearches();
 
@@ -27,8 +38,17 @@ function AirportWeather() {
     }
   }, [icao, addRecent]);
 
-  const handleSearch = (newIcao: string) => {
-    navigate(`/weather/${newIcao.toUpperCase()}`);
+  const handleSearch = (newIcao: string, newTargetTime: Date | null) => {
+    const url = newTargetTime
+      ? `/weather/${newIcao.toUpperCase()}?time=${newTargetTime.toISOString()}`
+      : `/weather/${newIcao.toUpperCase()}`;
+    navigate(url);
+  };
+
+  const clearTargetTime = () => {
+    if (icao) {
+      navigate(`/weather/${icao.toUpperCase()}`);
+    }
   };
 
   const toggleFavorite = () => {
@@ -43,8 +63,12 @@ function AirportWeather() {
   return (
     <div className="max-w-7xl mx-auto px-4 py-6">
       {/* Search bar */}
-      <div className="max-w-md mb-6">
-        <AirportSearch onSearch={handleSearch} initialValue={icao} />
+      <div className="max-w-xl mb-6">
+        <AirportSearch
+          onSearch={handleSearch}
+          initialValue={icao}
+          initialTime={targetTime}
+        />
       </div>
 
       {loading && <LoadingSpinner />}
@@ -79,6 +103,14 @@ function AirportWeather() {
 
       {data && (
         <>
+          {/* Target time banner */}
+          {data.atTargetTime && (
+            <TargetTimeDisplay
+              snapshot={data.atTargetTime}
+              onClear={clearTargetTime}
+            />
+          )}
+
           {/* Airport header */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
             <div className="flex items-start justify-between">
@@ -160,12 +192,22 @@ function AirportWeather() {
           <div className="grid lg:grid-cols-3 gap-6 mb-6">
             {/* Current conditions - takes 2 columns */}
             <div className="lg:col-span-2">
-              <CurrentConditions conditions={data.current} />
+              <CurrentConditions
+                conditions={data.current}
+                targetTimeLabel={
+                  data.atTargetTime
+                    ? new Date(data.atTargetTime.targetTime).toLocaleString()
+                    : undefined
+                }
+              />
             </div>
 
             {/* Part 135 Summary */}
             <div>
-              <Part135Summary status={data.part135Status} />
+              <Part135Summary
+                status={data.part135Status}
+                isForTargetTime={!!data.atTargetTime}
+              />
             </div>
           </div>
 
@@ -189,12 +231,18 @@ function AirportWeather() {
 
           {/* Forecast timeline */}
           <div className="mb-6">
-            <ForecastTimeline forecast={data.forecast} />
+            <ForecastTimeline
+              forecast={data.forecast}
+              highlightTime={data.atTargetTime?.targetTime}
+            />
           </div>
 
           {/* Weather charts */}
           <div className="mb-6">
-            <WeatherChart forecast={data.forecast} />
+            <WeatherChart
+              forecast={data.forecast}
+              highlightTime={data.atTargetTime?.targetTime}
+            />
           </div>
         </>
       )}

@@ -116,12 +116,23 @@ export interface WeatherAlert {
   area?: string;
 }
 
+export interface TargetTimeSnapshot {
+  targetTime: string;
+  conditions: ForecastPeriod;
+  isCurrentObservation: boolean;
+  forecastHoursAhead: number;
+  confidence: 'high' | 'medium' | 'low';
+  surroundingPeriods: ForecastPeriod[];
+}
+
 export interface UnifiedWeatherData {
   airport: AirportInfo;
   timestamp: string;
+  targetTime?: string;
   sources: WeatherSource[];
   current: CurrentConditions;
   forecast: ForecastPeriod[];
+  atTargetTime?: TargetTimeSnapshot;
   consensus: ConsensusAnalysis;
   part135Status: Part135Status;
   alerts: WeatherAlert[];

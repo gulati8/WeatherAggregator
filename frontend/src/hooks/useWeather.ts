@@ -9,7 +9,10 @@ interface UseWeatherResult {
   refresh: () => Promise<void>;
 }
 
-export function useWeather(icao: string | undefined): UseWeatherResult {
+export function useWeather(
+  icao: string | undefined,
+  targetTime?: Date | null
+): UseWeatherResult {
   const [data, setData] = useState<UnifiedWeatherData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -26,7 +29,10 @@ export function useWeather(icao: string | undefined): UseWeatherResult {
       setError(null);
 
       try {
-        const result = await weatherApi.getWeather(icao, forceRefresh);
+        const result = await weatherApi.getWeather(icao, {
+          refresh: forceRefresh,
+          targetTime: targetTime || undefined,
+        });
         setData(result);
       } catch (err) {
         const message =
@@ -39,7 +45,7 @@ export function useWeather(icao: string | undefined): UseWeatherResult {
         setLoading(false);
       }
     },
-    [icao]
+    [icao, targetTime]
   );
 
   useEffect(() => {

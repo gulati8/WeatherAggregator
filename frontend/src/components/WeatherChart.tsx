@@ -14,6 +14,7 @@ import { ForecastPeriod, WeatherSourceId } from '../types/weather';
 
 interface WeatherChartProps {
   forecast: ForecastPeriod[];
+  highlightTime?: string;
 }
 
 const SOURCE_COLORS: Record<WeatherSourceId | 'consensus', string> = {
@@ -34,12 +35,21 @@ const SOURCE_NAMES: Record<WeatherSourceId | 'consensus', string> = {
 
 type ChartParam = 'windSpeed' | 'visibility' | 'precipProb';
 
-function WeatherChart({ forecast }: WeatherChartProps) {
+function WeatherChart({ forecast, highlightTime }: WeatherChartProps) {
   const [selectedParam, setSelectedParam] = useState<ChartParam>('visibility');
   const [showSources, setShowSources] = useState(true);
 
   const now = new Date();
   const next24h = new Date(now.getTime() + 24 * 3600000);
+  const highlightDate = highlightTime ? new Date(highlightTime) : null;
+
+  // Find the time label for the highlight reference line
+  const highlightTimeLabel = highlightDate
+    ? highlightDate.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    : null;
 
   // Build chart data with separate lines for each source
   const chartData = forecast
@@ -236,6 +246,23 @@ function WeatherChart({ forecast }: WeatherChartProps) {
                 }}
               />
             ))}
+
+            {/* Target time reference line */}
+            {highlightTimeLabel && (
+              <ReferenceLine
+                x={highlightTimeLabel}
+                stroke="#2563eb"
+                strokeWidth={2}
+                strokeDasharray="4 4"
+                label={{
+                  value: 'Departure',
+                  position: 'top',
+                  fontSize: 11,
+                  fill: '#2563eb',
+                  fontWeight: 'bold',
+                }}
+              />
+            )}
 
             {/* Source lines */}
             {showSources &&

@@ -10,6 +10,7 @@ import {
 
 interface ForecastTimelineProps {
   forecast: ForecastPeriod[];
+  highlightTime?: string;
 }
 
 const SOURCE_COLORS: Record<WeatherSourceId, { bg: string; text: string; border: string }> = {
@@ -41,7 +42,7 @@ function getMainSource(period: ForecastPeriod): WeatherSourceId {
   return 'openmeteo';
 }
 
-function ForecastTimeline({ forecast }: ForecastTimelineProps) {
+function ForecastTimeline({ forecast, highlightTime }: ForecastTimelineProps) {
   const [selectedHours, setSelectedHours] = useState(24);
   const [filterSource, setFilterSource] = useState<WeatherSourceId | 'all'>('all');
 
@@ -54,6 +55,7 @@ function ForecastTimeline({ forecast }: ForecastTimelineProps) {
 
   const now = new Date();
   const cutoffTime = new Date(now.getTime() + selectedHours * 3600000);
+  const highlightDate = highlightTime ? new Date(highlightTime) : null;
 
   const filteredForecast = forecast.filter((period) => {
     const periodStart = new Date(period.validFrom);
@@ -66,6 +68,13 @@ function ForecastTimeline({ forecast }: ForecastTimelineProps) {
     const mainSource = getMainSource(period);
     return mainSource === filterSource;
   });
+
+  const isHighlightedPeriod = (period: ForecastPeriod): boolean => {
+    if (!highlightDate) return false;
+    const from = new Date(period.validFrom);
+    const to = new Date(period.validTo);
+    return highlightDate >= from && highlightDate < to;
+  };
 
   // Get unique sources in the forecast
   const sourcesInForecast = Array.from(
@@ -161,12 +170,24 @@ function ForecastTimeline({ forecast }: ForecastTimelineProps) {
           {filteredForecast.map((period, index) => {
             const mainSource = getMainSource(period);
             const sourceStyle = SOURCE_COLORS[mainSource];
+            const isHighlighted = isHighlightedPeriod(period);
 
             return (
               <div
                 key={index}
-                className={`flex items-start gap-4 p-4 rounded-lg border-l-4 transition-colors ${sourceStyle.bg} ${sourceStyle.border}`}
+                className={`relative flex items-start gap-4 p-4 rounded-lg border-l-4 transition-colors ${
+                  isHighlighted
+                    ? 'bg-blue-100 border-blue-500 ring-2 ring-blue-500 ring-offset-2'
+                    : `${sourceStyle.bg} ${sourceStyle.border}`
+                }`}
               >
+                {isHighlighted && (
+                  <div className="absolute -top-3 left-4">
+                    <div className="bg-blue-600 text-white text-xs px-2 py-0.5 rounded font-bold shadow">
+                      DEPARTURE TIME
+                    </div>
+                  </div>
+                )}
                 {/* Source badge */}
                 <div className="flex-shrink-0 w-20">
                   <span

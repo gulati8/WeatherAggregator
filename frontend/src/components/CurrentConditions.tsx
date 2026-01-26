@@ -13,14 +13,15 @@ import {
 
 interface CurrentConditionsProps {
   conditions: CurrentConditionsType;
+  targetTimeLabel?: string;
 }
 
-function CurrentConditions({ conditions }: CurrentConditionsProps) {
+function CurrentConditions({ conditions, targetTimeLabel }: CurrentConditionsProps) {
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-lg font-semibold text-gray-900">
-          Current Conditions
+          {targetTimeLabel ? 'Conditions at Target Time' : 'Current Conditions'}
         </h2>
         <div className="flex items-center gap-3">
           <FlightCategoryBadge
@@ -28,7 +29,7 @@ function CurrentConditions({ conditions }: CurrentConditionsProps) {
             size="lg"
           />
           <span className="text-sm text-gray-500">
-            {formatRelativeTime(conditions.observationTime)}
+            {targetTimeLabel || formatRelativeTime(conditions.observationTime)}
           </span>
         </div>
       </div>
