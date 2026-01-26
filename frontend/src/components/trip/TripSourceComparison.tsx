@@ -1,6 +1,7 @@
 import { UnifiedWeatherData, WeatherSourceId } from '../../types/weather';
-import { formatCeiling, formatVisibility, formatDateTime } from '../../utils/formatters';
+import { formatCeiling, formatVisibility } from '../../utils/formatters';
 import FlightCategoryBadge from '../FlightCategoryBadge';
+import DualTime from '../DualTime';
 
 interface TripSourceComparisonProps {
   airport: string;
@@ -46,7 +47,7 @@ function TripSourceComparison({
         <div>
           <span className="text-xs text-gray-500">{label}</span>
           <h4 className="text-lg font-bold text-gray-900">{airport}</h4>
-          <span className="text-xs text-gray-500">{formatDateTime(time)}</span>
+          <DualTime time={time} size="sm" layout="stacked" />
         </div>
         <div className="text-right">
           <FlightCategoryBadge

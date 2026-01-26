@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTripBuilder, useTripWeather, useSavedTrips } from '../hooks/useTrip';
 import {
@@ -7,6 +7,7 @@ import {
   TripLegCard,
   TripSummaryPanel,
 } from '../components/trip';
+import DualTime from '../components/DualTime';
 
 function TripPlanner() {
   const { tripId } = useParams();
@@ -85,6 +86,36 @@ function TripPlanner() {
     ? tripWeather?.legs.find((l) => l.legId === selectedLegId)
     : null;
 
+  // Calculate ETD (first leg departure) and ETA (last leg arrival)
+  const tripTimes = useMemo(() => {
+    if (trip.legs.length === 0) return null;
+
+    const firstLeg = trip.legs[0];
+    const lastLeg = trip.legs[trip.legs.length - 1];
+    const etd = firstLeg.departureTime;
+    const eta = new Date(
+      lastLeg.departureTime.getTime() + lastLeg.estimatedFlightMinutes * 60 * 1000
+    );
+
+    // Calculate total flight time
+    let totalFlightMinutes = 0;
+    trip.legs.forEach((leg) => {
+      totalFlightMinutes += leg.estimatedFlightMinutes;
+    });
+
+    // Calculate total trip duration (from first departure to last arrival)
+    const totalTripMinutes = Math.round((eta.getTime() - etd.getTime()) / 60000);
+
+    return {
+      etd,
+      eta,
+      totalFlightMinutes,
+      totalTripMinutes,
+      departureAirport: firstLeg.departureAirport,
+      arrivalAirport: lastLeg.arrivalAirport,
+    };
+  }, [trip.legs]);
+
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Header */}
@@ -157,6 +188,49 @@ function TripPlanner() {
           onAddLeg={addLeg}
           canAddLeg={canAddLeg}
         />
+
+        {/* ETD/ETA Display */}
+        {tripTimes && tripTimes.departureAirport && tripTimes.arrivalAirport && (
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* ETD */}
+              <div className="flex flex-col">
+                <span className="text-xs text-gray-500 uppercase tracking-wide mb-1">
+                  ETD - {tripTimes.departureAirport}
+                </span>
+                <DualTime time={tripTimes.etd} layout="stacked" size="md" />
+              </div>
+
+              {/* ETA */}
+              <div className="flex flex-col">
+                <span className="text-xs text-gray-500 uppercase tracking-wide mb-1">
+                  ETA - {tripTimes.arrivalAirport}
+                </span>
+                <DualTime time={tripTimes.eta} layout="stacked" size="md" />
+              </div>
+
+              {/* Flight Time */}
+              <div className="flex flex-col">
+                <span className="text-xs text-gray-500 uppercase tracking-wide mb-1">
+                  Total Flight Time
+                </span>
+                <span className="text-sm font-medium text-gray-700">
+                  {Math.floor(tripTimes.totalFlightMinutes / 60)}h {tripTimes.totalFlightMinutes % 60}m
+                </span>
+              </div>
+
+              {/* Trip Duration */}
+              <div className="flex flex-col">
+                <span className="text-xs text-gray-500 uppercase tracking-wide mb-1">
+                  Trip Duration
+                </span>
+                <span className="text-sm font-medium text-gray-700">
+                  {Math.floor(tripTimes.totalTripMinutes / 60)}h {tripTimes.totalTripMinutes % 60}m
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Get Weather button */}
         {trip.legs.length > 0 && (

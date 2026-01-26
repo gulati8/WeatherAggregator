@@ -81,6 +81,69 @@ export const formatDateTime = (isoString: string): string => {
   });
 };
 
+// Dual time formatting (local + UTC)
+export const formatTimeDual = (isoString: string | Date): { local: string; utc: string } => {
+  const date = typeof isoString === 'string' ? new Date(isoString) : isoString;
+
+  const local = date.toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
+
+  const utc = date.toLocaleTimeString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+    timeZone: 'UTC',
+  }) + 'Z';
+
+  return { local, utc };
+};
+
+export const formatDateTimeDual = (isoString: string | Date): { local: string; utc: string; localFull: string; utcFull: string } => {
+  const date = typeof isoString === 'string' ? new Date(isoString) : isoString;
+
+  const local = date.toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
+
+  const utc = date.toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+    timeZone: 'UTC',
+  }) + 'Z';
+
+  const localFull = date.toLocaleString('en-US', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+    timeZoneName: 'short',
+  });
+
+  const utcFull = date.toLocaleString('en-US', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+    timeZone: 'UTC',
+  }) + ' UTC';
+
+  return { local, utc, localFull, utcFull };
+};
+
 export const formatRelativeTime = (isoString: string): string => {
   const date = new Date(isoString);
   const now = new Date();

@@ -5,8 +5,8 @@ import {
   formatWindSpeed,
   formatVisibility,
   formatCeiling,
-  formatTime,
 } from '../utils/formatters';
+import DualTime from './DualTime';
 
 interface ForecastTimelineProps {
   forecast: ForecastPeriod[];
@@ -198,12 +198,10 @@ function ForecastTimeline({ forecast, highlightTime }: ForecastTimelineProps) {
                 </div>
 
                 {/* Time column */}
-                <div className="flex-shrink-0 w-24">
-                  <div className="text-sm font-semibold text-gray-900">
-                    {formatTime(period.validFrom)}
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    to {formatTime(period.validTo)}
+                <div className="flex-shrink-0 w-32">
+                  <DualTime time={period.validFrom} showDate={false} size="sm" layout="stacked" />
+                  <div className="text-xs text-gray-500 mt-1">
+                    to <DualTime time={period.validTo} showDate={false} size="sm" />
                   </div>
                   {period.type !== 'BASE' && (
                     <span className="inline-block mt-1 px-2 py-0.5 text-xs bg-white/70 text-gray-700 rounded">

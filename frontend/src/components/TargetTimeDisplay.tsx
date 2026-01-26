@@ -4,6 +4,7 @@ import {
   formatWindSpeed,
   formatVisibility,
   formatCeiling,
+  formatDateTimeDual,
 } from '../utils/formatters';
 
 interface TargetTimeDisplayProps {
@@ -14,6 +15,7 @@ interface TargetTimeDisplayProps {
 function TargetTimeDisplay({ snapshot, onClear }: TargetTimeDisplayProps) {
   const targetDate = new Date(snapshot.targetTime);
   const { conditions } = snapshot;
+  const dualTime = formatDateTimeDual(targetDate);
 
   const confidenceColors = {
     high: 'bg-green-100 text-green-800 border-green-300',
@@ -51,16 +53,10 @@ function TargetTimeDisplay({ snapshot, onClear }: TargetTimeDisplayProps) {
               Forecast for Departure Time
             </div>
             <div className="text-2xl font-bold">
-              {targetDate.toLocaleDateString('en-US', {
-                weekday: 'long',
-                month: 'short',
-                day: 'numeric',
-              })}{' '}
-              at{' '}
-              {targetDate.toLocaleTimeString('en-US', {
-                hour: 'numeric',
-                minute: '2-digit',
-              })}
+              {dualTime.localFull}
+            </div>
+            <div className="text-lg text-blue-200 font-mono">
+              {dualTime.utcFull}
             </div>
             <div className="flex items-center gap-3 mt-2">
               <span

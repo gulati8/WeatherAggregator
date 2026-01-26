@@ -1,7 +1,8 @@
 import { TripLegWeather, TripLegIssue } from '../../types/trip';
-import { formatDateTime, formatCeiling, formatVisibility } from '../../utils/formatters';
+import { formatCeiling, formatVisibility } from '../../utils/formatters';
 import FlightCategoryBadge from '../FlightCategoryBadge';
 import TripSourceComparison from './TripSourceComparison';
+import DualTime from '../DualTime';
 
 interface TripLegCardProps {
   leg: TripLegWeather;
@@ -67,8 +68,9 @@ function TripLegCard({ leg, index }: TripLegCardProps) {
             <div className="text-lg font-bold text-gray-900">
               {leg.departureAirport.icao} → {leg.arrivalAirport.icao}
             </div>
-            <span className="text-sm text-gray-500">
-              {formatDateTime(leg.departureTime)} ({durationStr})
+            <span className="text-sm text-gray-500 flex items-center gap-1">
+              <DualTime time={leg.departureTime} size="sm" />
+              <span>({durationStr})</span>
             </span>
           </div>
           {getStatusBadge()}

@@ -1,6 +1,6 @@
 import { WeatherAlert } from '../types/weather';
 import { ALERT_SEVERITY_STYLES } from '../utils/colors';
-import { formatDateTime } from '../utils/formatters';
+import DualTime from './DualTime';
 
 interface AlertDisplayProps {
   alerts: WeatherAlert[];
@@ -93,9 +93,13 @@ function AlertDisplay({ alerts }: AlertDisplayProps) {
                     {alert.description.slice(0, 200)}
                     {alert.description.length > 200 && '...'}
                   </p>
-                  <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
-                    <span>Valid: {formatDateTime(alert.validFrom)}</span>
-                    <span>Expires: {formatDateTime(alert.validTo)}</span>
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-2 text-xs text-gray-500">
+                    <span className="flex items-center gap-1">
+                      Valid: <DualTime time={alert.validFrom} size="sm" />
+                    </span>
+                    <span className="flex items-center gap-1">
+                      Expires: <DualTime time={alert.validTo} size="sm" />
+                    </span>
                   </div>
                   {alert.area && (
                     <div className="text-xs text-gray-500 mt-1">

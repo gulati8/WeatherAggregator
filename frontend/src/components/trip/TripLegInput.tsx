@@ -1,4 +1,5 @@
 import { TripLeg } from '../../types/trip';
+import DualTime from '../DualTime';
 
 interface TripLegInputProps {
   leg: TripLeg;
@@ -190,14 +191,9 @@ function TripLegInput({
       </div>
 
       {/* Arrival time display */}
-      <div className="mt-2 text-xs text-gray-500">
-        Arrival:{' '}
-        {arrivalTime.toLocaleString('en-US', {
-          month: 'short',
-          day: 'numeric',
-          hour: 'numeric',
-          minute: '2-digit',
-        })}
+      <div className="mt-2 text-xs text-gray-500 flex items-center gap-1">
+        <span>Arrival:</span>
+        <DualTime time={arrivalTime} size="sm" />
       </div>
     </div>
   );

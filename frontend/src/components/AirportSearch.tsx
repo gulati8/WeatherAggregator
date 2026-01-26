@@ -1,4 +1,5 @@
 import { useState, FormEvent } from 'react';
+import { formatDateTimeDual } from '../utils/formatters';
 
 interface AirportSearchProps {
   onSearch: (icao: string, targetTime: Date | null) => void;
@@ -62,26 +63,23 @@ function AirportSearch({
     onSearch(trimmed, targetTime);
   };
 
-  const formatDisplayTime = (): string => {
+  const formatDisplayTime = (): { local: string; utc: string; suffix: string } => {
     const targetTime = getTargetTime();
-    if (!targetTime) return '';
+    if (!targetTime) return { local: '', utc: '', suffix: '' };
 
     const now = new Date();
     const diffHours = Math.round(
       (targetTime.getTime() - now.getTime()) / (1000 * 60 * 60)
     );
 
-    const timeStr = targetTime.toLocaleString('en-US', {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-    });
+    const { local, utc } = formatDateTimeDual(targetTime);
 
-    if (diffHours === 0) return `${timeStr} (now)`;
-    if (diffHours > 0) return `${timeStr} (+${diffHours}h)`;
-    return `${timeStr} (${diffHours}h)`;
+    let suffix = '';
+    if (diffHours === 0) suffix = '(now)';
+    else if (diffHours > 0) suffix = `(+${diffHours}h)`;
+    else suffix = `(${diffHours}h)`;
+
+    return { local, utc, suffix };
   };
 
   // Calculate min/max dates for the picker
@@ -182,8 +180,11 @@ function AirportSearch({
             className="px-2 py-1.5 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
-        <span className="text-sm text-gray-500">
-          {formatDisplayTime()}
+        <span className="text-sm flex items-center gap-1 flex-wrap">
+          <span className="text-gray-700">{formatDisplayTime().local}</span>
+          <span className="text-gray-400">/</span>
+          <span className="text-blue-600 font-mono">{formatDisplayTime().utc}</span>
+          <span className="text-gray-500">{formatDisplayTime().suffix}</span>
         </span>
       </div>
 
