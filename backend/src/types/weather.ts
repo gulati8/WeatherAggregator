@@ -1,0 +1,149 @@
+// Unified weather data structure that normalizes all API responses
+
+export interface AirportInfo {
+  icao: string;
+  name: string;
+  city: string;
+  country: string;
+  latitude: number;
+  longitude: number;
+  elevation: number; // feet
+}
+
+export type WeatherSourceId = 'awc' | 'avwx' | 'openmeteo' | 'nws';
+
+export interface WeatherSource {
+  id: WeatherSourceId;
+  name: string;
+  lastUpdated: string;
+  status: 'ok' | 'error' | 'stale';
+  errorMessage?: string;
+}
+
+// Value with data from multiple sources for comparison
+export interface SourceValue<T> {
+  value: T; // Consensus/primary value
+  bySource: Partial<Record<WeatherSourceId, T>>; // Value from each source
+  confidence: 'high' | 'medium' | 'low';
+  spread?: number; // For numeric values, max-min
+}
+
+export interface CloudLayer {
+  coverage: 'SKC' | 'CLR' | 'FEW' | 'SCT' | 'BKN' | 'OVC' | 'VV';
+  base: number; // Feet AGL
+  type?: 'CB' | 'TCU'; // Cumulonimbus or Towering Cumulus
+}
+
+export interface WeatherPhenomenon {
+  intensity: '-' | '' | '+'; // Light, moderate, heavy
+  descriptor?: string;
+  type: string; // RA, SN, FG, BR, etc.
+  description: string; // Human-readable
+}
+
+export type FlightCategory = 'VFR' | 'MVFR' | 'IFR' | 'LIFR';
+
+export interface CurrentConditions {
+  observationTime: string;
+  rawMetar?: string;
+  temperature: SourceValue<number>; // Celsius
+  dewpoint: SourceValue<number>; // Celsius
+  humidity: SourceValue<number>; // Percent
+  pressure: SourceValue<number>; // hPa/mb
+  windDirection: SourceValue<number | null>; // Degrees, null = calm/variable
+  windSpeed: SourceValue<number>; // Knots
+  windGust: SourceValue<number | null>; // Knots
+  visibility: SourceValue<number>; // Statute miles
+  ceiling: SourceValue<number | null>; // Feet AGL, null = unlimited
+  cloudLayers: CloudLayer[];
+  weatherPhenomena: WeatherPhenomenon[];
+  flightCategory: SourceValue<FlightCategory>;
+}
+
+export interface ForecastPeriod {
+  validFrom: string;
+  validTo: string;
+  type: 'FM' | 'TEMPO' | 'BECMG' | 'PROB' | 'BASE';
+  probability?: number;
+  temperature: SourceValue<number>;
+  windDirection: SourceValue<number | null>;
+  windSpeed: SourceValue<number>;
+  windGust: SourceValue<number | null>;
+  visibility: SourceValue<number>;
+  ceiling: SourceValue<number | null>;
+  precipitationProbability: SourceValue<number>;
+  cloudLayers: CloudLayer[];
+  weatherPhenomena: WeatherPhenomenon[];
+  flightCategory: SourceValue<FlightCategory>;
+}
+
+export interface DisagreementItem {
+  parameter: string;
+  description: string;
+  severity: 'minor' | 'moderate' | 'significant';
+  sourceValues: Record<string, string>;
+}
+
+export interface ConsensusAnalysis {
+  overallAgreement: 'strong' | 'moderate' | 'weak';
+  disagreementAreas: DisagreementItem[];
+  confidenceScore: number; // 0-100
+}
+
+export interface MinimumStatus {
+  value: number | null;
+  minimum: number;
+  margin: number; // How much above/below minimum
+  status: 'above' | 'at' | 'below';
+}
+
+export interface Part135Status {
+  canDispatch: boolean;
+  flightCategory: FlightCategory;
+  ceilingStatus: MinimumStatus;
+  visibilityStatus: MinimumStatus;
+  weatherHazards: string[];
+  alternateRequired: boolean;
+  alternateReason?: string;
+}
+
+export interface WeatherAlert {
+  type: 'SIGMET' | 'AIRMET' | 'CONVECTIVE' | 'TFR' | 'NOTAM' | 'WARNING';
+  severity: 'info' | 'warning' | 'danger';
+  title: string;
+  description: string;
+  validFrom: string;
+  validTo: string;
+  area?: string;
+}
+
+export interface UnifiedWeatherData {
+  airport: AirportInfo;
+  timestamp: string;
+  sources: WeatherSource[];
+  current: CurrentConditions;
+  forecast: ForecastPeriod[];
+  consensus: ConsensusAnalysis;
+  part135Status: Part135Status;
+  alerts: WeatherAlert[];
+}
+
+// Flight category thresholds
+export const FLIGHT_CATEGORY_THRESHOLDS = {
+  VFR: { ceiling: 3000, visibility: 5 },
+  MVFR: { ceiling: 1000, visibility: 3 },
+  IFR: { ceiling: 500, visibility: 1 },
+  LIFR: { ceiling: 0, visibility: 0 },
+};
+
+// Part 135 minimums
+export const PART_135_MINIMUMS = {
+  ceiling: {
+    standard: 500, // feet AGL
+    precision: 200, // CAT I ILS
+  },
+  visibility: {
+    standard: 1.0, // statute miles
+    precision: 0.5, // CAT I ILS
+  },
+};

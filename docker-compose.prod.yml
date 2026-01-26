@@ -1,0 +1,23 @@
+services:
+  backend:
+    image: ghcr.io/gulati8/weatheraggregator-api:latest
+    container_name: weatheraggregator-api
+    environment:
+      NODE_ENV: production
+      PORT: 3002
+    restart: unless-stopped
+    networks:
+      - proxy
+
+  frontend:
+    image: ghcr.io/gulati8/weatheraggregator-web:latest
+    container_name: weatheraggregator-web
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true

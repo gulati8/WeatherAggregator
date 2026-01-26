@@ -1,0 +1,32 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      target: development
+    container_name: weatheraggregator-api-dev
+    environment:
+      NODE_ENV: development
+      PORT: 3002
+    volumes:
+      - ./backend/src:/app/src
+      - ./backend/package.json:/app/package.json
+    ports:
+      - "3002:3002"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      target: development
+    container_name: weatheraggregator-web-dev
+    environment:
+      VITE_API_URL: http://localhost:3002
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/index.html:/app/index.html
+      - ./frontend/package.json:/app/package.json
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    restart: unless-stopped
