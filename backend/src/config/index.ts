@@ -12,11 +12,7 @@ export const config = {
     aviationWeather: {
       baseUrl: 'https://aviationweather.gov/api/data',
     },
-    avwx: {
-      baseUrl: 'https://avwx.rest/api',
-      apiKey: process.env.AVWX_API_KEY,
-    },
-    openMeteo: {
+openMeteo: {
       baseUrl: 'https://api.open-meteo.com/v1',
     },
     nws: {

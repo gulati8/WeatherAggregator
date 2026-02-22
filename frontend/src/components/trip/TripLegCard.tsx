@@ -1,8 +1,62 @@
 import { TripLegWeather, TripLegIssue } from '../../types/trip';
+import { UnifiedWeatherData } from '../../types/weather';
 import { formatCeiling, formatVisibility } from '../../utils/formatters';
 import FlightCategoryBadge from '../FlightCategoryBadge';
 import TripSourceComparison from './TripSourceComparison';
 import DualTime from '../DualTime';
+
+function RawReports({ icao, weather }: { icao: string; weather: UnifiedWeatherData }) {
+  return (
+    <div className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-600 rounded-lg p-3">
+      <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        {icao} Raw Reports
+      </h5>
+
+      {/* Current METAR */}
+      {weather.current.rawMetar ? (
+        <div className="mb-2">
+          <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">METAR (current)</span>
+          <pre className="mt-0.5 text-xs font-mono text-gray-800 dark:text-gray-200 whitespace-pre-wrap break-all bg-white dark:bg-gray-800 rounded px-2 py-1.5 border border-gray-200 dark:border-gray-700">
+            {weather.current.rawMetar}
+          </pre>
+        </div>
+      ) : (
+        <p className="text-xs text-gray-400 dark:text-gray-500 mb-2">No METAR available</p>
+      )}
+
+      {/* Previous METARs */}
+      {weather.recentMetars && weather.recentMetars.length > 0 && (
+        <div className="mb-2">
+          <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">
+            Previous METARs ({weather.recentMetars.length})
+          </span>
+          <div className="mt-0.5 space-y-1">
+            {weather.recentMetars.map((metar, idx) => (
+              <pre
+                key={idx}
+                className="text-xs font-mono text-gray-600 dark:text-gray-400 whitespace-pre-wrap break-all bg-white dark:bg-gray-800 rounded px-2 py-1.5 border border-gray-100 dark:border-gray-700"
+              >
+                {metar}
+              </pre>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* TAF */}
+      {weather.rawTaf ? (
+        <div>
+          <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">TAF</span>
+          <pre className="mt-0.5 text-xs font-mono text-gray-800 dark:text-gray-200 whitespace-pre-wrap break-all bg-white dark:bg-gray-800 rounded px-2 py-1.5 border border-gray-200 dark:border-gray-700">
+            {weather.rawTaf}
+          </pre>
+        </div>
+      ) : (
+        <p className="text-xs text-gray-400 dark:text-gray-500">No TAF available</p>
+      )}
+    </div>
+  );
+}
 
 interface TripLegCardProps {
   leg: TripLegWeather;
@@ -13,18 +67,18 @@ function TripLegCard({ leg, index }: TripLegCardProps) {
   const getSeverityStyle = (severity: TripLegIssue['severity']) => {
     switch (severity) {
       case 'warning':
-        return 'bg-red-100 text-red-800 border-red-200';
+        return 'bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-300 border-red-200 dark:border-red-700';
       case 'caution':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+        return 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-300 border-yellow-200 dark:border-yellow-700';
       case 'info':
-        return 'bg-blue-100 text-blue-800 border-blue-200';
+        return 'bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-700';
     }
   };
 
   const getStatusBadge = () => {
     if (!leg.legStatus.canDispatch) {
       return (
-        <span className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-semibold">
+        <span className="px-3 py-1 bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-300 rounded-full text-sm font-semibold">
           NO-GO
         </span>
       );
@@ -34,20 +88,20 @@ function TripLegCard({ leg, index }: TripLegCardProps) {
 
     if (hasWarnings) {
       return (
-        <span className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-semibold">
+        <span className="px-3 py-1 bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-300 rounded-full text-sm font-semibold">
           CAUTION
         </span>
       );
     }
     if (hasCautions) {
       return (
-        <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-semibold">
+        <span className="px-3 py-1 bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-300 rounded-full text-sm font-semibold">
           CAUTION
         </span>
       );
     }
     return (
-      <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-semibold">
+      <span className="px-3 py-1 bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300 rounded-full text-sm font-semibold">
         GO
       </span>
     );
@@ -59,16 +113,16 @@ function TripLegCard({ leg, index }: TripLegCardProps) {
   const durationStr = `${hours}h ${mins}m`;
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 overflow-hidden">
       {/* Header */}
-      <div className="bg-gray-50 border-b border-gray-200 p-4">
+      <div className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600 p-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div className="flex flex-wrap items-center gap-2 sm:gap-4">
-            <span className="text-sm font-medium text-gray-500">Leg {index + 1}</span>
-            <div className="text-lg font-bold text-gray-900">
+            <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Leg {index + 1}</span>
+            <div className="text-lg font-bold text-gray-900 dark:text-gray-100">
               {leg.departureAirport.icao} → {leg.arrivalAirport.icao}
             </div>
-            <span className="text-sm text-gray-500 flex items-center gap-1">
+            <span className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
               <DualTime time={leg.departureTime} size="sm" />
               <span>({durationStr})</span>
             </span>
@@ -101,16 +155,16 @@ function TripLegCard({ leg, index }: TripLegCardProps) {
         {/* Part 135 Summary Row */}
         <div className="grid md:grid-cols-2 gap-4 mb-4">
           {/* Departure Part 135 */}
-          <div className="bg-white border border-gray-200 rounded-lg p-3">
-            <h5 className="text-sm font-medium text-gray-700 mb-2">
+          <div className="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-3">
+            <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               {leg.departureAirport.icao} Part 135 Status
             </h5>
             <div className="flex flex-wrap items-center gap-2 sm:gap-4">
               <div
                 className={`px-3 py-1 rounded-lg ${
                   leg.legStatus.departureStatus.canDispatch
-                    ? 'bg-green-50 text-green-700'
-                    : 'bg-red-50 text-red-700'
+                    ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                    : 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400'
                 }`}
               >
                 <span className="font-semibold">
@@ -121,7 +175,7 @@ function TripLegCard({ leg, index }: TripLegCardProps) {
                 category={leg.legStatus.departureStatus.flightCategory}
                 size="sm"
               />
-              <div className="text-xs text-gray-600">
+              <div className="text-xs text-gray-600 dark:text-gray-400">
                 <div>Ceiling: {formatCeiling(leg.legStatus.departureStatus.ceilingStatus.value)}</div>
                 <div>Visibility: {formatVisibility(leg.legStatus.departureStatus.visibilityStatus.value || 0)}</div>
               </div>
@@ -129,16 +183,16 @@ function TripLegCard({ leg, index }: TripLegCardProps) {
           </div>
 
           {/* Arrival Part 135 */}
-          <div className="bg-white border border-gray-200 rounded-lg p-3">
-            <h5 className="text-sm font-medium text-gray-700 mb-2">
+          <div className="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-3">
+            <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               {leg.arrivalAirport.icao} Part 135 Status
             </h5>
             <div className="flex flex-wrap items-center gap-2 sm:gap-4">
               <div
                 className={`px-3 py-1 rounded-lg ${
                   leg.legStatus.arrivalStatus.canDispatch
-                    ? 'bg-green-50 text-green-700'
-                    : 'bg-red-50 text-red-700'
+                    ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                    : 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400'
                 }`}
               >
                 <span className="font-semibold">
@@ -149,23 +203,38 @@ function TripLegCard({ leg, index }: TripLegCardProps) {
                 category={leg.legStatus.arrivalStatus.flightCategory}
                 size="sm"
               />
-              <div className="text-xs text-gray-600">
+              <div className="text-xs text-gray-600 dark:text-gray-400">
                 <div>Ceiling: {formatCeiling(leg.legStatus.arrivalStatus.ceilingStatus.value)}</div>
                 <div>Visibility: {formatVisibility(leg.legStatus.arrivalStatus.visibilityStatus.value || 0)}</div>
               </div>
             </div>
             {leg.legStatus.arrivalStatus.alternateRequired && (
-              <div className="mt-2 text-xs text-yellow-700 bg-yellow-50 px-2 py-1 rounded">
+              <div className="mt-2 text-xs text-yellow-700 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/30 px-2 py-1 rounded">
                 Alternate required: {leg.legStatus.arrivalStatus.alternateReason}
               </div>
             )}
           </div>
         </div>
 
+        {/* Raw METAR & TAF */}
+        <div className="grid md:grid-cols-2 gap-4 mb-4">
+          {/* Departure Raw */}
+          <RawReports
+            icao={leg.departureAirport.icao}
+            weather={leg.departureAirport.weather}
+          />
+
+          {/* Arrival Raw */}
+          <RawReports
+            icao={leg.arrivalAirport.icao}
+            weather={leg.arrivalAirport.weather}
+          />
+        </div>
+
         {/* Issues list */}
         {leg.legStatus.issues.length > 0 && (
           <div>
-            <h5 className="text-sm font-medium text-gray-700 mb-2">
+            <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Issues ({leg.legStatus.issues.length})
             </h5>
             <div className="space-y-1">

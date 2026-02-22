@@ -1,6 +1,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { weatherAggregator } from '../services/weather-aggregator';
 import { aviationWeatherService } from '../services/aviation-weather';
+import { flightReleaseService } from '../services/flight-release-service';
 import { cacheService } from '../services/cache';
 
 const router = Router();
@@ -146,6 +147,41 @@ router.get(
       }
 
       res.json(taf);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// GET /api/weather/:icao/release - Generate a Part 135 flight release document
+router.get(
+  '/:icao/release',
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { icao } = req.params;
+      const timeParam = req.query.time as string | undefined;
+
+      if (!validateIcao(icao)) {
+        return res.status(400).json({
+          error: 'Invalid ICAO code',
+          message: 'ICAO code must be exactly 4 letters (e.g., KJFK, KLAX)',
+        });
+      }
+
+      let targetTime: Date | undefined;
+      if (timeParam) {
+        targetTime = new Date(timeParam);
+        if (isNaN(targetTime.getTime())) {
+          return res.status(400).json({
+            error: 'Invalid time format',
+            message: 'Time must be a valid ISO 8601 datetime string',
+          });
+        }
+      }
+
+      const weather = await weatherAggregator.getAggregatedWeather(icao, targetTime);
+      const release = flightReleaseService.generate(weather);
+      res.json(release);
     } catch (error) {
       next(error);
     }

@@ -26,10 +26,10 @@ function DualTime({
   if (layout === 'stacked') {
     return (
       <div className={`${sizeClasses[size]} ${className}`}>
-        <div className="text-gray-700 font-medium">
+        <div className="text-gray-700 dark:text-gray-300 font-medium">
           {showDate ? formatted.local : (formatted as { local: string; utc: string }).local}
         </div>
-        <div className="text-blue-600 font-mono">
+        <div className="text-blue-600 dark:text-blue-400 font-mono">
           {showDate ? formatted.utc : (formatted as { local: string; utc: string }).utc}
         </div>
       </div>
@@ -38,11 +38,11 @@ function DualTime({
 
   return (
     <span className={`${sizeClasses[size]} ${className}`}>
-      <span className="text-gray-700">
+      <span className="text-gray-700 dark:text-gray-300">
         {showDate ? formatted.local : (formatted as { local: string; utc: string }).local}
       </span>
-      <span className="text-gray-400 mx-1">/</span>
-      <span className="text-blue-600 font-mono">
+      <span className="text-gray-400 dark:text-gray-500 mx-1">/</span>
+      <span className="text-blue-600 dark:text-blue-400 font-mono">
         {showDate ? formatted.utc : (formatted as { local: string; utc: string }).utc}
       </span>
     </span>

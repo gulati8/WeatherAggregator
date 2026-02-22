@@ -45,9 +45,9 @@ function Clock({ className = '', compact = false }: ClockProps) {
   if (compact) {
     return (
       <div className={`flex items-center gap-2 text-xs font-mono ${className}`}>
-        <span className="text-gray-600">{formatLocalTime(time)}</span>
-        <span className="text-gray-400">/</span>
-        <span className="text-blue-600">{formatUtcTime(time)}Z</span>
+        <span className="text-gray-600 dark:text-gray-400">{formatLocalTime(time)}</span>
+        <span className="text-gray-400 dark:text-gray-500">/</span>
+        <span className="text-blue-600 dark:text-blue-400">{formatUtcTime(time)}Z</span>
       </div>
     );
   }
@@ -55,12 +55,12 @@ function Clock({ className = '', compact = false }: ClockProps) {
   return (
     <div className={`flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 text-xs ${className}`}>
       <div className="flex items-center gap-1">
-        <span className="text-gray-500">{getLocalTimezone()}:</span>
-        <span className="font-mono font-medium text-gray-700">{formatLocalTime(time)}</span>
+        <span className="text-gray-500 dark:text-gray-400">{getLocalTimezone()}:</span>
+        <span className="font-mono font-medium text-gray-700 dark:text-gray-300">{formatLocalTime(time)}</span>
       </div>
       <div className="flex items-center gap-1">
-        <span className="text-gray-500">UTC:</span>
-        <span className="font-mono font-medium text-blue-600">{formatUtcTime(time)}Z</span>
+        <span className="text-gray-500 dark:text-gray-400">UTC:</span>
+        <span className="font-mono font-medium text-blue-600 dark:text-blue-400">{formatUtcTime(time)}Z</span>
       </div>
     </div>
   );

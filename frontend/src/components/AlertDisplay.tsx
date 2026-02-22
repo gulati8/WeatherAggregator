@@ -12,8 +12,8 @@ function AlertDisplay({ alerts }: AlertDisplayProps) {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-      <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 p-6">
+      <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
         <svg
           className="w-5 h-5 text-yellow-500"
           fill="currentColor"
@@ -93,7 +93,7 @@ function AlertDisplay({ alerts }: AlertDisplayProps) {
                     {alert.description.slice(0, 200)}
                     {alert.description.length > 200 && '...'}
                   </p>
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-2 text-xs text-gray-500">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-2 text-xs text-gray-500 dark:text-gray-400">
                     <span className="flex items-center gap-1">
                       Valid: <DualTime time={alert.validFrom} size="sm" />
                     </span>
@@ -102,7 +102,7 @@ function AlertDisplay({ alerts }: AlertDisplayProps) {
                     </span>
                   </div>
                   {alert.area && (
-                    <div className="text-xs text-gray-500 mt-1">
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                       Area: {alert.area}
                     </div>
                   )}

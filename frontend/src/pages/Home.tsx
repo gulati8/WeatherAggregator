@@ -15,10 +15,10 @@ function Home() {
     <div className="max-w-4xl mx-auto px-4 py-12">
       {/* Hero section */}
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">
+        <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">
           Aviation Weather Aggregator
         </h1>
-        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+        <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
           Compare weather data from multiple sources to make informed flight
           planning decisions. Get consensus reports and Part 135 compliance
           checks for any airport.
@@ -33,8 +33,8 @@ function Home() {
       {/* Quick access sections */}
       <div className="grid md:grid-cols-2 gap-8">
         {/* Favorites */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 p-6">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
             <svg
               className="w-5 h-5 text-yellow-500"
               fill="currentColor"
@@ -49,11 +49,11 @@ function Home() {
               {favorites.map((icao) => (
                 <div
                   key={icao}
-                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                  className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
                 >
                   <button
                     onClick={() => handleSearch(icao)}
-                    className="font-mono font-semibold text-blue-600 hover:text-blue-800"
+                    className="font-mono font-semibold text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
                   >
                     {icao}
                   </button>
@@ -70,7 +70,7 @@ function Home() {
               ))}
             </div>
           ) : (
-            <p className="text-gray-500 text-sm">
+            <p className="text-gray-500 dark:text-gray-400 text-sm">
               No favorites yet. Search for an airport and click the star to add
               it here.
             </p>
@@ -78,11 +78,11 @@ function Home() {
         </div>
 
         {/* Recent searches */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
               <svg
-                className="w-5 h-5 text-gray-500"
+                className="w-5 h-5 text-gray-500 dark:text-gray-400"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -99,7 +99,7 @@ function Home() {
             {recent.length > 0 && (
               <button
                 onClick={clearRecent}
-                className="text-sm text-gray-500 hover:text-gray-700"
+                className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
               >
                 Clear
               </button>
@@ -111,14 +111,14 @@ function Home() {
                 <button
                   key={icao}
                   onClick={() => handleSearch(icao)}
-                  className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-full font-mono text-sm font-semibold text-gray-700 transition-colors"
+                  className="px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full font-mono text-sm font-semibold text-gray-700 dark:text-gray-300 transition-colors"
                 >
                   {icao}
                 </button>
               ))}
             </div>
           ) : (
-            <p className="text-gray-500 text-sm">
+            <p className="text-gray-500 dark:text-gray-400 text-sm">
               Your recent airport searches will appear here.
             </p>
           )}
@@ -126,25 +126,25 @@ function Home() {
       </div>
 
       {/* Quick tips */}
-      <div className="mt-12 bg-blue-50 rounded-lg p-6">
-        <h3 className="font-semibold text-blue-900 mb-3">Quick Tips</h3>
-        <ul className="text-sm text-blue-800 space-y-2">
+      <div className="mt-12 bg-blue-50 dark:bg-blue-900/30 rounded-lg p-6">
+        <h3 className="font-semibold text-blue-900 dark:text-blue-200 mb-3">Quick Tips</h3>
+        <ul className="text-sm text-blue-800 dark:text-blue-300 space-y-2">
           <li className="flex items-start gap-2">
-            <span className="text-blue-500 mt-0.5">•</span>
+            <span className="text-blue-500 dark:text-blue-400 mt-0.5">&#8226;</span>
             Enter any 4-letter ICAO airport code (e.g., KJFK, KLAX, EGLL)
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-blue-500 mt-0.5">•</span>
+            <span className="text-blue-500 dark:text-blue-400 mt-0.5">&#8226;</span>
             Weather data is aggregated from Aviation Weather Center, Open-Meteo,
             and NWS
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-blue-500 mt-0.5">•</span>
+            <span className="text-blue-500 dark:text-blue-400 mt-0.5">&#8226;</span>
             Part 135 compliance is automatically checked for ceiling and
             visibility minimums
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-blue-500 mt-0.5">•</span>
+            <span className="text-blue-500 dark:text-blue-400 mt-0.5">&#8226;</span>
             Consensus indicators show where sources agree or disagree
           </li>
         </ul>

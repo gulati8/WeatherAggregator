@@ -19,7 +19,6 @@ interface WeatherChartProps {
 
 const SOURCE_COLORS: Record<WeatherSourceId | 'consensus', string> = {
   awc: '#2563eb',      // Blue
-  avwx: '#7c3aed',     // Purple
   openmeteo: '#16a34a', // Green
   nws: '#dc2626',      // Red
   consensus: '#6b7280', // Gray
@@ -27,7 +26,6 @@ const SOURCE_COLORS: Record<WeatherSourceId | 'consensus', string> = {
 
 const SOURCE_NAMES: Record<WeatherSourceId | 'consensus', string> = {
   awc: 'AWC (Official)',
-  avwx: 'AVWX',
   openmeteo: 'Open-Meteo',
   nws: 'NWS',
   consensus: 'Consensus',

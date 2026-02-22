@@ -101,8 +101,8 @@ function TripTimeline({ legs, selectedLegId, onSelectLeg }: TripTimelineProps) {
 
   if (legs.length === 0) {
     return (
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
-        <div className="text-center py-8 text-gray-500">
+      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 p-4">
+        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
           <p>Add legs to see the timeline</p>
         </div>
       </div>
@@ -110,19 +110,19 @@ function TripTimeline({ legs, selectedLegId, onSelectLeg }: TripTimelineProps) {
   }
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-4">
-      <h3 className="text-sm font-semibold text-gray-700 mb-3">Trip Timeline</h3>
+    <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 p-4">
+      <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Trip Timeline</h3>
 
       {/* Timeline container - horizontal scroll on mobile */}
       <div className="relative overflow-x-auto">
         {/* Time header */}
-        <div className="flex border-b border-gray-200 pb-2 mb-2">
+        <div className="flex border-b border-gray-200 dark:border-gray-600 pb-2 mb-2">
           <div className="w-16 flex-shrink-0" /> {/* Label column spacer */}
           <div className="flex-1 relative h-6">
             {timeLabels.map((label, index) => (
               <div
                 key={index}
-                className="absolute text-xs text-gray-500 transform -translate-x-1/2"
+                className="absolute text-xs text-gray-500 dark:text-gray-400 transform -translate-x-1/2"
                 style={{ left: `${getTimePosition(label.time)}%` }}
               >
                 {label.label}
@@ -147,12 +147,12 @@ function TripTimeline({ legs, selectedLegId, onSelectLeg }: TripTimelineProps) {
               <div
                 key={leg.legId}
                 className={`flex items-center cursor-pointer rounded transition-colors ${
-                  selectedLegId === leg.legId ? 'bg-blue-50' : 'hover:bg-gray-50'
+                  selectedLegId === leg.legId ? 'bg-blue-50 dark:bg-blue-900/30' : 'hover:bg-gray-50 dark:hover:bg-gray-700'
                 }`}
                 onClick={() => onSelectLeg(leg.legId)}
               >
                 {/* Leg label */}
-                <div className="w-16 flex-shrink-0 text-xs font-medium text-gray-600">
+                <div className="w-16 flex-shrink-0 text-xs font-medium text-gray-600 dark:text-gray-400">
                   Leg {index + 1}
                 </div>
 
@@ -163,7 +163,7 @@ function TripTimeline({ legs, selectedLegId, onSelectLeg }: TripTimelineProps) {
                     className={`absolute top-1/2 transform -translate-y-1/2 h-6 rounded-full ${getLegColor(
                       leg
                     )} flex items-center justify-center transition-all ${
-                      selectedLegId === leg.legId ? 'ring-2 ring-blue-500 ring-offset-1' : ''
+                      selectedLegId === leg.legId ? 'ring-2 ring-blue-500 ring-offset-1 dark:ring-offset-gray-800' : ''
                     }`}
                     style={{
                       left: `${startPos}%`,
@@ -215,8 +215,8 @@ function TripTimeline({ legs, selectedLegId, onSelectLeg }: TripTimelineProps) {
       </div>
 
       {/* Legend */}
-      <div className="mt-4 pt-3 border-t border-gray-200">
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-gray-600">
+      <div className="mt-4 pt-3 border-t border-gray-200 dark:border-gray-600">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-gray-600 dark:text-gray-400">
           <div className="flex items-center gap-1">
             <span className="w-3 h-3 rounded-full bg-green-500" />
             <span>GO</span>
@@ -229,7 +229,7 @@ function TripTimeline({ legs, selectedLegId, onSelectLeg }: TripTimelineProps) {
             <span className="w-3 h-3 rounded-full bg-red-500" />
             <span>NO-GO</span>
           </div>
-          <div className="w-full sm:w-auto sm:border-l sm:border-gray-300 sm:pl-4 flex items-center gap-1 pt-2 sm:pt-0">
+          <div className="w-full sm:w-auto sm:border-l sm:border-gray-300 dark:sm:border-gray-600 sm:pl-4 flex items-center gap-1 pt-2 sm:pt-0">
             <span className="w-3 h-3 rounded-full border-2 border-solid border-gray-400" />
             <span>Strong</span>
           </div>

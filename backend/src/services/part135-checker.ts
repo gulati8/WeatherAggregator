@@ -3,9 +3,10 @@ import {
   FlightCategory,
   Part135Status,
   MinimumStatus,
-  FLIGHT_CATEGORY_THRESHOLDS,
+  AlternateAnalysis,
   PART_135_MINIMUMS,
   WeatherPhenomenon,
+  ForecastPeriod,
 } from '../types/weather';
 
 class Part135Checker {
@@ -93,42 +94,185 @@ class Part135Checker {
     return hazards;
   }
 
-  needsAlternate(conditions: CurrentConditions): {
-    required: boolean;
-    reason?: string;
-  } {
+  /**
+   * Analyze alternate requirement per 14 CFR 135.223(b).
+   *
+   * An alternate is NOT required when ALL of the following are met for the
+   * period from 1 hour before to 1 hour after ETA:
+   *   - A standard instrument approach exists at the destination
+   *   - Ceiling >= 1,500 ft above lowest circling MDA
+   *     (simplified: we use 2,000 ft above airport elevation as a proxy
+   *      since we don't have MDA data)
+   *   - Visibility >= 3 SM (or >= 2 SM above lowest applicable minimums,
+   *     whichever is greater)
+   *
+   * This method checks TAF forecast periods that overlap the ETA ±1 hour
+   * window. If no TAF is available, it falls back to current conditions.
+   */
+  analyzeAlternate(
+    conditions: CurrentConditions,
+    forecast: ForecastPeriod[],
+    eta?: Date,
+  ): AlternateAnalysis {
+    // If we have TAF periods and an ETA, analyze the forecast window
+    if (eta && forecast.length > 0) {
+      return this.analyzeAlternateFromTaf(forecast, eta);
+    }
+
+    // Fallback: use current conditions
+    return this.analyzeAlternateFromCurrent(conditions);
+  }
+
+  private analyzeAlternateFromTaf(
+    forecast: ForecastPeriod[],
+    eta: Date,
+  ): AlternateAnalysis {
+    const windowStart = new Date(eta.getTime() - 60 * 60 * 1000); // ETA - 1hr
+    const windowEnd = new Date(eta.getTime() + 60 * 60 * 1000);   // ETA + 1hr
+
+    // Find forecast periods that overlap our window
+    const relevantPeriods = forecast.filter((p) => {
+      const from = new Date(p.validFrom);
+      const to = new Date(p.validTo);
+      return from < windowEnd && to > windowStart;
+    });
+
+    if (relevantPeriods.length === 0) {
+      return {
+        required: true,
+        reason: 'No TAF forecast available for ETA ±1 hour window',
+        regulation: '14 CFR 135.223(b)',
+        analysisMethod: 'unavailable',
+      };
+    }
+
+    // Check worst conditions across all periods in the window
+    // Per 135.223(b), conditions must be met for the ENTIRE window
+    let worstCeiling: number | null = null; // null = unlimited (best)
+    let worstVisibility = Infinity;
+    let hasThunderstorms = false;
+
+    for (const period of relevantPeriods) {
+      const ceiling = period.ceiling.value;
+      const visibility = period.visibility.value;
+
+      // Track worst ceiling (lowest value; null means unlimited)
+      if (ceiling !== null) {
+        if (worstCeiling === null || ceiling < worstCeiling) {
+          worstCeiling = ceiling;
+        }
+      }
+
+      // Track worst visibility
+      if (visibility < worstVisibility) {
+        worstVisibility = visibility;
+      }
+
+      // Check for thunderstorms
+      if (period.weatherPhenomena.some((p) => p.descriptor === 'TS')) {
+        hasThunderstorms = true;
+      }
+    }
+
+    const forecastWindow = {
+      from: windowStart.toISOString(),
+      to: windowEnd.toISOString(),
+      worstCeiling,
+      worstVisibility,
+    };
+
+    // 135.223(b): Ceiling must be >= 1,500 ft above lowest circling MDA.
+    // Since we don't have MDA data, use 2,000 ft as conservative proxy.
+    const ceilingThreshold = 2000;
+    // Visibility must be >= 3 SM
+    const visibilityThreshold = 3;
+
+    const reasons: string[] = [];
+
+    if (worstCeiling !== null && worstCeiling < ceilingThreshold) {
+      reasons.push(
+        `TAF forecast ceiling ${worstCeiling}ft within ETA ±1hr window is below ${ceilingThreshold}ft threshold`
+      );
+    }
+
+    if (worstVisibility < visibilityThreshold) {
+      reasons.push(
+        `TAF forecast visibility ${worstVisibility.toFixed(1)}SM within ETA ±1hr window is below ${visibilityThreshold}SM threshold`
+      );
+    }
+
+    if (hasThunderstorms) {
+      reasons.push('Thunderstorms forecast within ETA ±1hr window');
+    }
+
+    if (reasons.length > 0) {
+      return {
+        required: true,
+        reason: reasons.join('; '),
+        regulation: '14 CFR 135.223(b)',
+        analysisMethod: 'taf',
+        forecastWindow,
+      };
+    }
+
+    return {
+      required: false,
+      regulation: '14 CFR 135.223(b)',
+      analysisMethod: 'taf',
+      forecastWindow,
+    };
+  }
+
+  private analyzeAlternateFromCurrent(
+    conditions: CurrentConditions,
+  ): AlternateAnalysis {
     const ceiling = conditions.ceiling.value;
     const visibility = conditions.visibility.value;
 
-    // Check 1-2-3 rule: Need alternate if forecast is below ceiling 2000ft or vis 3mi
-    // This is simplified - in practice would check TAF for destination
+    const reasons: string[] = [];
 
     if (ceiling !== null && ceiling < 2000) {
-      return {
-        required: true,
-        reason: `Ceiling ${ceiling}ft is below 2000ft alternate requirement`,
-      };
+      reasons.push(
+        `Current ceiling ${ceiling}ft is below 2000ft alternate threshold`
+      );
     }
 
     if (visibility < 3) {
-      return {
-        required: true,
-        reason: `Visibility ${visibility}SM is below 3SM alternate requirement`,
-      };
+      reasons.push(
+        `Current visibility ${visibility}SM is below 3SM alternate threshold`
+      );
     }
 
-    // Check for significant weather
     if (conditions.weatherPhenomena.some((p) => p.descriptor === 'TS')) {
-      return {
-        required: true,
-        reason: 'Thunderstorms forecast',
-      };
+      reasons.push('Thunderstorms reported');
     }
 
-    return { required: false };
+    return {
+      required: reasons.length > 0,
+      reason: reasons.length > 0 ? reasons.join('; ') : undefined,
+      regulation: '14 CFR 135.223(b)',
+      analysisMethod: 'current',
+    };
   }
 
-  checkStatus(conditions: CurrentConditions): Part135Status {
+  /**
+   * Legacy method for backward compatibility.
+   * Prefer analyzeAlternate() which uses TAF data.
+   */
+  needsAlternate(
+    conditions: CurrentConditions,
+    forecast?: ForecastPeriod[],
+    eta?: Date,
+  ): { required: boolean; reason?: string } {
+    const analysis = this.analyzeAlternate(conditions, forecast || [], eta);
+    return { required: analysis.required, reason: analysis.reason };
+  }
+
+  checkStatus(
+    conditions: CurrentConditions,
+    forecast?: ForecastPeriod[],
+    eta?: Date,
+  ): Part135Status {
     const ceiling = conditions.ceiling.value;
     const visibility = conditions.visibility.value;
 
@@ -146,7 +290,11 @@ class Part135Checker {
 
     const hazards = this.identifyHazards(conditions);
 
-    const alternateCheck = this.needsAlternate(conditions);
+    const alternateAnalysis = this.analyzeAlternate(
+      conditions,
+      forecast || [],
+      eta,
+    );
 
     const canDispatch =
       ceilingStatus.status !== 'below' &&
@@ -159,8 +307,9 @@ class Part135Checker {
       ceilingStatus,
       visibilityStatus,
       weatherHazards: hazards,
-      alternateRequired: alternateCheck.required,
-      alternateReason: alternateCheck.reason,
+      alternateRequired: alternateAnalysis.required,
+      alternateReason: alternateAnalysis.reason,
+      alternateAnalysis,
     };
   }
 }

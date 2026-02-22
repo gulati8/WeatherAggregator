@@ -14,15 +14,13 @@ interface ForecastTimelineProps {
 }
 
 const SOURCE_COLORS: Record<WeatherSourceId, { bg: string; text: string; border: string }> = {
-  awc: { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-300' },
-  avwx: { bg: 'bg-purple-50', text: 'text-purple-700', border: 'border-purple-300' },
-  openmeteo: { bg: 'bg-green-50', text: 'text-green-700', border: 'border-green-300' },
-  nws: { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-300' },
+  awc: { bg: 'bg-blue-50 dark:bg-blue-900/30', text: 'text-blue-700 dark:text-blue-300', border: 'border-blue-300 dark:border-blue-600' },
+  openmeteo: { bg: 'bg-green-50 dark:bg-green-900/30', text: 'text-green-700 dark:text-green-300', border: 'border-green-300 dark:border-green-600' },
+  nws: { bg: 'bg-red-50 dark:bg-red-900/30', text: 'text-red-700 dark:text-red-300', border: 'border-red-300 dark:border-red-600' },
 };
 
 const SOURCE_NAMES: Record<WeatherSourceId, string> = {
   awc: 'AWC',
-  avwx: 'AVWX',
   openmeteo: 'Open-Meteo',
   nws: 'NWS',
 };
@@ -97,23 +95,23 @@ function ForecastTimeline({ forecast, highlightTime }: ForecastTimelineProps) {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 p-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-        <h2 className="text-lg font-semibold text-gray-900">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
           Forecast Timeline
         </h2>
 
         <div className="flex flex-wrap items-center gap-4">
           {/* Source filter */}
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-500">Source:</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">Source:</span>
             <div className="flex gap-1">
               <button
                 onClick={() => setFilterSource('all')}
                 className={`px-2 py-1 text-xs font-medium rounded transition-colors ${
                   filterSource === 'all'
-                    ? 'bg-gray-800 text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    ? 'bg-gray-800 dark:bg-gray-200 text-white dark:text-gray-900'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
                 }`}
               >
                 All
@@ -125,7 +123,7 @@ function ForecastTimeline({ forecast, highlightTime }: ForecastTimelineProps) {
                   className={`px-2 py-1 text-xs font-medium rounded transition-colors ${
                     filterSource === source
                       ? `${SOURCE_COLORS[source].bg} ${SOURCE_COLORS[source].text} ring-1 ring-current`
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
                   }`}
                 >
                   {SOURCE_NAMES[source]}
@@ -135,15 +133,15 @@ function ForecastTimeline({ forecast, highlightTime }: ForecastTimelineProps) {
           </div>
 
           {/* Time range */}
-          <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
+          <div className="flex gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
             {timeOptions.map((option) => (
               <button
                 key={option.hours}
                 onClick={() => setSelectedHours(option.hours)}
                 className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
                   selectedHours === option.hours
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100 shadow-sm'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                 }`}
               >
                 {option.label}
@@ -154,14 +152,14 @@ function ForecastTimeline({ forecast, highlightTime }: ForecastTimelineProps) {
       </div>
 
       {/* Source legend */}
-      <div className="flex flex-wrap gap-4 mb-4 p-3 bg-gray-50 rounded-lg text-xs">
+      <div className="flex flex-wrap gap-4 mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg text-xs">
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded bg-blue-500" />
-          <span><strong>AWC</strong> = Aviation Weather Center (TAF - official)</span>
+          <span className="text-gray-700 dark:text-gray-300"><strong>AWC</strong> = Aviation Weather Center (TAF - official)</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded bg-green-500" />
-          <span><strong>Open-Meteo</strong> = Weather model (extended forecast)</span>
+          <span className="text-gray-700 dark:text-gray-300"><strong>Open-Meteo</strong> = Weather model (extended forecast)</span>
         </div>
       </div>
 
@@ -177,7 +175,7 @@ function ForecastTimeline({ forecast, highlightTime }: ForecastTimelineProps) {
                 key={index}
                 className={`relative flex items-start gap-4 p-4 rounded-lg border-l-4 transition-colors ${
                   isHighlighted
-                    ? 'bg-blue-100 border-blue-500 ring-2 ring-blue-500 ring-offset-2'
+                    ? 'bg-blue-100 dark:bg-blue-900/40 border-blue-500 ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-gray-800'
                     : `${sourceStyle.bg} ${sourceStyle.border}`
                 }`}
               >
@@ -191,7 +189,7 @@ function ForecastTimeline({ forecast, highlightTime }: ForecastTimelineProps) {
                 {/* Source badge */}
                 <div className="flex-shrink-0 w-20">
                   <span
-                    className={`inline-block px-2 py-0.5 text-xs font-bold rounded ${sourceStyle.text} bg-white/50`}
+                    className={`inline-block px-2 py-0.5 text-xs font-bold rounded ${sourceStyle.text} bg-white/50 dark:bg-gray-800/50`}
                   >
                     {SOURCE_NAMES[mainSource]}
                   </span>
@@ -200,11 +198,11 @@ function ForecastTimeline({ forecast, highlightTime }: ForecastTimelineProps) {
                 {/* Time column */}
                 <div className="flex-shrink-0 w-32">
                   <DualTime time={period.validFrom} showDate={false} size="sm" layout="stacked" />
-                  <div className="text-xs text-gray-500 mt-1">
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                     to <DualTime time={period.validTo} showDate={false} size="sm" />
                   </div>
                   {period.type !== 'BASE' && (
-                    <span className="inline-block mt-1 px-2 py-0.5 text-xs bg-white/70 text-gray-700 rounded">
+                    <span className="inline-block mt-1 px-2 py-0.5 text-xs bg-white/70 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300 rounded">
                       {getPeriodTypeLabel(period.type)}
                       {period.probability && ` ${period.probability}%`}
                     </span>
@@ -222,34 +220,34 @@ function ForecastTimeline({ forecast, highlightTime }: ForecastTimelineProps) {
                 {/* Weather details */}
                 <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                   <div>
-                    <span className="text-gray-500">Wind</span>
-                    <div className="font-medium text-gray-900">
+                    <span className="text-gray-500 dark:text-gray-400">Wind</span>
+                    <div className="font-medium text-gray-900 dark:text-gray-100">
                       {period.windDirection.value !== null
                         ? `${String(period.windDirection.value).padStart(3, '0')}°`
                         : 'VRB'}{' '}
                       {formatWindSpeed(period.windSpeed.value)}
                       {period.windGust.value && (
-                        <span className="text-orange-600">
+                        <span className="text-orange-600 dark:text-orange-400">
                           {' '}G{Math.round(period.windGust.value)}
                         </span>
                       )}
                     </div>
                   </div>
                   <div>
-                    <span className="text-gray-500">Visibility</span>
-                    <div className="font-medium text-gray-900">
+                    <span className="text-gray-500 dark:text-gray-400">Visibility</span>
+                    <div className="font-medium text-gray-900 dark:text-gray-100">
                       {formatVisibility(period.visibility.value)}
                     </div>
                   </div>
                   <div>
-                    <span className="text-gray-500">Ceiling</span>
-                    <div className="font-medium text-gray-900">
+                    <span className="text-gray-500 dark:text-gray-400">Ceiling</span>
+                    <div className="font-medium text-gray-900 dark:text-gray-100">
                       {formatCeiling(period.ceiling.value)}
                     </div>
                   </div>
                   <div>
-                    <span className="text-gray-500">Precip %</span>
-                    <div className="font-medium text-gray-900">
+                    <span className="text-gray-500 dark:text-gray-400">Precip %</span>
+                    <div className="font-medium text-gray-900 dark:text-gray-100">
                       {period.precipitationProbability.value}%
                     </div>
                   </div>
@@ -261,7 +259,7 @@ function ForecastTimeline({ forecast, highlightTime }: ForecastTimelineProps) {
                     {period.weatherPhenomena.map((wx, i) => (
                       <span
                         key={i}
-                        className="inline-block px-2 py-1 text-xs bg-white/70 text-gray-700 rounded"
+                        className="inline-block px-2 py-1 text-xs bg-white/70 dark:bg-gray-800/50 text-gray-700 dark:text-gray-300 rounded"
                       >
                         {wx.description}
                       </span>
@@ -273,7 +271,7 @@ function ForecastTimeline({ forecast, highlightTime }: ForecastTimelineProps) {
           })}
         </div>
       ) : (
-        <div className="text-center py-8 text-gray-500">
+        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
           No forecast data available for the selected time period and source.
         </div>
       )}

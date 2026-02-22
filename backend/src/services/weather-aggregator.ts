@@ -13,16 +13,21 @@ import {
   WeatherAlert,
   WeatherSourceId,
   TargetTimeSnapshot,
+  PirepReport,
+  AirSigmet,
 } from '../types/weather';
 import {
   aviationWeatherService,
   AwcMetarResponse,
   AwcTafResponse,
   AwcCloud,
+  AwcPirep,
+  AwcAirSigmet,
 } from './aviation-weather';
 import { openMeteoService, OpenMeteoResponse } from './open-meteo';
 import { nwsService, NwsAlert } from './nws';
 import { part135Checker } from './part135-checker';
+import { fratService } from './frat-service';
 import { cacheService } from './cache';
 
 class WeatherAggregator {
@@ -41,10 +46,13 @@ class WeatherAggregator {
     }
 
     // Fetch from all sources in parallel
-    const [awcData, openMeteoData, nwsAlerts] = await Promise.allSettled([
+    const [awcData, openMeteoData, nwsAlerts, pirepData, airSigmetData, recentMetarData] = await Promise.allSettled([
       aviationWeatherService.getMetarAndTaf(normalizedIcao),
       this.fetchOpenMeteo(normalizedIcao),
       this.fetchNwsAlerts(normalizedIcao),
+      this.fetchPireps(normalizedIcao),
+      this.fetchAirSigmets(normalizedIcao),
+      aviationWeatherService.getRecentMetars(normalizedIcao, 3),
     ]);
 
     // Extract results
@@ -53,6 +61,11 @@ class WeatherAggregator {
     const openMeteo =
       openMeteoData.status === 'fulfilled' ? openMeteoData.value : null;
     const alerts = nwsAlerts.status === 'fulfilled' ? nwsAlerts.value : [];
+    const rawPireps = pirepData.status === 'fulfilled' ? pirepData.value : [];
+    const rawAirSigmets = airSigmetData.status === 'fulfilled' ? airSigmetData.value : [];
+    const recentMetars = recentMetarData.status === 'fulfilled'
+      ? recentMetarData.value.map(m => m.rawOb)
+      : [];
 
     // Build airport info from AWC data
     const airport = this.buildAirportInfo(normalizedIcao, awc.metar);
@@ -79,22 +92,38 @@ class WeatherAggregator {
     const conditionsForPart135 = atTargetTime
       ? this.forecastToCurrentConditions(atTargetTime.conditions, current)
       : current;
-    const part135Status = part135Checker.checkStatus(conditionsForPart135);
+    const part135Status = part135Checker.checkStatus(
+      conditionsForPart135,
+      forecast,
+      targetTime,
+    );
+
+    // Assess flight risk (FRAT)
+    const frat = fratService.assess(conditionsForPart135, consensus, targetTime);
 
     // Build weather alerts
     const weatherAlerts = this.buildAlerts(alerts);
+
+    // Convert PIREPs and AIR/SIGMETs to our types
+    const pireps = this.convertPireps(rawPireps);
+    const airSigmets = this.convertAirSigmets(rawAirSigmets);
 
     const result: UnifiedWeatherData = {
       airport,
       timestamp: new Date().toISOString(),
       targetTime: targetTime?.toISOString(),
+      rawTaf: awc.taf?.rawTAF,
+      recentMetars: recentMetars.length > 0 ? recentMetars : undefined,
       sources,
       current,
       forecast,
       atTargetTime,
       consensus,
       part135Status,
+      frat,
       alerts: weatherAlerts,
+      pireps,
+      airSigmets,
     };
 
     // Cache the result (only non-target-time requests)
@@ -238,7 +267,7 @@ class WeatherAggregator {
         icao: metar.icaoId,
         name: metar.name || icao,
         city: metar.name?.split(',')[0] || '',
-        country: 'US', // AWC is primarily US airports
+        country: this.deriveCountry(metar.icaoId),
         latitude: metar.lat,
         longitude: metar.lon,
         elevation: metar.elev,
@@ -386,23 +415,32 @@ class WeatherAggregator {
       omWindSpeed ? openMeteoService.windSpeedToKnots(omWindSpeed) : null,
       0
     );
+    const omVisMiles = omVisibility ? openMeteoService.visibilityToStatuteMiles(omVisibility) : null;
+    // Use first available source; default to 10 SM only if both sources are present but null
+    const visDefault = (awcVisibility !== null || omVisMiles !== null) ? 10 : 10;
     const visibility = createSourceValue(
       awcVisibility,
-      omVisibility ? openMeteoService.visibilityToStatuteMiles(omVisibility) : null,
-      10
+      omVisMiles,
+      visDefault
     );
 
     const flightCategory = part135Checker.categorize(ceiling, visibility.value);
 
+    // Handle wind direction: numeric degrees, 'VRB' for variable, or null for calm
+    const awcWindDir = metar?.wdir;
+    const isVariableWind = typeof awcWindDir === 'string' && awcWindDir.toUpperCase() === 'VRB';
+    const awcWindDirValue = typeof awcWindDir === 'number' ? awcWindDir : null;
+
     return {
       observationTime: metar?.reportTime || new Date().toISOString(),
       rawMetar: metar?.rawOb,
+      isVariableWind,
       temperature,
       dewpoint: createSourceValue(metar?.dewp, null, 0),
       humidity: createSourceValue(humidity, omHumidity, 0),
       pressure: createSourceValue(metar?.altim, null, 29.92),
       windDirection: createSourceValue(
-        typeof metar?.wdir === 'number' ? metar.wdir : null,
+        awcWindDirValue,
         omWindDir,
         null
       ),
@@ -449,9 +487,9 @@ class WeatherAggregator {
     return Math.min(...ceilingLayers.map((l) => l.base));
   }
 
-  private parseVisibility(visib: string | number | null | undefined): number {
+  private parseVisibility(visib: string | number | null | undefined): number | null {
     if (visib === null || visib === undefined) {
-      return 10; // Assume good visibility if not reported
+      return null; // Not reported
     }
 
     if (typeof visib === 'number') {
@@ -460,15 +498,18 @@ class WeatherAggregator {
 
     // Parse string visibility like "10+" or "1/2"
     if (visib.includes('+')) {
-      return parseFloat(visib.replace('+', '')) || 10;
+      const parsed = parseFloat(visib.replace('+', ''));
+      return isNaN(parsed) ? null : parsed;
     }
 
     if (visib.includes('/')) {
       const [num, den] = visib.split('/');
-      return parseFloat(num) / parseFloat(den);
+      const result = parseFloat(num) / parseFloat(den);
+      return isNaN(result) ? null : result;
     }
 
-    return parseFloat(visib) || 10;
+    const parsed = parseFloat(visib);
+    return isNaN(parsed) ? null : parsed;
   }
 
   private parseWeatherPhenomena(wxString: string | null | undefined): WeatherPhenomenon[] {
@@ -554,7 +595,8 @@ class WeatherAggregator {
 
         const cloudLayers = this.parseCloudLayers(fcst.clouds);
         const ceiling = this.calculateCeiling(cloudLayers);
-        const visibility = this.parseVisibility(fcst.visib);
+        const parsedVis = this.parseVisibility(fcst.visib);
+        const visibility = parsedVis !== null ? parsedVis : 10; // TAF visibility defaults to P6SM (10) if not specified
         const weatherPhenomena = this.parseWeatherPhenomena(fcst.wxString);
         const flightCategory = part135Checker.categorize(ceiling, visibility);
 
@@ -563,7 +605,7 @@ class WeatherAggregator {
           validTo: toDate.toISOString(),
           type: (fcst.fcstChange as ForecastPeriod['type']) || 'BASE',
           probability: fcst.probability || undefined,
-          temperature: { value: 0, bySource: {}, confidence: 'low' },
+          temperature: { value: null as unknown as number, bySource: {}, confidence: 'low' },
           windDirection: {
             value: typeof fcst.wdir === 'number' ? fcst.wdir : null,
             bySource: {
@@ -571,6 +613,7 @@ class WeatherAggregator {
             },
             confidence: 'high',
           },
+          isVariableWind: typeof fcst.wdir === 'string' && fcst.wdir.toUpperCase() === 'VRB',
           windSpeed: {
             value: fcst.wspd || 0,
             bySource: { awc: fcst.wspd || 0 },
@@ -620,7 +663,7 @@ class WeatherAggregator {
           continue;
         }
 
-        const visibility = hourly.visibility[i]
+        const visibility = hourly.visibility[i] != null
           ? openMeteoService.visibilityToStatuteMiles(hourly.visibility[i]!)
           : 10;
         const flightCategory = part135Checker.categorize(null, visibility);
@@ -801,6 +844,119 @@ class WeatherAggregator {
       validTo: alert.properties.expires,
       area: alert.properties.areaDesc,
     }));
+  }
+
+  private async fetchPireps(icao: string): Promise<AwcPirep[]> {
+    const metar = await aviationWeatherService.getMetar(icao);
+    if (!metar) return [];
+    return aviationWeatherService.getPireps(metar.lat, metar.lon);
+  }
+
+  private async fetchAirSigmets(icao: string): Promise<AwcAirSigmet[]> {
+    const metar = await aviationWeatherService.getMetar(icao);
+    if (!metar) return [];
+    return aviationWeatherService.getAirSigmets(metar.lat, metar.lon);
+  }
+
+  private convertPireps(rawPireps: AwcPirep[]): PirepReport[] {
+    return rawPireps.map((pirep) => {
+      const report: PirepReport = {
+        id: pirep.pirepId,
+        reportTime: pirep.reportTime,
+        location: { lat: pirep.lat, lon: pirep.lon },
+        altitude: pirep.fltlvl * 100, // Convert flight level to feet
+        aircraftType: pirep.acType || 'Unknown',
+        rawReport: pirep.rawOb,
+        weatherString: pirep.wxString || undefined,
+      };
+
+      // Extract turbulence info
+      if (pirep.turb && pirep.turb.length > 0) {
+        const worstTurb = pirep.turb.reduce((worst, t) => {
+          const intensityOrder = ['NEG', 'SMTH', 'LGT', 'LGT-MOD', 'MOD', 'MOD-SEV', 'SEV', 'EXTRM'];
+          const worstIdx = intensityOrder.indexOf(worst.intensity);
+          const tIdx = intensityOrder.indexOf(t.intensity);
+          return tIdx > worstIdx ? t : worst;
+        });
+        report.turbulence = {
+          intensity: worstTurb.intensity,
+          minAlt: worstTurb.minAltFt,
+          maxAlt: worstTurb.maxAltFt,
+        };
+      }
+
+      // Extract icing info
+      if (pirep.ice && pirep.ice.length > 0) {
+        const worstIce = pirep.ice.reduce((worst, i) => {
+          const intensityOrder = ['NEG', 'NEGClr', 'TRC', 'LGT', 'LGT-MOD', 'MOD', 'MOD-SEV', 'SEV', 'EXTRM'];
+          const worstIdx = intensityOrder.indexOf(worst.intensity);
+          const iIdx = intensityOrder.indexOf(i.intensity);
+          return iIdx > worstIdx ? i : worst;
+        });
+        report.icing = {
+          intensity: worstIce.intensity,
+          minAlt: worstIce.minAltFt,
+          maxAlt: worstIce.maxAltFt,
+        };
+      }
+
+      return report;
+    });
+  }
+
+  private convertAirSigmets(rawAirSigmets: AwcAirSigmet[]): AirSigmet[] {
+    return rawAirSigmets.map((item) => {
+      let type: AirSigmet['type'];
+      const typeUpper = item.airSigmetType?.toUpperCase() || '';
+      if (typeUpper.includes('CONVECTIVE') || typeUpper === 'CONV') {
+        type = 'CONVECTIVE_SIGMET';
+      } else if (typeUpper.includes('SIGMET') || typeUpper === 'SIGMET') {
+        type = 'SIGMET';
+      } else {
+        type = 'AIRMET';
+      }
+
+      return {
+        id: item.airSigmetId,
+        type,
+        hazard: item.hazard || 'Unknown',
+        severity: item.severity || 'Unknown',
+        validFrom: new Date(item.validTimeFrom * 1000).toISOString(),
+        validTo: new Date(item.validTimeTo * 1000).toISOString(),
+        altitudeLow: item.altLow,
+        altitudeHigh: item.altHi,
+        rawText: item.rawAirSigmet,
+        coordinates: item.coords || [],
+      };
+    });
+  }
+
+  private deriveCountry(icao: string): string {
+    const prefix = icao.charAt(0).toUpperCase();
+    const prefix2 = icao.substring(0, 2).toUpperCase();
+    const countryMap: Record<string, string> = {
+      'K': 'US', 'PH': 'US', 'PA': 'US', 'PF': 'US', // US (CONUS, Hawaii, Alaska)
+      'C': 'CA',  // Canada
+      'M': 'MX',  // Mexico/Central America
+      'T': 'Caribbean',
+      'EG': 'GB', 'EI': 'IE', 'EH': 'NL', 'ED': 'DE', 'EB': 'BE',
+      'EF': 'FI', 'EN': 'NO', 'ES': 'SE', 'EK': 'DK',
+      'LF': 'FR', 'LI': 'IT', 'LE': 'ES', 'LP': 'PT', 'LG': 'GR',
+      'LO': 'AT', 'LS': 'CH', 'LK': 'CZ', 'LH': 'HU', 'LW': 'MK',
+      'R': 'Asia-Pacific',
+      'Z': 'CN',  // China
+      'V': 'South Asia',
+      'W': 'Southeast Asia',
+      'Y': 'AU',  // Australia
+      'NZ': 'NZ', // New Zealand
+      'S': 'South America',
+      'F': 'Africa',
+      'H': 'East Africa',
+      'D': 'West Africa',
+      'O': 'Middle East',
+      'U': 'Russia/CIS',
+    };
+    return countryMap[prefix2] || countryMap[prefix] || '';
   }
 
   private mapAlertType(event: string): WeatherAlert['type'] {

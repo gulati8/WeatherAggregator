@@ -117,7 +117,8 @@ function AirportSearch({
           placeholder="Enter ICAO code (e.g., KJFK)"
           className={`block w-full pl-12 pr-24 py-4 text-lg font-mono border rounded-lg shadow-sm
             focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-            ${error ? 'border-red-300' : 'border-gray-300'}
+            bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
+            ${error ? 'border-red-300 dark:border-red-600' : 'border-gray-300 dark:border-gray-600'}
           `}
           maxLength={4}
           autoComplete="off"
@@ -134,11 +135,11 @@ function AirportSearch({
       </div>
 
       {/* Departure time picker - always visible */}
-      <div className="flex flex-wrap items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-        <span className="text-sm text-gray-600 font-medium">Departure:</span>
+      <div className="flex flex-wrap items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+        <span className="text-sm text-gray-600 dark:text-gray-300 font-medium">Departure:</span>
         <div className="flex items-center gap-2">
           <svg
-            className="w-4 h-4 text-gray-500"
+            className="w-4 h-4 text-gray-500 dark:text-gray-400"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -156,12 +157,12 @@ function AirportSearch({
             onChange={(e) => setSelectedDate(e.target.value)}
             min={today}
             max={maxDate}
-            className="px-2 py-1.5 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
           />
         </div>
         <div className="flex items-center gap-2">
           <svg
-            className="w-4 h-4 text-gray-500"
+            className="w-4 h-4 text-gray-500 dark:text-gray-400"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -177,19 +178,19 @@ function AirportSearch({
             type="time"
             value={selectedTime}
             onChange={(e) => setSelectedTime(e.target.value)}
-            className="px-2 py-1.5 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
           />
         </div>
         <span className="text-sm flex items-center gap-1 flex-wrap">
-          <span className="text-gray-700">{formatDisplayTime().local}</span>
+          <span className="text-gray-700 dark:text-gray-300">{formatDisplayTime().local}</span>
           <span className="text-gray-400">/</span>
-          <span className="text-blue-600 font-mono">{formatDisplayTime().utc}</span>
-          <span className="text-gray-500">{formatDisplayTime().suffix}</span>
+          <span className="text-blue-600 dark:text-blue-400 font-mono">{formatDisplayTime().utc}</span>
+          <span className="text-gray-500 dark:text-gray-400">{formatDisplayTime().suffix}</span>
         </span>
       </div>
 
       {error && (
-        <p className="text-sm text-red-600 flex items-center gap-1">
+        <p className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
             <path
               fillRule="evenodd"

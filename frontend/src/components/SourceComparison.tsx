@@ -14,7 +14,6 @@ interface SourceComparisonProps {
 function SourceComparison({ sources, current }: SourceComparisonProps) {
   const sourceNames: Record<WeatherSourceId, string> = {
     awc: 'Aviation Weather Center',
-    avwx: 'AVWX',
     openmeteo: 'Open-Meteo',
     nws: 'National Weather Service',
   };
@@ -22,11 +21,11 @@ function SourceComparison({ sources, current }: SourceComparisonProps) {
   const getStatusColor = (status: WeatherSource['status']) => {
     switch (status) {
       case 'ok':
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300';
       case 'stale':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-300';
       case 'error':
-        return 'bg-red-100 text-red-800';
+        return 'bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-300';
     }
   };
 
@@ -54,7 +53,7 @@ function SourceComparison({ sources, current }: SourceComparisonProps) {
     if (spread === undefined) return null;
     if (spread > threshold) {
       return (
-        <span className="ml-1 text-xs text-orange-600" title={`Spread: ${spread.toFixed(1)}`}>
+        <span className="ml-1 text-xs text-orange-600 dark:text-orange-400" title={`Spread: ${spread.toFixed(1)}`}>
           !
         </span>
       );
@@ -63,8 +62,8 @@ function SourceComparison({ sources, current }: SourceComparisonProps) {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-      <h2 className="text-lg font-semibold text-gray-900 mb-4">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 p-6">
+      <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
         Source Comparison
       </h2>
 
@@ -100,8 +99,8 @@ function SourceComparison({ sources, current }: SourceComparisonProps) {
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-gray-200">
-              <th className="text-left py-2 pr-4 font-medium text-gray-700">
+            <tr className="border-b border-gray-200 dark:border-gray-600">
+              <th className="text-left py-2 pr-4 font-medium text-gray-700 dark:text-gray-300">
                 Parameter
               </th>
               {sources
@@ -109,60 +108,60 @@ function SourceComparison({ sources, current }: SourceComparisonProps) {
                 .map((source) => (
                   <th
                     key={source.id}
-                    className="text-center py-2 px-4 font-medium text-gray-700"
+                    className="text-center py-2 px-4 font-medium text-gray-700 dark:text-gray-300"
                   >
                     {sourceNames[source.id]}
                   </th>
                 ))}
-              <th className="text-center py-2 pl-4 font-medium text-gray-900 bg-gray-50">
+              <th className="text-center py-2 pl-4 font-medium text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-gray-700">
                 Consensus
               </th>
             </tr>
           </thead>
           <tbody>
             {/* Temperature */}
-            <tr className="border-b border-gray-100">
-              <td className="py-3 pr-4 text-gray-600">Temperature</td>
+            <tr className="border-b border-gray-100 dark:border-gray-700">
+              <td className="py-3 pr-4 text-gray-600 dark:text-gray-400">Temperature</td>
               {sources
                 .filter((s) => s.status === 'ok')
                 .map((source) => (
-                  <td key={source.id} className="text-center py-3 px-4">
+                  <td key={source.id} className="text-center py-3 px-4 text-gray-900 dark:text-gray-100">
                     {formatValue(source.id, 'temperature')}
                   </td>
                 ))}
-              <td className="text-center py-3 pl-4 font-semibold bg-gray-50">
+              <td className="text-center py-3 pl-4 font-semibold bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100">
                 {formatTemperature(current.temperature.value)}
                 {getSpreadIndicator(current.temperature.spread, 3)}
               </td>
             </tr>
 
             {/* Wind Speed */}
-            <tr className="border-b border-gray-100">
-              <td className="py-3 pr-4 text-gray-600">Wind Speed</td>
+            <tr className="border-b border-gray-100 dark:border-gray-700">
+              <td className="py-3 pr-4 text-gray-600 dark:text-gray-400">Wind Speed</td>
               {sources
                 .filter((s) => s.status === 'ok')
                 .map((source) => (
-                  <td key={source.id} className="text-center py-3 px-4">
+                  <td key={source.id} className="text-center py-3 px-4 text-gray-900 dark:text-gray-100">
                     {formatValue(source.id, 'windSpeed')}
                   </td>
                 ))}
-              <td className="text-center py-3 pl-4 font-semibold bg-gray-50">
+              <td className="text-center py-3 pl-4 font-semibold bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100">
                 {formatWindSpeed(current.windSpeed.value)}
                 {getSpreadIndicator(current.windSpeed.spread, 5)}
               </td>
             </tr>
 
             {/* Visibility */}
-            <tr className="border-b border-gray-100">
-              <td className="py-3 pr-4 text-gray-600">Visibility</td>
+            <tr className="border-b border-gray-100 dark:border-gray-700">
+              <td className="py-3 pr-4 text-gray-600 dark:text-gray-400">Visibility</td>
               {sources
                 .filter((s) => s.status === 'ok')
                 .map((source) => (
-                  <td key={source.id} className="text-center py-3 px-4">
+                  <td key={source.id} className="text-center py-3 px-4 text-gray-900 dark:text-gray-100">
                     {formatValue(source.id, 'visibility')}
                   </td>
                 ))}
-              <td className="text-center py-3 pl-4 font-semibold bg-gray-50">
+              <td className="text-center py-3 pl-4 font-semibold bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100">
                 {formatVisibility(current.visibility.value)}
                 {getSpreadIndicator(current.visibility.spread, 2)}
               </td>
@@ -171,8 +170,8 @@ function SourceComparison({ sources, current }: SourceComparisonProps) {
         </table>
       </div>
 
-      <p className="mt-3 text-xs text-gray-500">
-        <span className="text-orange-600">!</span> indicates significant
+      <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">
+        <span className="text-orange-600 dark:text-orange-400">!</span> indicates significant
         disagreement between sources
       </p>
     </div>

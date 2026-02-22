@@ -7,9 +7,12 @@ import SourceComparison from '../components/SourceComparison';
 import SourceComparisonDetailed from '../components/SourceComparisonDetailed';
 import ConsensusIndicator from '../components/ConsensusIndicator';
 import Part135Summary from '../components/Part135Summary';
+import FratDisplay from '../components/FratDisplay';
 import ForecastTimeline from '../components/ForecastTimeline';
 import WeatherChart from '../components/WeatherChart';
 import AlertDisplay from '../components/AlertDisplay';
+import PirepDisplay from '../components/PirepDisplay';
+import AirSigmetDisplay from '../components/AirSigmetDisplay';
 import TargetTimeDisplay from '../components/TargetTimeDisplay';
 import { formatRelativeTime } from '../utils/formatters';
 import { useEffect, useMemo } from 'react';
@@ -74,7 +77,7 @@ function AirportWeather() {
       {loading && <LoadingSpinner />}
 
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+        <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-lg p-6 text-center">
           <svg
             className="w-12 h-12 text-red-400 mx-auto mb-4"
             fill="none"
@@ -88,10 +91,10 @@ function AirportWeather() {
               d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
             />
           </svg>
-          <h3 className="text-lg font-semibold text-red-800 mb-2">
+          <h3 className="text-lg font-semibold text-red-800 dark:text-red-300 mb-2">
             Error Loading Weather
           </h3>
-          <p className="text-red-600 mb-4">{error}</p>
+          <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
           <button
             onClick={refresh}
             className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
@@ -112,11 +115,11 @@ function AirportWeather() {
           )}
 
           {/* Airport header */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 p-6 mb-6">
             <div className="flex items-start justify-between">
               <div>
                 <div className="flex items-center gap-3">
-                  <h1 className="text-3xl font-bold text-gray-900">
+                  <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
                     {data.airport.icao}
                   </h1>
                   <button
@@ -124,7 +127,7 @@ function AirportWeather() {
                     className={`p-2 rounded-full transition-colors ${
                       isFavorite(data.airport.icao)
                         ? 'text-yellow-500 hover:text-yellow-600'
-                        : 'text-gray-300 hover:text-yellow-500'
+                        : 'text-gray-300 dark:text-gray-500 hover:text-yellow-500'
                     }`}
                     title={
                       isFavorite(data.airport.icao)
@@ -141,21 +144,21 @@ function AirportWeather() {
                     </svg>
                   </button>
                 </div>
-                <p className="text-lg text-gray-600">{data.airport.name}</p>
+                <p className="text-lg text-gray-600 dark:text-gray-400">{data.airport.name}</p>
                 {data.airport.city && (
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
                     {data.airport.city}
                     {data.airport.country && `, ${data.airport.country}`}
                   </p>
                 )}
               </div>
               <div className="text-right">
-                <div className="text-sm text-gray-500">
+                <div className="text-sm text-gray-500 dark:text-gray-400">
                   Last updated: {formatRelativeTime(data.timestamp)}
                 </div>
                 <button
                   onClick={refresh}
-                  className="mt-2 inline-flex items-center gap-1 px-3 py-1.5 text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors"
+                  className="mt-2 inline-flex items-center gap-1 px-3 py-1.5 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
                 >
                   <svg
                     className="w-4 h-4"
@@ -173,7 +176,7 @@ function AirportWeather() {
                   Refresh
                 </button>
                 {data.airport.elevation > 0 && (
-                  <div className="text-xs text-gray-400 mt-1">
+                  <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">
                     Elevation: {data.airport.elevation.toLocaleString()} ft
                   </div>
                 )}
@@ -185,6 +188,20 @@ function AirportWeather() {
           {data.alerts.length > 0 && (
             <div className="mb-6">
               <AlertDisplay alerts={data.alerts} />
+            </div>
+          )}
+
+          {/* SIGMETs/AIRMETs */}
+          {data.airSigmets && data.airSigmets.length > 0 && (
+            <div className="mb-6">
+              <AirSigmetDisplay airSigmets={data.airSigmets} />
+            </div>
+          )}
+
+          {/* PIREPs */}
+          {data.pireps && data.pireps.length > 0 && (
+            <div className="mb-6">
+              <PirepDisplay pireps={data.pireps} />
             </div>
           )}
 
@@ -202,12 +219,13 @@ function AirportWeather() {
               />
             </div>
 
-            {/* Part 135 Summary */}
-            <div>
+            {/* Part 135 Summary + FRAT stacked */}
+            <div className="space-y-6">
               <Part135Summary
                 status={data.part135Status}
                 isForTargetTime={!!data.atTargetTime}
               />
+              {data.frat && <FratDisplay frat={data.frat} />}
             </div>
           </div>
 

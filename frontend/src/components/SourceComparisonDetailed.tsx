@@ -29,14 +29,12 @@ interface SourceComparisonDetailedProps {
 
 const SOURCE_COLORS: Record<WeatherSourceId, string> = {
   awc: '#2563eb', // Blue - Aviation Weather Center (official)
-  avwx: '#7c3aed', // Purple - AVWX
   openmeteo: '#16a34a', // Green - Open-Meteo
   nws: '#dc2626', // Red - NWS
 };
 
 const SOURCE_NAMES: Record<WeatherSourceId, string> = {
   awc: 'Aviation Weather Center',
-  avwx: 'AVWX',
   openmeteo: 'Open-Meteo',
   nws: 'National Weather Service',
 };

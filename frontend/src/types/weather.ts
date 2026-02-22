@@ -10,7 +10,7 @@ export interface AirportInfo {
   elevation: number;
 }
 
-export type WeatherSourceId = 'awc' | 'avwx' | 'openmeteo' | 'nws';
+export type WeatherSourceId = 'awc' | 'openmeteo' | 'nws';
 
 export interface WeatherSource {
   id: WeatherSourceId;
@@ -45,6 +45,7 @@ export type FlightCategory = 'VFR' | 'MVFR' | 'IFR' | 'LIFR';
 export interface CurrentConditions {
   observationTime: string;
   rawMetar?: string;
+  isVariableWind?: boolean;
   temperature: SourceValue<number>;
   dewpoint: SourceValue<number>;
   humidity: SourceValue<number>;
@@ -64,6 +65,7 @@ export interface ForecastPeriod {
   validTo: string;
   type: 'FM' | 'TEMPO' | 'BECMG' | 'PROB' | 'BASE';
   probability?: number;
+  isVariableWind?: boolean;
   temperature: SourceValue<number>;
   windDirection: SourceValue<number | null>;
   windSpeed: SourceValue<number>;
@@ -96,6 +98,19 @@ export interface MinimumStatus {
   status: 'above' | 'at' | 'below';
 }
 
+export interface AlternateAnalysis {
+  required: boolean;
+  reason?: string;
+  regulation: string;
+  analysisMethod: 'taf' | 'current' | 'unavailable';
+  forecastWindow?: {
+    from: string;
+    to: string;
+    worstCeiling: number | null;
+    worstVisibility: number;
+  };
+}
+
 export interface Part135Status {
   canDispatch: boolean;
   flightCategory: FlightCategory;
@@ -104,16 +119,64 @@ export interface Part135Status {
   weatherHazards: string[];
   alternateRequired: boolean;
   alternateReason?: string;
+  alternateAnalysis?: AlternateAnalysis;
+}
+
+export interface FratFactor {
+  category: string;
+  factor: string;
+  points: number;
+  description: string;
+}
+
+export interface FratResult {
+  totalScore: number;
+  riskLevel: 'LOW' | 'MODERATE' | 'HIGH' | 'CRITICAL';
+  factors: FratFactor[];
+  recommendation: string;
 }
 
 export interface WeatherAlert {
-  type: 'SIGMET' | 'AIRMET' | 'CONVECTIVE' | 'TFR' | 'NOTAM' | 'WARNING';
+  type: 'SIGMET' | 'AIRMET' | 'CONVECTIVE' | 'TFR' | 'NOTAM' | 'WARNING' | 'PIREP';
   severity: 'info' | 'warning' | 'danger';
   title: string;
   description: string;
   validFrom: string;
   validTo: string;
   area?: string;
+}
+
+export interface PirepReport {
+  id: number;
+  reportTime: string;
+  location: { lat: number; lon: number };
+  altitude: number; // feet
+  aircraftType: string;
+  rawReport: string;
+  turbulence?: {
+    intensity: string; // NEG, LGT, MOD, SEV, EXTRM
+    minAlt: number | null;
+    maxAlt: number | null;
+  };
+  icing?: {
+    intensity: string;
+    minAlt: number | null;
+    maxAlt: number | null;
+  };
+  weatherString?: string;
+}
+
+export interface AirSigmet {
+  id: number;
+  type: 'SIGMET' | 'AIRMET' | 'CONVECTIVE_SIGMET';
+  hazard: string;
+  severity: string;
+  validFrom: string;
+  validTo: string;
+  altitudeLow: number | null;
+  altitudeHigh: number | null;
+  rawText: string;
+  coordinates: Array<{ lat: number; lon: number }>;
 }
 
 export interface TargetTimeSnapshot {
@@ -129,11 +192,16 @@ export interface UnifiedWeatherData {
   airport: AirportInfo;
   timestamp: string;
   targetTime?: string;
+  rawTaf?: string;
+  recentMetars?: string[];
   sources: WeatherSource[];
   current: CurrentConditions;
   forecast: ForecastPeriod[];
   atTargetTime?: TargetTimeSnapshot;
   consensus: ConsensusAnalysis;
   part135Status: Part135Status;
+  frat?: FratResult;
   alerts: WeatherAlert[];
+  pireps: PirepReport[];
+  airSigmets: AirSigmet[];
 }

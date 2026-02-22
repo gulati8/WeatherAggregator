@@ -30,7 +30,7 @@ function FlightCategoryBadge({
       />
       {category}
       {showLabel && (
-        <span className="font-normal text-gray-600 ml-1">
+        <span className="font-normal text-gray-600 dark:text-gray-400 ml-1">
           ({style.label})
         </span>
       )}

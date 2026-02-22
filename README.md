@@ -22,7 +22,7 @@ npm install
 npm run dev
 ```
 
-The API runs on `http://localhost:3001`
+The API runs on `http://localhost:3002`
 
 ### Frontend
 
@@ -42,16 +42,17 @@ The app runs on `http://localhost:5173`
 | `GET /api/weather/:icao/raw` | Raw METAR and TAF strings |
 | `GET /api/weather/:icao/metar` | METAR data only |
 | `GET /api/weather/:icao/taf` | TAF data only |
+| `POST /api/trip` | Multi-leg trip weather planning |
 | `GET /health` | Service health check |
 
 ## Example Usage
 
 ```bash
 # Get aggregated weather for JFK
-curl http://localhost:3001/api/weather/KJFK
+curl http://localhost:3002/api/weather/KJFK
 
 # Get raw METAR/TAF
-curl http://localhost:3001/api/weather/KJFK/raw
+curl http://localhost:3002/api/weather/KJFK/raw
 ```
 
 ## Weather Sources
