@@ -54,9 +54,9 @@ router.get(
 
       // Clear cache if refresh requested
       if (refresh) {
-        cacheService.del(`weather:${icao.toUpperCase()}`);
-        cacheService.del(`metar:${icao.toUpperCase()}`);
-        cacheService.del(`taf:${icao.toUpperCase()}`);
+        await cacheService.del(`weather:${icao.toUpperCase()}`);
+        await cacheService.del(`metar:${icao.toUpperCase()}`);
+        await cacheService.del(`taf:${icao.toUpperCase()}`);
       }
 
       const weather = await weatherAggregator.getAggregatedWeather(icao, targetTime);

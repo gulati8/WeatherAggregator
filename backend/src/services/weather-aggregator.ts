@@ -39,7 +39,7 @@ class WeatherAggregator {
 
     // Check cache first (only for non-target-time requests to keep cache simple)
     if (!targetTime) {
-      const cached = cacheService.getWeather<UnifiedWeatherData>(normalizedIcao);
+      const cached = await cacheService.getWeather<UnifiedWeatherData>(normalizedIcao);
       if (cached) {
         return cached;
       }
@@ -128,7 +128,7 @@ class WeatherAggregator {
 
     // Cache the result (only non-target-time requests)
     if (!targetTime) {
-      cacheService.setWeather(normalizedIcao, result);
+      await cacheService.setWeather(normalizedIcao, result);
     }
 
     return result;

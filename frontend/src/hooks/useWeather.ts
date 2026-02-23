@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import { weatherApi } from '../api/client';
+import { weatherApi, favoritesApi, preferencesApi } from '../api/client';
 import { UnifiedWeatherData } from '../types/weather';
+import { useAuth } from '../contexts/AuthContext';
 
 interface UseWeatherResult {
   data: UnifiedWeatherData | null;
@@ -73,29 +74,63 @@ function getStoredArray(key: string): string[] {
   }
 }
 
-// Hook for managing favorites in localStorage
+// Hook for managing favorites — uses API when authenticated, localStorage when not
 export function useFavorites() {
+  const { isAuthenticated } = useAuth();
   const [favorites, setFavorites] = useState<string[]>([]);
-
   useEffect(() => {
-    setFavorites(getStoredArray(FAVORITES_KEY));
-  }, []);
+    const load = async () => {
+      if (isAuthenticated) {
+        try {
+          const serverFavs = await favoritesApi.getAll();
+          setFavorites(serverFavs);
+        } catch {
+          setFavorites(getStoredArray(FAVORITES_KEY));
+        }
+      } else {
+        setFavorites(getStoredArray(FAVORITES_KEY));
+      }
+    };
+    load();
+  }, [isAuthenticated]);
 
-  const addFavorite = useCallback((icao: string) => {
+  const addFavorite = useCallback(async (icao: string) => {
+    const normalized = icao.toUpperCase();
     setFavorites((prev) => {
-      const updated = [...new Set([...prev, icao.toUpperCase()])];
-      localStorage.setItem(FAVORITES_KEY, JSON.stringify(updated));
+      const updated = [...new Set([...prev, normalized])];
+      if (!isAuthenticated) {
+        localStorage.setItem(FAVORITES_KEY, JSON.stringify(updated));
+      }
       return updated;
     });
-  }, []);
 
-  const removeFavorite = useCallback((icao: string) => {
+    if (isAuthenticated) {
+      try {
+        await favoritesApi.add(normalized);
+      } catch {
+        // Revert on failure would be complex; keep optimistic update
+      }
+    }
+  }, [isAuthenticated]);
+
+  const removeFavorite = useCallback(async (icao: string) => {
+    const normalized = icao.toUpperCase();
     setFavorites((prev) => {
-      const updated = prev.filter((f) => f !== icao.toUpperCase());
-      localStorage.setItem(FAVORITES_KEY, JSON.stringify(updated));
+      const updated = prev.filter((f) => f !== normalized);
+      if (!isAuthenticated) {
+        localStorage.setItem(FAVORITES_KEY, JSON.stringify(updated));
+      }
       return updated;
     });
-  }, []);
+
+    if (isAuthenticated) {
+      try {
+        await favoritesApi.remove(normalized);
+      } catch {
+        // Keep optimistic update
+      }
+    }
+  }, [isAuthenticated]);
 
   const isFavorite = useCallback(
     (icao: string) => favorites.includes(icao.toUpperCase()),
@@ -105,28 +140,63 @@ export function useFavorites() {
   return { favorites, addFavorite, removeFavorite, isFavorite };
 }
 
-// Hook for recent searches
+// Hook for recent searches — uses API when authenticated, localStorage when not
 export function useRecentSearches() {
+  const { isAuthenticated } = useAuth();
   const [recent, setRecent] = useState<string[]>([]);
 
   useEffect(() => {
-    setRecent(getStoredArray(RECENT_KEY));
-  }, []);
+    const load = async () => {
+      if (isAuthenticated) {
+        try {
+          const prefs = await preferencesApi.get();
+          setRecent((prefs.recentSearches as string[]) || []);
+        } catch {
+          setRecent(getStoredArray(RECENT_KEY));
+        }
+      } else {
+        setRecent(getStoredArray(RECENT_KEY));
+      }
+    };
+    load();
+  }, [isAuthenticated]);
 
-  const addRecent = useCallback((icao: string) => {
+  const addRecent = useCallback(async (icao: string) => {
+    const normalized = icao.toUpperCase();
     setRecent((prev) => {
-      const normalized = icao.toUpperCase();
       const filtered = prev.filter((r) => r !== normalized);
       const updated = [normalized, ...filtered].slice(0, MAX_RECENT);
-      localStorage.setItem(RECENT_KEY, JSON.stringify(updated));
+      if (!isAuthenticated) {
+        localStorage.setItem(RECENT_KEY, JSON.stringify(updated));
+      }
       return updated;
     });
-  }, []);
 
-  const clearRecent = useCallback(() => {
+    if (isAuthenticated) {
+      try {
+        // Debounce server update by just calling with current state
+        setRecent((current) => {
+          preferencesApi.update({ recentSearches: current }).catch(() => {});
+          return current;
+        });
+      } catch {
+        // Non-critical
+      }
+    }
+  }, [isAuthenticated]);
+
+  const clearRecent = useCallback(async () => {
     setRecent([]);
-    localStorage.removeItem(RECENT_KEY);
-  }, []);
+    if (isAuthenticated) {
+      try {
+        await preferencesApi.update({ recentSearches: [] });
+      } catch {
+        // Non-critical
+      }
+    } else {
+      localStorage.removeItem(RECENT_KEY);
+    }
+  }, [isAuthenticated]);
 
   return { recent, addRecent, clearRecent };
 }

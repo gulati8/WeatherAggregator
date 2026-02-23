@@ -2,8 +2,14 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import { config } from './config';
+import { connectRedis, isRedisHealthy } from './services/redis';
+import { connectDb, isDbHealthy, runMigrations } from './db/connection';
 import weatherRoutes from './routes/weather';
 import tripRoutes from './routes/trip';
+import authRoutes from './routes/auth';
+import usersRoutes from './routes/users';
+import favoritesRoutes from './routes/favorites';
+import preferencesRoutes from './routes/preferences';
 
 const app = express();
 
@@ -13,17 +19,30 @@ app.use(cors({ origin: config.cors.origin }));
 app.use(express.json());
 
 // Health check
-app.get('/health', (_req, res) => {
-  res.json({
-    status: 'ok',
+app.get('/health', async (_req, res) => {
+  const [redisOk, dbOk] = await Promise.all([
+    isRedisHealthy(),
+    isDbHealthy(),
+  ]);
+
+  const status = redisOk && dbOk ? 'ok' : 'degraded';
+
+  res.status(status === 'ok' ? 200 : 503).json({
+    status,
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
+    redis: redisOk ? 'ok' : 'error',
+    database: dbOk ? 'ok' : 'error',
   });
 });
 
 // API routes
 app.use('/api/weather', weatherRoutes);
 app.use('/api/trip', tripRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/users', usersRoutes);
+app.use('/api/favorites', favoritesRoutes);
+app.use('/api/preferences', preferencesRoutes);
 
 // Error handling
 app.use(
@@ -47,8 +66,28 @@ app.use((_req, res) => {
 });
 
 // Start server
-const port = config.port;
-app.listen(port, () => {
-  console.log(`Weather Aggregator API running on port ${port}`);
-  console.log(`Health check: http://localhost:${port}/health`);
-});
+async function start() {
+  try {
+    // Connect to Redis
+    await connectRedis();
+    console.log('Redis connected');
+
+    // Connect to database and run migrations
+    await connectDb();
+    console.log('Database connected');
+
+    await runMigrations();
+    console.log('Database migrations complete');
+
+    const port = config.port;
+    app.listen(port, () => {
+      console.log(`Weather Aggregator API running on port ${port}`);
+      console.log(`Health check: http://localhost:${port}/health`);
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
+}
+
+start();

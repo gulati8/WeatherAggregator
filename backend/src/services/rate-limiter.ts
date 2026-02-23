@@ -1,70 +1,37 @@
+import { getRedis } from './redis';
+
 /**
- * Simple token-bucket rate limiter for external API calls.
- * AWC limits to 100 requests/minute.
+ * Redis-based fixed-window rate limiter.
+ * Survives restarts and works across replicas.
  */
 class RateLimiter {
-  private tokens: number;
-  private lastRefill: number;
-  private readonly maxTokens: number;
-  private readonly refillRate: number; // tokens per ms
-  private queue: Array<{ resolve: () => void; reject: (err: Error) => void }> = [];
-  private draining = false;
+  private readonly maxRequests: number;
+  private readonly windowMs: number;
+  private readonly keyPrefix: string;
 
-  constructor(maxRequestsPerMinute: number) {
-    this.maxTokens = maxRequestsPerMinute;
-    this.tokens = maxRequestsPerMinute;
-    this.lastRefill = Date.now();
-    this.refillRate = maxRequestsPerMinute / 60000; // per ms
-  }
-
-  private refill(): void {
-    const now = Date.now();
-    const elapsed = now - this.lastRefill;
-    this.tokens = Math.min(this.maxTokens, this.tokens + elapsed * this.refillRate);
-    this.lastRefill = now;
+  constructor(maxRequestsPerMinute: number, keyPrefix = 'ratelimit') {
+    this.maxRequests = maxRequestsPerMinute;
+    this.windowMs = 60000; // 1 minute window
+    this.keyPrefix = keyPrefix;
   }
 
   async acquire(): Promise<void> {
-    this.refill();
+    const redis = getRedis();
+    const windowKey = `${this.keyPrefix}:${Math.floor(Date.now() / this.windowMs)}`;
 
-    if (this.tokens >= 1) {
-      this.tokens -= 1;
-      return;
+    const current = await redis.incr(windowKey);
+    if (current === 1) {
+      // First request in this window — set expiry
+      await redis.expire(windowKey, Math.ceil(this.windowMs / 1000) + 1);
     }
 
-    // Wait for a token to become available
-    return new Promise((resolve, reject) => {
-      this.queue.push({ resolve, reject });
-      this.scheduleDrain();
-    });
-  }
-
-  private scheduleDrain(): void {
-    if (this.draining) return;
-    this.draining = true;
-
-    const drain = () => {
-      this.refill();
-
-      while (this.queue.length > 0 && this.tokens >= 1) {
-        this.tokens -= 1;
-        const next = this.queue.shift()!;
-        next.resolve();
-      }
-
-      if (this.queue.length > 0) {
-        // Wait until at least one token is available
-        const waitMs = Math.ceil(1 / this.refillRate);
-        setTimeout(drain, waitMs);
-      } else {
-        this.draining = false;
-      }
-    };
-
-    const waitMs = Math.ceil(1 / this.refillRate);
-    setTimeout(drain, waitMs);
+    if (current > this.maxRequests) {
+      // Over limit — wait until next window
+      const remainingMs = this.windowMs - (Date.now() % this.windowMs);
+      await new Promise((resolve) => setTimeout(resolve, remainingMs));
+    }
   }
 }
 
 // AWC rate limiter: 80 req/min (conservative margin under 100 limit)
-export const awcRateLimiter = new RateLimiter(80);
+export const awcRateLimiter = new RateLimiter(80, 'ratelimit:awc');

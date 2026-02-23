@@ -141,7 +141,7 @@ class AviationWeatherService {
   private baseUrl = config.apis.aviationWeather.baseUrl;
 
   async getMetar(icao: string): Promise<AwcMetarResponse | null> {
-    const cached = cacheService.getMetar<AwcMetarResponse>(icao);
+    const cached = await cacheService.getMetar<AwcMetarResponse>(icao);
     if (cached) {
       return cached;
     }
@@ -161,7 +161,7 @@ class AviationWeatherService {
 
       if (response.data && response.data.length > 0) {
         const metar = response.data[0];
-        cacheService.setMetar(icao, metar);
+        await cacheService.setMetar(icao, metar);
         return metar;
       }
 
@@ -173,7 +173,7 @@ class AviationWeatherService {
   }
 
   async getTaf(icao: string): Promise<AwcTafResponse | null> {
-    const cached = cacheService.getTaf<AwcTafResponse>(icao);
+    const cached = await cacheService.getTaf<AwcTafResponse>(icao);
     if (cached) {
       return cached;
     }
@@ -193,7 +193,7 @@ class AviationWeatherService {
 
       if (response.data && response.data.length > 0) {
         const taf = response.data[0];
-        cacheService.setTaf(icao, taf);
+        await cacheService.setTaf(icao, taf);
         return taf;
       }
 

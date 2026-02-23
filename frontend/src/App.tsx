@@ -1,6 +1,77 @@
+import { useState, useRef, useEffect } from 'react';
 import { Outlet, Link } from 'react-router-dom';
 import Clock from './components/Clock';
 import { useDarkMode } from './hooks/useDarkMode';
+import { useAuth } from './contexts/AuthContext';
+
+function UserMenu() {
+  const { user, isAuthenticated, logout } = useAuth();
+  const [open, setOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  if (!isAuthenticated || !user) {
+    return (
+      <Link
+        to="/login"
+        className="text-sm text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+      >
+        Sign In
+      </Link>
+    );
+  }
+
+  return (
+    <div className="relative" ref={menuRef}>
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+      >
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+        </svg>
+        <span className="hidden sm:inline">{user.name}</span>
+        <span className="text-xs text-gray-400 dark:text-gray-500 hidden sm:inline">({user.role})</span>
+      </button>
+
+      {open && (
+        <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50">
+          <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-700">
+            <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{user.name}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{user.email}</p>
+          </div>
+          {user.role === 'admin' && (
+            <Link
+              to="/admin"
+              onClick={() => setOpen(false)}
+              className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+            >
+              User Management
+            </Link>
+          )}
+          <button
+            onClick={async () => {
+              setOpen(false);
+              await logout();
+            }}
+            className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+          >
+            Sign Out
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
 
 function App() {
   const [isDark, toggleDark] = useDarkMode();
@@ -85,6 +156,7 @@ function App() {
                   </svg>
                   Map
                 </Link>
+                <UserMenu />
                 <button
                   onClick={toggleDark}
                   className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import { tripApi } from '../api/client';
+import { tripApi, savedTripsApi } from '../api/client';
 import { Trip, TripLeg, TripWeatherResponse, MAX_TRIP_LEGS } from '../types/trip';
+import { useAuth } from '../contexts/AuthContext';
 
 // Generate unique IDs
 const generateId = (): string => {
@@ -54,7 +55,7 @@ export function useTripWeather(trip: Trip | null): UseTripWeatherResult {
   return { data, loading, error, refresh };
 }
 
-// Saved trips hook (localStorage)
+// Saved trips hook — uses API when authenticated, localStorage when not
 const TRIPS_KEY = 'weather-aggregator-trips';
 
 function getStoredTrips(): Trip[] {
@@ -95,19 +96,55 @@ function serializeTrip(trip: Trip): object {
   };
 }
 
-function saveTrips(trips: Trip[]): void {
+function saveTripsToStorage(trips: Trip[]): void {
   const serialized = trips.map(serializeTrip);
   localStorage.setItem(TRIPS_KEY, JSON.stringify(serialized));
 }
 
 export function useSavedTrips() {
+  const { isAuthenticated } = useAuth();
   const [trips, setTrips] = useState<Trip[]>([]);
 
   useEffect(() => {
-    setTrips(getStoredTrips());
-  }, []);
+    const load = async () => {
+      if (isAuthenticated) {
+        try {
+          const serverTrips = await savedTripsApi.getAll();
+          // Convert server trips to Trip format
+          const converted = (serverTrips as Array<{
+            tripId: string;
+            name: string | null;
+            legs: unknown;
+            createdAt: string;
+            updatedAt: string;
+          }>).map((t) => ({
+            tripId: t.tripId,
+            name: t.name || '',
+            legs: (t.legs as Array<{
+              legId: string;
+              departureAirport: string;
+              arrivalAirport: string;
+              departureTime: string;
+              estimatedFlightMinutes: number;
+            }>).map((leg) => ({
+              ...leg,
+              departureTime: new Date(leg.departureTime),
+            })),
+            createdAt: new Date(t.createdAt),
+            updatedAt: new Date(t.updatedAt),
+          }));
+          setTrips(converted);
+        } catch {
+          setTrips(getStoredTrips());
+        }
+      } else {
+        setTrips(getStoredTrips());
+      }
+    };
+    load();
+  }, [isAuthenticated]);
 
-  const saveTrip = useCallback((trip: Trip) => {
+  const saveTrip = useCallback(async (trip: Trip) => {
     setTrips((prev) => {
       const existing = prev.findIndex((t) => t.tripId === trip.tripId);
       let updated: Trip[];
@@ -117,18 +154,45 @@ export function useSavedTrips() {
       } else {
         updated = [...prev, { ...trip, createdAt: new Date(), updatedAt: new Date() }];
       }
-      saveTrips(updated);
+      if (!isAuthenticated) {
+        saveTripsToStorage(updated);
+      }
       return updated;
     });
-  }, []);
 
-  const deleteTrip = useCallback((tripId: string) => {
+    if (isAuthenticated) {
+      try {
+        const serialized = serializeTrip(trip);
+        const tripData = serialized as { tripId: string; name?: string; legs: unknown };
+        // Try update first, then create
+        try {
+          await savedTripsApi.update(trip.tripId, { name: tripData.name, legs: tripData.legs });
+        } catch {
+          await savedTripsApi.save(tripData);
+        }
+      } catch {
+        // Keep optimistic local state
+      }
+    }
+  }, [isAuthenticated]);
+
+  const deleteTrip = useCallback(async (tripId: string) => {
     setTrips((prev) => {
       const updated = prev.filter((t) => t.tripId !== tripId);
-      saveTrips(updated);
+      if (!isAuthenticated) {
+        saveTripsToStorage(updated);
+      }
       return updated;
     });
-  }, []);
+
+    if (isAuthenticated) {
+      try {
+        await savedTripsApi.delete(tripId);
+      } catch {
+        // Keep optimistic state
+      }
+    }
+  }, [isAuthenticated]);
 
   const getTrip = useCallback(
     (tripId: string): Trip | undefined => {

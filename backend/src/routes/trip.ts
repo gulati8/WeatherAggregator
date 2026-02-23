@@ -1,6 +1,10 @@
 import { Router, Request, Response, NextFunction } from 'express';
+import { eq, and } from 'drizzle-orm';
 import { tripService } from '../services/trip-service';
 import { TripInput, MAX_TRIP_LEGS, MAX_FUTURE_DAYS } from '../types/trip';
+import { authenticate, requireRole } from '../middleware/auth';
+import { getDb } from '../db/connection';
+import { trips } from '../db/schema';
 
 const router = Router();
 
@@ -93,7 +97,7 @@ const validateTripInput = (
   return { valid: true };
 };
 
-// POST /api/trip - Get weather for a multi-leg trip
+// POST /api/trip - Get weather for a multi-leg trip (public)
 router.post(
   '/',
   async (req: Request, res: Response, next: NextFunction) => {
@@ -113,6 +117,114 @@ router.post(
       const tripWeather = await tripService.getTripWeather(input);
 
       res.json(tripWeather);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// --- Saved trip CRUD (authenticated, dispatcher+) ---
+
+// GET /api/trip/saved
+router.get(
+  '/saved',
+  authenticate,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const db = getDb();
+      const savedTrips = await db
+        .select()
+        .from(trips)
+        .where(eq(trips.userId, req.user!.userId))
+        .orderBy(trips.updatedAt);
+
+      res.json(savedTrips);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// POST /api/trip/saved
+router.post(
+  '/saved',
+  authenticate,
+  requireRole('admin', 'dispatcher'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { tripId, name, legs } = req.body;
+
+      if (!tripId || !legs) {
+        return res.status(400).json({ error: 'tripId and legs are required' });
+      }
+
+      const db = getDb();
+      const [saved] = await db.insert(trips).values({
+        userId: req.user!.userId,
+        tripId,
+        name: name || null,
+        legs,
+      }).returning();
+
+      res.status(201).json(saved);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// PUT /api/trip/saved/:tripId
+router.put(
+  '/saved/:tripId',
+  authenticate,
+  requireRole('admin', 'dispatcher'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { tripId } = req.params;
+      const { name, legs } = req.body;
+
+      const db = getDb();
+      const data: Record<string, unknown> = { updatedAt: new Date() };
+      if (name !== undefined) data.name = name;
+      if (legs !== undefined) data.legs = legs;
+
+      const [updated] = await db
+        .update(trips)
+        .set(data)
+        .where(and(eq(trips.userId, req.user!.userId), eq(trips.tripId, tripId)))
+        .returning();
+
+      if (!updated) {
+        return res.status(404).json({ error: 'Trip not found' });
+      }
+
+      res.json(updated);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// DELETE /api/trip/saved/:tripId
+router.delete(
+  '/saved/:tripId',
+  authenticate,
+  requireRole('admin', 'dispatcher'),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { tripId } = req.params;
+      const db = getDb();
+
+      const result = await db
+        .delete(trips)
+        .where(and(eq(trips.userId, req.user!.userId), eq(trips.tripId, tripId)))
+        .returning({ id: trips.id });
+
+      if (result.length === 0) {
+        return res.status(404).json({ error: 'Trip not found' });
+      }
+
+      res.json({ message: 'Trip deleted' });
     } catch (error) {
       next(error);
     }

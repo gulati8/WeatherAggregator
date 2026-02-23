@@ -1,64 +1,77 @@
-import NodeCache from 'node-cache';
 import { config } from '../config';
+import { getRedis } from './redis';
 
 class CacheService {
-  private cache: NodeCache;
-
-  constructor() {
-    this.cache = new NodeCache({
-      checkperiod: 60, // Check for expired keys every 60 seconds
-    });
-  }
-
-  get<T>(key: string): T | undefined {
-    return this.cache.get<T>(key);
-  }
-
-  set<T>(key: string, value: T, ttlSeconds?: number): boolean {
-    if (ttlSeconds) {
-      return this.cache.set(key, value, ttlSeconds);
+  async get<T>(key: string): Promise<T | undefined> {
+    try {
+      const data = await getRedis().get(key);
+      if (data === null) return undefined;
+      return JSON.parse(data) as T;
+    } catch {
+      return undefined;
     }
-    return this.cache.set(key, value);
   }
 
-  del(key: string): number {
-    return this.cache.del(key);
+  async set<T>(key: string, value: T, ttlSeconds?: number): Promise<boolean> {
+    try {
+      const serialized = JSON.stringify(value);
+      if (ttlSeconds) {
+        await getRedis().setex(key, ttlSeconds, serialized);
+      } else {
+        await getRedis().set(key, serialized);
+      }
+      return true;
+    } catch {
+      return false;
+    }
   }
 
-  flush(): void {
-    this.cache.flushAll();
+  async del(key: string): Promise<number> {
+    try {
+      return await getRedis().del(key);
+    } catch {
+      return 0;
+    }
+  }
+
+  async flush(): Promise<void> {
+    try {
+      await getRedis().flushdb();
+    } catch {
+      // ignore
+    }
   }
 
   // Convenience methods with default TTLs
-  setMetar<T>(icao: string, value: T): boolean {
+  async setMetar<T>(icao: string, value: T): Promise<boolean> {
     return this.set(`metar:${icao.toUpperCase()}`, value, config.cache.metarTtl);
   }
 
-  getMetar<T>(icao: string): T | undefined {
+  async getMetar<T>(icao: string): Promise<T | undefined> {
     return this.get<T>(`metar:${icao.toUpperCase()}`);
   }
 
-  setTaf<T>(icao: string, value: T): boolean {
+  async setTaf<T>(icao: string, value: T): Promise<boolean> {
     return this.set(`taf:${icao.toUpperCase()}`, value, config.cache.tafTtl);
   }
 
-  getTaf<T>(icao: string): T | undefined {
+  async getTaf<T>(icao: string): Promise<T | undefined> {
     return this.get<T>(`taf:${icao.toUpperCase()}`);
   }
 
-  setAirport<T>(icao: string, value: T): boolean {
+  async setAirport<T>(icao: string, value: T): Promise<boolean> {
     return this.set(`airport:${icao.toUpperCase()}`, value, config.cache.airportTtl);
   }
 
-  getAirport<T>(icao: string): T | undefined {
+  async getAirport<T>(icao: string): Promise<T | undefined> {
     return this.get<T>(`airport:${icao.toUpperCase()}`);
   }
 
-  setWeather<T>(icao: string, value: T): boolean {
+  async setWeather<T>(icao: string, value: T): Promise<boolean> {
     return this.set(`weather:${icao.toUpperCase()}`, value, config.cache.metarTtl);
   }
 
-  getWeather<T>(icao: string): T | undefined {
+  async getWeather<T>(icao: string): Promise<T | undefined> {
     return this.get<T>(`weather:${icao.toUpperCase()}`);
   }
 }

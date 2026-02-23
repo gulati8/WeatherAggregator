@@ -1,6 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { preferencesApi } from '../api/client';
+import { useAuth } from '../contexts/AuthContext';
 
 export function useDarkMode(): [boolean, () => void] {
+  const { isAuthenticated } = useAuth();
+  const syncTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const [isDark, setIsDark] = useState(() => {
     const saved = localStorage.getItem('weather-aggregator-dark-mode');
     if (saved !== null) return saved === 'true';
@@ -17,6 +22,26 @@ export function useDarkMode(): [boolean, () => void] {
     localStorage.setItem('weather-aggregator-dark-mode', String(isDark));
   }, [isDark]);
 
-  const toggle = () => setIsDark(!isDark);
+  // Sync to server when authenticated (debounced)
+  const syncToServer = useCallback((value: boolean) => {
+    if (!isAuthenticated) return;
+
+    if (syncTimerRef.current) {
+      clearTimeout(syncTimerRef.current);
+    }
+
+    syncTimerRef.current = setTimeout(() => {
+      preferencesApi.update({ darkMode: value }).catch(() => {});
+    }, 1000);
+  }, [isAuthenticated]);
+
+  const toggle = useCallback(() => {
+    setIsDark((prev) => {
+      const next = !prev;
+      syncToServer(next);
+      return next;
+    });
+  }, [syncToServer]);
+
   return [isDark, toggle];
 }
