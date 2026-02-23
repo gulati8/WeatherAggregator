@@ -40,12 +40,12 @@ function TripSourceComparison({
   );
 
   return (
-    <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+    <div className="bg-stone-50 dark:bg-stone-700 rounded-lg p-4">
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div>
-          <span className="text-xs text-gray-500 dark:text-gray-400">{label}</span>
-          <h4 className="text-lg font-bold text-gray-900 dark:text-gray-100">{airport}</h4>
+          <span className="text-xs text-stone-500 dark:text-stone-400">{label}</span>
+          <h4 className="text-lg font-bold text-stone-900 dark:text-stone-100">{airport}</h4>
           <DualTime time={time} size="sm" layout="stacked" />
         </div>
         <div className="text-right">
@@ -71,13 +71,13 @@ function TripSourceComparison({
       {/* Multi-source comparison grid */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {/* Flight Category */}
-        <div className="bg-white dark:bg-gray-800 rounded p-2">
-          <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Category</div>
+        <div className="bg-white dark:bg-stone-800 rounded p-2">
+          <div className="text-xs font-medium text-stone-500 dark:text-stone-400 mb-2">Category</div>
           <div className="space-y-1">
             {Object.entries(conditions.flightCategory?.bySource || {}).map(
               ([source, value]) => (
                 <div key={source} className="flex items-center justify-between text-xs">
-                  <span className="text-gray-600 dark:text-gray-400">
+                  <span className="text-stone-600 dark:text-stone-400">
                     {sourceNames[source as WeatherSourceId]}:
                   </span>
                   <FlightCategoryBadge
@@ -88,34 +88,34 @@ function TripSourceComparison({
               )
             )}
           </div>
-          <div className="mt-2 pt-2 border-t border-gray-100 dark:border-gray-600">
-            <div className="text-xs text-gray-500 dark:text-gray-400">Consensus</div>
-            <div className="font-semibold text-gray-900 dark:text-gray-100">
+          <div className="mt-2 pt-2 border-t border-stone-100 dark:border-stone-700">
+            <div className="text-xs text-stone-500 dark:text-stone-400">Consensus</div>
+            <div className="font-semibold text-stone-900 dark:text-stone-100">
               {conditions.flightCategory?.value}
             </div>
           </div>
         </div>
 
         {/* Visibility */}
-        <div className="bg-white dark:bg-gray-800 rounded p-2">
-          <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Visibility</div>
+        <div className="bg-white dark:bg-stone-800 rounded p-2">
+          <div className="text-xs font-medium text-stone-500 dark:text-stone-400 mb-2">Visibility</div>
           <div className="space-y-1">
             {Object.entries(conditions.visibility?.bySource || {}).map(
               ([source, value]) => (
                 <div key={source} className="flex items-center justify-between text-xs">
-                  <span className="text-gray-600 dark:text-gray-400">
+                  <span className="text-stone-600 dark:text-stone-400">
                     {sourceNames[source as WeatherSourceId]}:
                   </span>
-                  <span className="font-mono text-gray-900 dark:text-gray-100">
+                  <span className="font-data text-stone-900 dark:text-stone-100">
                     {formatVisibility(value as number)}
                   </span>
                 </div>
               )
             )}
           </div>
-          <div className="mt-2 pt-2 border-t border-gray-100 dark:border-gray-600">
-            <div className="text-xs text-gray-500 dark:text-gray-400">Consensus</div>
-            <div className="font-semibold text-gray-900 dark:text-gray-100">
+          <div className="mt-2 pt-2 border-t border-stone-100 dark:border-stone-700">
+            <div className="text-xs text-stone-500 dark:text-stone-400">Consensus</div>
+            <div className="font-semibold text-stone-900 dark:text-stone-100">
               {formatVisibility(conditions.visibility?.value || 0)}
             </div>
             {conditions.visibility?.spread && conditions.visibility.spread > 1 && (
@@ -127,25 +127,25 @@ function TripSourceComparison({
         </div>
 
         {/* Ceiling */}
-        <div className="bg-white dark:bg-gray-800 rounded p-2">
-          <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Ceiling</div>
+        <div className="bg-white dark:bg-stone-800 rounded p-2">
+          <div className="text-xs font-medium text-stone-500 dark:text-stone-400 mb-2">Ceiling</div>
           <div className="space-y-1">
             {Object.entries(conditions.ceiling?.bySource || {}).map(
               ([source, value]) => (
                 <div key={source} className="flex items-center justify-between text-xs">
-                  <span className="text-gray-600 dark:text-gray-400">
+                  <span className="text-stone-600 dark:text-stone-400">
                     {sourceNames[source as WeatherSourceId]}:
                   </span>
-                  <span className="font-mono text-gray-900 dark:text-gray-100">
+                  <span className="font-data text-stone-900 dark:text-stone-100">
                     {formatCeiling(value as number | null)}
                   </span>
                 </div>
               )
             )}
           </div>
-          <div className="mt-2 pt-2 border-t border-gray-100 dark:border-gray-600">
-            <div className="text-xs text-gray-500 dark:text-gray-400">Consensus</div>
-            <div className="font-semibold text-gray-900 dark:text-gray-100">
+          <div className="mt-2 pt-2 border-t border-stone-100 dark:border-stone-700">
+            <div className="text-xs text-stone-500 dark:text-stone-400">Consensus</div>
+            <div className="font-semibold text-stone-900 dark:text-stone-100">
               {formatCeiling(conditions.ceiling?.value ?? null)}
             </div>
             {conditions.ceiling?.spread && conditions.ceiling.spread > 500 && (
@@ -160,7 +160,7 @@ function TripSourceComparison({
       {/* Source agreement indicator */}
       <div className="mt-3 flex items-center justify-between text-xs">
         <div className="flex items-center gap-2">
-          <span className="text-gray-500 dark:text-gray-400">Source Agreement:</span>
+          <span className="text-stone-500 dark:text-stone-400">Source Agreement:</span>
           <span
             className={`font-medium ${
               weather.consensus.overallAgreement === 'strong'
@@ -174,7 +174,7 @@ function TripSourceComparison({
               weather.consensus.overallAgreement.slice(1)}
           </span>
         </div>
-        <div className="text-gray-500 dark:text-gray-400">
+        <div className="text-stone-500 dark:text-stone-400">
           Confidence: {weather.consensus.confidenceScore}%
         </div>
       </div>

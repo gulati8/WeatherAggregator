@@ -109,15 +109,15 @@ export default function AirportAutocomplete({
       {showDropdown && (
         <ul
           ref={listRef}
-          className="absolute z-50 left-0 right-0 mt-1 max-h-48 sm:max-h-60 overflow-y-auto bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg"
+          className="absolute z-50 left-0 right-0 mt-1 max-h-48 sm:max-h-60 overflow-y-auto bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg shadow-lg"
         >
           {loading && results.length === 0 && (
-            <li className="px-3 py-2 text-sm text-gray-400 dark:text-gray-500">
+            <li className="px-3 py-2 text-sm text-stone-400 dark:text-stone-500">
               Searching...
             </li>
           )}
           {!loading && results.length === 0 && value.length >= 2 && (
-            <li className="px-3 py-2 text-sm text-gray-400 dark:text-gray-500">
+            <li className="px-3 py-2 text-sm text-stone-400 dark:text-stone-500">
               No airports found
             </li>
           )}
@@ -131,19 +131,19 @@ export default function AirportAutocomplete({
               onMouseEnter={() => setHighlightIndex(i)}
               className={`px-3 py-3 cursor-pointer text-sm flex items-center gap-2 ${
                 i === highlightIndex
-                  ? 'bg-blue-50 dark:bg-blue-900/30'
-                  : 'hover:bg-gray-50 dark:hover:bg-gray-700'
+                  ? 'bg-teal-50 dark:bg-teal-900/30'
+                  : 'hover:bg-stone-50 dark:hover:bg-stone-700'
               }`}
             >
-              <span className="font-mono font-bold text-gray-900 dark:text-gray-100 min-w-[3.5rem]">
+              <span className="font-data font-bold text-stone-900 dark:text-stone-100 min-w-[3.5rem]">
                 {airport.icao}
               </span>
               {airport.iata && (
-                <span className="text-xs text-gray-400 dark:text-gray-500 min-w-[2rem]">
+                <span className="text-xs text-stone-400 dark:text-stone-500 min-w-[2rem]">
                   {airport.iata}
                 </span>
               )}
-              <span className="text-gray-600 dark:text-gray-300 truncate">
+              <span className="text-stone-600 dark:text-stone-300 truncate">
                 {airport.city ? `${airport.name}, ${airport.city}` : airport.name}
               </span>
             </li>

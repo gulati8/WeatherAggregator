@@ -1,4 +1,5 @@
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useWeather, useFavorites, useRecentSearches } from '../hooks/useWeather';
 import AirportSearch from '../components/AirportSearch';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -16,8 +17,20 @@ import AirSigmetDisplay from '../components/AirSigmetDisplay';
 import TargetTimeDisplay from '../components/TargetTimeDisplay';
 import WindsAloftDisplay from '../components/WindsAloftDisplay';
 import NotamDisplay from '../components/NotamDisplay';
+import ExpandableSection from '../components/ui/ExpandableSection';
 import { formatRelativeTime } from '../utils/formatters';
+import { FRIENDLY_LABELS } from '../utils/personality';
 import { useEffect, useMemo } from 'react';
+
+const stagger = {
+  container: {
+    animate: { transition: { staggerChildren: 0.07 } },
+  },
+  item: {
+    initial: { opacity: 0, y: 12 },
+    animate: { opacity: 1, y: 0, transition: { duration: 0.3 } },
+  },
+};
 
 function AirportWeather() {
   const { icao } = useParams<{ icao: string }>();
@@ -79,7 +92,7 @@ function AirportWeather() {
       {loading && <LoadingSpinner />}
 
       {error && (
-        <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-lg p-6 text-center">
+        <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-card p-6 text-center">
           <svg
             className="w-12 h-12 text-red-400 mx-auto mb-4"
             fill="none"
@@ -99,7 +112,7 @@ function AirportWeather() {
           <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
           <button
             onClick={refresh}
-            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+            className="px-4 py-2 bg-red-600 text-white rounded-card hover:bg-red-700 transition-colors"
           >
             Try Again
           </button>
@@ -107,21 +120,48 @@ function AirportWeather() {
       )}
 
       {data && (
-        <>
+        <motion.div
+          variants={stagger.container}
+          initial="initial"
+          animate="animate"
+        >
           {/* Target time banner */}
           {data.atTargetTime && (
-            <TargetTimeDisplay
-              snapshot={data.atTargetTime}
-              onClear={clearTargetTime}
-            />
+            <motion.div variants={stagger.item}>
+              <TargetTimeDisplay
+                snapshot={data.atTargetTime}
+                onClear={clearTargetTime}
+              />
+            </motion.div>
           )}
 
-          {/* Airport header */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 p-6 mb-6">
-            <div className="flex flex-col sm:flex-row items-start sm:justify-between gap-4">
+          {/* Alerts — always visible (safety-critical) */}
+          {data.alerts.length > 0 && (
+            <motion.div variants={stagger.item} className="mb-6">
+              <AlertDisplay alerts={data.alerts} />
+            </motion.div>
+          )}
+
+          {/* SIGMETs/AIRMETs — always visible (safety-critical) */}
+          {data.airSigmets && data.airSigmets.length > 0 && (
+            <motion.div variants={stagger.item} className="mb-6">
+              <AirSigmetDisplay airSigmets={data.airSigmets} />
+            </motion.div>
+          )}
+
+          {/* PIREPs — always visible (safety-critical) */}
+          {data.pireps && data.pireps.length > 0 && (
+            <motion.div variants={stagger.item} className="mb-6">
+              <PirepDisplay pireps={data.pireps} />
+            </motion.div>
+          )}
+
+          {/* Layer 1: Hero Summary — Airport header + conditions + Part 135 */}
+          <motion.div variants={stagger.item} className="card p-6 mb-6">
+            <div className="flex flex-col sm:flex-row items-start sm:justify-between gap-4 mb-6">
               <div>
                 <div className="flex items-center gap-3">
-                  <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                  <h1 className="text-3xl font-bold font-display text-stone-900 dark:text-stone-100">
                     {data.airport.icao}
                   </h1>
                   <button
@@ -129,7 +169,7 @@ function AirportWeather() {
                     className={`p-2 rounded-full transition-colors ${
                       isFavorite(data.airport.icao)
                         ? 'text-yellow-500 hover:text-yellow-600'
-                        : 'text-gray-300 dark:text-gray-500 hover:text-yellow-500'
+                        : 'text-stone-300 dark:text-stone-500 hover:text-yellow-500'
                     }`}
                     title={
                       isFavorite(data.airport.icao)
@@ -146,21 +186,24 @@ function AirportWeather() {
                     </svg>
                   </button>
                 </div>
-                <p className="text-lg text-gray-600 dark:text-gray-400">{data.airport.name}</p>
+                <p className="text-lg text-stone-600 dark:text-stone-400">{data.airport.name}</p>
                 {data.airport.city && (
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                  <p className="text-sm text-stone-500 dark:text-stone-400">
                     {data.airport.city}
                     {data.airport.country && `, ${data.airport.country}`}
                   </p>
                 )}
+                <p className="text-sm text-teal-600 dark:text-teal-400 mt-1 font-medium">
+                  {FRIENDLY_LABELS[data.current.flightCategory.value]}
+                </p>
               </div>
               <div className="text-right">
-                <div className="text-sm text-gray-500 dark:text-gray-400">
+                <div className="text-sm text-stone-500 dark:text-stone-400">
                   Last updated: {formatRelativeTime(data.timestamp)}
                 </div>
                 <button
                   onClick={refresh}
-                  className="mt-2 inline-flex items-center gap-1 px-3 py-1.5 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
+                  className="mt-2 inline-flex items-center gap-1 px-3 py-1.5 text-sm text-teal-600 dark:text-teal-400 hover:text-teal-800 dark:hover:text-teal-300 hover:bg-teal-50 dark:hover:bg-teal-900/30 rounded-card transition-colors"
                 >
                   <svg
                     className="w-4 h-4"
@@ -178,38 +221,16 @@ function AirportWeather() {
                   Refresh
                 </button>
                 {data.airport.elevation > 0 && (
-                  <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                  <div className="text-xs text-stone-400 dark:text-stone-500 mt-1">
                     Elevation: {data.airport.elevation.toLocaleString()} ft
                   </div>
                 )}
               </div>
             </div>
-          </div>
+          </motion.div>
 
-          {/* Alerts */}
-          {data.alerts.length > 0 && (
-            <div className="mb-6">
-              <AlertDisplay alerts={data.alerts} />
-            </div>
-          )}
-
-          {/* SIGMETs/AIRMETs */}
-          {data.airSigmets && data.airSigmets.length > 0 && (
-            <div className="mb-6">
-              <AirSigmetDisplay airSigmets={data.airSigmets} />
-            </div>
-          )}
-
-          {/* PIREPs */}
-          {data.pireps && data.pireps.length > 0 && (
-            <div className="mb-6">
-              <PirepDisplay pireps={data.pireps} />
-            </div>
-          )}
-
-          {/* Main grid */}
-          <div className="grid lg:grid-cols-3 gap-6 mb-6">
-            {/* Current conditions - takes 2 columns */}
+          {/* Main grid — conditions + Part 135 */}
+          <motion.div variants={stagger.item} className="grid lg:grid-cols-3 gap-6 mb-6">
             <div className="lg:col-span-2">
               <CurrentConditions
                 conditions={data.current}
@@ -220,8 +241,6 @@ function AirportWeather() {
                 }
               />
             </div>
-
-            {/* Part 135 Summary + FRAT stacked */}
             <div className="space-y-6">
               <Part135Summary
                 status={data.part135Status}
@@ -229,52 +248,74 @@ function AirportWeather() {
               />
               {data.frat && <FratDisplay frat={data.frat} />}
             </div>
-          </div>
+          </motion.div>
 
-          {/* Source comparison and consensus */}
-          <div className="grid lg:grid-cols-2 gap-6 mb-6">
-            <SourceComparison
-              sources={data.sources}
-              current={data.current}
-            />
-            <ConsensusIndicator consensus={data.consensus} />
-          </div>
+          {/* Layer 2: Source comparison + consensus (default open) */}
+          <motion.div variants={stagger.item} className="card p-6 mb-6">
+            <ExpandableSection title="Source Comparison & Consensus" defaultOpen>
+              <div className="grid lg:grid-cols-2 gap-6 mt-4">
+                <SourceComparison
+                  sources={data.sources}
+                  current={data.current}
+                />
+                <ConsensusIndicator consensus={data.consensus} />
+              </div>
+            </ExpandableSection>
+          </motion.div>
 
-          {/* Detailed source comparison with charts */}
-          <div className="mb-6">
-            <SourceComparisonDetailed
-              sources={data.sources}
-              current={data.current}
-              forecast={data.forecast}
-            />
-          </div>
+          {/* Forecast timeline (default open) */}
+          <motion.div variants={stagger.item} className="card p-6 mb-6">
+            <ExpandableSection title="Forecast Timeline" defaultOpen>
+              <div className="mt-4">
+                <ForecastTimeline
+                  forecast={data.forecast}
+                  highlightTime={data.atTargetTime?.targetTime}
+                />
+              </div>
+            </ExpandableSection>
+          </motion.div>
 
-          {/* Forecast timeline */}
-          <div className="mb-6">
-            <ForecastTimeline
-              forecast={data.forecast}
-              highlightTime={data.atTargetTime?.targetTime}
-            />
-          </div>
+          {/* Layer 2/3: Collapsible sections */}
+          <motion.div variants={stagger.item} className="card p-6 mb-6">
+            <ExpandableSection title="NOTAMs">
+              <div className="mt-4">
+                <NotamDisplay icao={data.airport.icao} />
+              </div>
+            </ExpandableSection>
+          </motion.div>
 
-          {/* NOTAMs */}
-          <div className="mb-6">
-            <NotamDisplay icao={data.airport.icao} />
-          </div>
+          <motion.div variants={stagger.item} className="card p-6 mb-6">
+            <ExpandableSection title="Winds Aloft">
+              <div className="mt-4">
+                <WindsAloftDisplay icao={data.airport.icao} />
+              </div>
+            </ExpandableSection>
+          </motion.div>
 
-          {/* Winds Aloft */}
-          <div className="mb-6">
-            <WindsAloftDisplay icao={data.airport.icao} />
-          </div>
+          {/* Layer 3: Detailed source comparison + charts (collapsed) */}
+          <motion.div variants={stagger.item} className="card p-6 mb-6">
+            <ExpandableSection title="Detailed Source Comparison">
+              <div className="mt-4">
+                <SourceComparisonDetailed
+                  sources={data.sources}
+                  current={data.current}
+                  forecast={data.forecast}
+                />
+              </div>
+            </ExpandableSection>
+          </motion.div>
 
-          {/* Weather charts */}
-          <div className="mb-6">
-            <WeatherChart
-              forecast={data.forecast}
-              highlightTime={data.atTargetTime?.targetTime}
-            />
-          </div>
-        </>
+          <motion.div variants={stagger.item} className="card p-6 mb-6">
+            <ExpandableSection title="Weather Charts">
+              <div className="mt-4">
+                <WeatherChart
+                  forecast={data.forecast}
+                  highlightTime={data.atTargetTime?.targetTime}
+                />
+              </div>
+            </ExpandableSection>
+          </motion.div>
+        </motion.div>
       )}
     </div>
   );

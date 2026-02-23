@@ -84,7 +84,7 @@ function TripTimeline({ legs, selectedLegId, onSelectLeg }: TripTimelineProps) {
   const getAgreementBorder = (leg: TripLegWeather, type: 'departure' | 'arrival'): string => {
     const weather =
       type === 'departure' ? leg.departureAirport.weather : leg.arrivalAirport.weather;
-    if (!weather) return 'border-2 border-gray-400';
+    if (!weather) return 'border-2 border-stone-400';
 
     const agreement = weather.consensus?.overallAgreement;
     switch (agreement) {
@@ -101,8 +101,8 @@ function TripTimeline({ legs, selectedLegId, onSelectLeg }: TripTimelineProps) {
 
   if (legs.length === 0) {
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 p-4">
-        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+      <div className="bg-white dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700 p-4">
+        <div className="text-center py-8 text-stone-500 dark:text-stone-400">
           <p>Add legs to see the timeline</p>
         </div>
       </div>
@@ -110,8 +110,8 @@ function TripTimeline({ legs, selectedLegId, onSelectLeg }: TripTimelineProps) {
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 p-4">
-      <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Trip Timeline</h3>
+    <div className="bg-white dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700 p-4">
+      <h3 className="text-sm font-semibold text-stone-700 dark:text-stone-300 mb-3">Trip Timeline</h3>
 
       {/* Mobile vertical leg buttons */}
       <div className="md:hidden space-y-2 mb-4">
@@ -125,12 +125,12 @@ function TripTimeline({ legs, selectedLegId, onSelectLeg }: TripTimelineProps) {
               onClick={() => onSelectLeg(leg.legId)}
               className={`w-full text-left p-3 rounded-lg border transition-colors ${
                 isSelected
-                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30'
-                  : 'border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
+                  ? 'border-teal-500 bg-teal-50 dark:bg-teal-900/30'
+                  : 'border-stone-200 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-700'
               }`}
             >
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <span className="text-sm font-medium text-stone-700 dark:text-stone-300">
                   Leg {index + 1}: {leg.departureAirport.icao} → {leg.arrivalAirport.icao}
                 </span>
                 <div className="flex items-center gap-2">
@@ -139,7 +139,7 @@ function TripTimeline({ legs, selectedLegId, onSelectLeg }: TripTimelineProps) {
                     style={{ backgroundColor: getCategoryColor(depCategory) }}
                     title={depCategory}
                   />
-                  <span className="text-xs text-gray-400">→</span>
+                  <span className="text-xs text-stone-400">→</span>
                   <span
                     className="w-3 h-3 rounded-full"
                     style={{ backgroundColor: getCategoryColor(arrCategory) }}
@@ -153,7 +153,7 @@ function TripTimeline({ legs, selectedLegId, onSelectLeg }: TripTimelineProps) {
                   }`} />
                 </div>
               </div>
-              <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              <div className="text-xs text-stone-500 dark:text-stone-400 mt-1">
                 {new Date(leg.departureTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
                 {' → '}
                 {new Date(leg.arrivalTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
@@ -166,13 +166,13 @@ function TripTimeline({ legs, selectedLegId, onSelectLeg }: TripTimelineProps) {
       {/* Timeline container - horizontal scroll on desktop/tablet */}
       <div className="relative overflow-x-auto hidden md:block">
         {/* Time header */}
-        <div className="flex border-b border-gray-200 dark:border-gray-600 pb-2 mb-2">
+        <div className="flex border-b border-stone-200 dark:border-stone-700 pb-2 mb-2">
           <div className="w-16 flex-shrink-0" /> {/* Label column spacer */}
           <div className="flex-1 relative h-6">
             {timeLabels.map((label, index) => (
               <div
                 key={index}
-                className="absolute text-xs text-gray-500 dark:text-gray-400 transform -translate-x-1/2"
+                className="absolute text-xs text-stone-500 dark:text-stone-400 transform -translate-x-1/2"
                 style={{ left: `${getTimePosition(label.time)}%` }}
               >
                 {label.label}
@@ -197,12 +197,12 @@ function TripTimeline({ legs, selectedLegId, onSelectLeg }: TripTimelineProps) {
               <div
                 key={leg.legId}
                 className={`flex items-center cursor-pointer rounded transition-colors ${
-                  selectedLegId === leg.legId ? 'bg-blue-50 dark:bg-blue-900/30' : 'hover:bg-gray-50 dark:hover:bg-gray-700'
+                  selectedLegId === leg.legId ? 'bg-teal-50 dark:bg-teal-900/30' : 'hover:bg-stone-50 dark:hover:bg-stone-700'
                 }`}
                 onClick={() => onSelectLeg(leg.legId)}
               >
                 {/* Leg label */}
-                <div className="w-16 flex-shrink-0 text-xs font-medium text-gray-600 dark:text-gray-400">
+                <div className="w-16 flex-shrink-0 text-xs font-medium text-stone-600 dark:text-stone-400">
                   Leg {index + 1}
                 </div>
 
@@ -213,7 +213,7 @@ function TripTimeline({ legs, selectedLegId, onSelectLeg }: TripTimelineProps) {
                     className={`absolute top-1/2 transform -translate-y-1/2 h-6 rounded-full ${getLegColor(
                       leg
                     )} flex items-center justify-center transition-all ${
-                      selectedLegId === leg.legId ? 'ring-2 ring-blue-500 ring-offset-1 dark:ring-offset-gray-800' : ''
+                      selectedLegId === leg.legId ? 'ring-2 ring-teal-500 ring-offset-1 dark:ring-offset-stone-800' : ''
                     }`}
                     style={{
                       left: `${startPos}%`,
@@ -265,8 +265,8 @@ function TripTimeline({ legs, selectedLegId, onSelectLeg }: TripTimelineProps) {
       </div>
 
       {/* Legend */}
-      <div className="mt-4 pt-3 border-t border-gray-200 dark:border-gray-600">
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-gray-600 dark:text-gray-400">
+      <div className="mt-4 pt-3 border-t border-stone-200 dark:border-stone-700">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-stone-600 dark:text-stone-400">
           <div className="flex items-center gap-1">
             <span className="w-3 h-3 rounded-full bg-green-500" />
             <span>GO</span>
@@ -279,16 +279,16 @@ function TripTimeline({ legs, selectedLegId, onSelectLeg }: TripTimelineProps) {
             <span className="w-3 h-3 rounded-full bg-red-500" />
             <span>NO-GO</span>
           </div>
-          <div className="w-full sm:w-auto sm:border-l sm:border-gray-300 dark:sm:border-gray-600 sm:pl-4 flex items-center gap-1 pt-2 sm:pt-0">
-            <span className="w-3 h-3 rounded-full border-2 border-solid border-gray-400" />
+          <div className="w-full sm:w-auto sm:border-l sm:border-stone-300 dark:sm:border-stone-700 sm:pl-4 flex items-center gap-1 pt-2 sm:pt-0">
+            <span className="w-3 h-3 rounded-full border-2 border-solid border-stone-400" />
             <span>Strong</span>
           </div>
           <div className="flex items-center gap-1">
-            <span className="w-3 h-3 rounded-full border-2 border-dashed border-gray-400" />
+            <span className="w-3 h-3 rounded-full border-2 border-dashed border-stone-400" />
             <span>Moderate</span>
           </div>
           <div className="flex items-center gap-1">
-            <span className="w-3 h-3 rounded-full border-2 border-dotted border-gray-400" />
+            <span className="w-3 h-3 rounded-full border-2 border-dotted border-stone-400" />
             <span>Weak</span>
           </div>
         </div>

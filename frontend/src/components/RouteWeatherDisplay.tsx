@@ -44,9 +44,9 @@ function RouteWeatherDisplay({ departureIcao, arrivalIcao, departureTime }: Rout
 
   if (loading) {
     return (
-      <div className="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-4">
-        <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-          <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+      <div className="bg-white dark:bg-stone-700 border border-stone-200 dark:border-stone-700 rounded-lg p-4">
+        <div className="flex items-center gap-2 text-sm text-stone-500 dark:text-stone-400">
+          <div className="w-4 h-4 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" />
           Loading en-route weather...
         </div>
       </div>
@@ -55,8 +55,8 @@ function RouteWeatherDisplay({ departureIcao, arrivalIcao, departureTime }: Rout
 
   if (error) {
     return (
-      <div className="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-4">
-        <p className="text-sm text-gray-400 dark:text-gray-500">{error}</p>
+      <div className="bg-white dark:bg-stone-700 border border-stone-200 dark:border-stone-700 rounded-lg p-4">
+        <p className="text-sm text-stone-400 dark:text-stone-500">{error}</p>
       </div>
     );
   }
@@ -66,14 +66,14 @@ function RouteWeatherDisplay({ departureIcao, arrivalIcao, departureTime }: Rout
   const { points, summary, totalDistanceNm } = routeWeather;
 
   return (
-    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden">
+    <div className="bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg overflow-hidden">
       {/* Header */}
-      <div className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600 px-4 py-3">
+      <div className="bg-stone-50 dark:bg-stone-700 border-b border-stone-200 dark:border-stone-700 px-4 py-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+          <h4 className="text-sm font-semibold text-stone-800 dark:text-stone-200">
             En-Route Weather
           </h4>
-          <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+          <div className="flex items-center gap-3 text-xs text-stone-500 dark:text-stone-400">
             <span>{totalDistanceNm} NM</span>
             <span>{points.length} checkpoints</span>
           </div>
@@ -82,7 +82,7 @@ function RouteWeatherDisplay({ departureIcao, arrivalIcao, departureTime }: Rout
 
       {/* Route category bar */}
       <div className="px-4 pt-3">
-        <div className="flex h-4 rounded-full overflow-hidden border border-gray-200 dark:border-gray-600">
+        <div className="flex h-4 rounded-full overflow-hidden border border-stone-200 dark:border-stone-700">
           {points.map((point, i) => {
             const width = 100 / points.length;
             return (
@@ -97,7 +97,7 @@ function RouteWeatherDisplay({ departureIcao, arrivalIcao, departureTime }: Rout
             );
           })}
         </div>
-        <div className="flex justify-between text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">
+        <div className="flex justify-between text-[10px] text-stone-400 dark:text-stone-500 mt-0.5">
           <span>{routeWeather.departure.icao}</span>
           <span>{routeWeather.arrival.icao}</span>
         </div>
@@ -106,7 +106,7 @@ function RouteWeatherDisplay({ departureIcao, arrivalIcao, departureTime }: Rout
       {/* Summary badges */}
       <div className="px-4 py-3 flex flex-wrap items-center gap-2">
         <div className="flex items-center gap-1.5">
-          <span className="text-xs text-gray-500 dark:text-gray-400">Worst:</span>
+          <span className="text-xs text-stone-500 dark:text-stone-400">Worst:</span>
           <FlightCategoryBadge category={summary.worstCategory} size="sm" />
         </div>
         {summary.hasThunderstorms && (
@@ -125,7 +125,7 @@ function RouteWeatherDisplay({ departureIcao, arrivalIcao, departureTime }: Rout
           </span>
         )}
         {summary.hazardSegments.length > 0 && (
-          <span className="text-xs text-gray-500 dark:text-gray-400">
+          <span className="text-xs text-stone-500 dark:text-stone-400">
             {summary.hazardSegments.length} hazard segment{summary.hazardSegments.length !== 1 ? 's' : ''}
           </span>
         )}
@@ -140,7 +140,7 @@ function RouteWeatherDisplay({ departureIcao, arrivalIcao, departureTime }: Rout
                 key={i}
                 className="flex items-center gap-2 text-xs bg-yellow-50 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-300 px-2 py-1 rounded"
               >
-                <span className="font-mono">{seg.fromDistanceNm}-{seg.toDistanceNm} NM</span>
+                <span className="font-data">{seg.fromDistanceNm}-{seg.toDistanceNm} NM</span>
                 <span>{seg.hazard}</span>
               </div>
             ))}
@@ -153,7 +153,7 @@ function RouteWeatherDisplay({ departureIcao, arrivalIcao, departureTime }: Rout
         <div className="overflow-x-auto">
           <table className="w-full text-xs min-w-[500px]">
             <thead>
-              <tr className="border-b border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400">
+              <tr className="border-b border-stone-200 dark:border-stone-700 text-stone-500 dark:text-stone-400">
                 <th className="text-left py-1.5 pr-3 font-medium">Dist (NM)</th>
                 <th className="text-left py-1.5 pr-3 font-medium">Cat</th>
                 <th className="text-right py-1.5 pr-3 font-medium">Wind</th>
@@ -165,8 +165,8 @@ function RouteWeatherDisplay({ departureIcao, arrivalIcao, departureTime }: Rout
             </thead>
             <tbody>
               {points.map((pt, i) => (
-                <tr key={i} className="border-b border-gray-100 dark:border-gray-700">
-                  <td className="py-1.5 pr-3 font-mono">{Math.round(pt.distanceNm)}</td>
+                <tr key={i} className="border-b border-stone-100 dark:border-stone-700">
+                  <td className="py-1.5 pr-3 font-data">{Math.round(pt.distanceNm)}</td>
                   <td className="py-1.5 pr-3">
                     <span
                       className="inline-block w-2 h-2 rounded-full mr-1"
@@ -174,13 +174,13 @@ function RouteWeatherDisplay({ departureIcao, arrivalIcao, departureTime }: Rout
                     />
                     {pt.flightCategory}
                   </td>
-                  <td className="py-1.5 pr-3 text-right font-mono">
+                  <td className="py-1.5 pr-3 text-right font-data">
                     {String(pt.windDirection).padStart(3, '0')}/{pt.windSpeed}kt
                   </td>
-                  <td className="py-1.5 pr-3 text-right font-mono">{pt.visibility}</td>
-                  <td className="py-1.5 pr-3 text-right font-mono">{Math.round(pt.cloudCover)}</td>
-                  <td className="py-1.5 pr-3 text-right font-mono">{Math.round(pt.temperature)}</td>
-                  <td className="py-1.5 text-gray-600 dark:text-gray-400">
+                  <td className="py-1.5 pr-3 text-right font-data">{pt.visibility}</td>
+                  <td className="py-1.5 pr-3 text-right font-data">{Math.round(pt.cloudCover)}</td>
+                  <td className="py-1.5 pr-3 text-right font-data">{Math.round(pt.temperature)}</td>
+                  <td className="py-1.5 text-stone-600 dark:text-stone-400">
                     {pt.hazards.length > 0 ? pt.hazards.join(', ') : '-'}
                   </td>
                 </tr>

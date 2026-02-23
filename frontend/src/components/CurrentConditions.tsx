@@ -1,5 +1,7 @@
 import { CurrentConditions as CurrentConditionsType } from '../types/weather';
 import FlightCategoryBadge from './FlightCategoryBadge';
+import DataValue from './ui/DataValue';
+import ExpandableSection from './ui/ExpandableSection';
 import {
   formatTemperature,
   formatWindSpeed,
@@ -18,17 +20,18 @@ interface CurrentConditionsProps {
 
 function CurrentConditions({ conditions, targetTimeLabel }: CurrentConditionsProps) {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 p-6">
+    <div className="card p-6">
       <div className="flex flex-wrap items-center justify-between gap-2 mb-6">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+        <h2 className="text-lg font-semibold font-display text-stone-900 dark:text-stone-100">
           {targetTimeLabel ? 'Conditions at Target Time' : 'Current Conditions'}
         </h2>
         <div className="flex items-center gap-3">
           <FlightCategoryBadge
             category={conditions.flightCategory.value}
             size="lg"
+            showFriendly
           />
-          <span className="text-sm text-gray-500 dark:text-gray-400">
+          <span className="text-sm text-stone-500 dark:text-stone-400">
             {targetTimeLabel || formatRelativeTime(conditions.observationTime)}
           </span>
         </div>
@@ -36,55 +39,36 @@ function CurrentConditions({ conditions, targetTimeLabel }: CurrentConditionsPro
 
       {/* Main weather grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
-        {/* Temperature */}
-        <div className="text-center">
-          <div className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">
-            {formatTemperature(conditions.temperature.value)}
-          </div>
-          <div className="text-sm text-gray-500 dark:text-gray-400">Temperature</div>
-          <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-            Dewpoint: {formatTemperature(conditions.dewpoint.value)}
-          </div>
-        </div>
-
-        {/* Wind */}
-        <div className="text-center">
-          <div className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">
-            {formatWindSpeed(conditions.windSpeed.value)}
-          </div>
-          <div className="text-sm text-gray-500 dark:text-gray-400">
-            {formatWindDirection(conditions.windDirection.value)}
-          </div>
-          {conditions.windGust.value && (
-            <div className="text-xs text-orange-600 dark:text-orange-400 mt-1">
-              Gusts: {formatWindSpeed(conditions.windGust.value)}
-            </div>
-          )}
-        </div>
-
-        {/* Visibility */}
-        <div className="text-center">
-          <div className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">
-            {formatVisibility(conditions.visibility.value)}
-          </div>
-          <div className="text-sm text-gray-500 dark:text-gray-400">Visibility</div>
-        </div>
-
-        {/* Ceiling */}
-        <div className="text-center">
-          <div className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">
-            {formatCeiling(conditions.ceiling.value)}
-          </div>
-          <div className="text-sm text-gray-500 dark:text-gray-400">Ceiling</div>
-        </div>
+        <DataValue
+          label="Temperature"
+          value={formatTemperature(conditions.temperature.value)}
+          sub={`Dewpoint: ${formatTemperature(conditions.dewpoint.value)}`}
+        />
+        <DataValue
+          label={formatWindDirection(conditions.windDirection.value)}
+          value={formatWindSpeed(conditions.windSpeed.value)}
+          sub={
+            conditions.windGust.value
+              ? `Gusts: ${formatWindSpeed(conditions.windGust.value)}`
+              : undefined
+          }
+        />
+        <DataValue
+          label="Visibility"
+          value={formatVisibility(conditions.visibility.value)}
+        />
+        <DataValue
+          label="Ceiling"
+          value={formatCeiling(conditions.ceiling.value)}
+        />
       </div>
 
       {/* Additional info */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 pt-4 border-t border-gray-200 dark:border-gray-600">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 pt-4 border-t border-stone-200 dark:border-stone-700">
         {/* Clouds */}
         <div>
-          <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Clouds</div>
-          <div className="text-sm text-gray-600 dark:text-gray-400">
+          <div className="text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">Clouds</div>
+          <div className="text-sm text-stone-600 dark:text-stone-400">
             {conditions.cloudLayers.length > 0 ? (
               conditions.cloudLayers.map((layer, i) => (
                 <div key={i}>
@@ -101,8 +85,8 @@ function CurrentConditions({ conditions, targetTimeLabel }: CurrentConditionsPro
 
         {/* Weather */}
         <div>
-          <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Weather</div>
-          <div className="text-sm text-gray-600 dark:text-gray-400">
+          <div className="text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">Weather</div>
+          <div className="text-sm text-stone-600 dark:text-stone-400">
             {conditions.weatherPhenomena.length > 0 ? (
               conditions.weatherPhenomena.map((wx, i) => (
                 <div key={i}>{wx.description}</div>
@@ -115,13 +99,13 @@ function CurrentConditions({ conditions, targetTimeLabel }: CurrentConditionsPro
 
         {/* Pressure & Humidity */}
         <div>
-          <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <div className="text-sm font-medium text-stone-700 dark:text-stone-300 mb-1">
             Altimeter
           </div>
-          <div className="text-sm text-gray-600 dark:text-gray-400">
+          <div className="text-sm text-stone-600 dark:text-stone-400">
             {formatPressure(conditions.pressure.value)}
           </div>
-          <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+          <div className="text-xs text-stone-500 dark:text-stone-400 mt-1">
             Humidity: {Math.round(conditions.humidity.value)}%
           </div>
         </div>
@@ -129,18 +113,12 @@ function CurrentConditions({ conditions, targetTimeLabel }: CurrentConditionsPro
 
       {/* Raw METAR */}
       {conditions.rawMetar && (
-        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
-          <details className="group">
-            <summary className="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer hover:text-gray-900 dark:hover:text-gray-100">
-              Raw METAR
-              <span className="ml-1 text-gray-400 dark:text-gray-500 group-open:hidden">
-                (click to expand)
-              </span>
-            </summary>
-            <pre className="mt-2 p-3 bg-gray-50 dark:bg-gray-700 rounded text-xs font-mono text-gray-700 dark:text-gray-300 overflow-x-auto">
+        <div className="mt-4 pt-4 border-t border-stone-200 dark:border-stone-700">
+          <ExpandableSection title="Raw METAR">
+            <pre className="mt-2 p-3 bg-stone-50 dark:bg-stone-700 rounded-card text-xs font-data text-stone-700 dark:text-stone-300 overflow-x-auto">
               {conditions.rawMetar}
             </pre>
-          </details>
+          </ExpandableSection>
         </div>
       )}
     </div>

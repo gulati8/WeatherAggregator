@@ -283,7 +283,7 @@ function MapView() {
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)]">
       {/* Search bar */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 relative z-[1001]">
+      <div className="bg-white dark:bg-stone-800 border-b border-stone-200 dark:border-stone-700 px-4 py-3 relative z-[1001]">
         <div className="max-w-7xl mx-auto flex flex-wrap items-center gap-2 sm:gap-3">
           <form onSubmit={handleSearch} className="flex items-center gap-2 w-full sm:w-auto">
             <AirportAutocomplete
@@ -294,12 +294,12 @@ function MapView() {
               }}
               placeholder="Airport code or city"
               className="flex-1 sm:w-48 sm:flex-none"
-              inputClassName="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-mono bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              inputClassName="w-full px-3 py-2 border border-stone-300 dark:border-stone-700 rounded-lg text-sm font-data bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
             />
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-3 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
+              className="px-4 py-3 bg-teal-600 text-white text-sm rounded-lg hover:bg-teal-700 disabled:bg-stone-400 transition-colors"
             >
               {loading ? 'Loading...' : 'Add'}
             </button>
@@ -316,18 +316,18 @@ function MapView() {
               return (
                 <div
                   key={airport.icao}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-2 bg-gray-100 dark:bg-gray-700 rounded-full text-sm"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-2 bg-stone-100 dark:bg-stone-700 rounded-full text-sm"
                 >
                   <span
                     className="w-2.5 h-2.5 rounded-full"
                     style={{ backgroundColor: FLIGHT_CATEGORY_COLORS[category] }}
                   />
-                  <span className="font-mono font-medium text-gray-800 dark:text-gray-200">
+                  <span className="font-data font-medium text-stone-800 dark:text-stone-200">
                     {airport.icao}
                   </span>
                   <button
                     onClick={() => removeAirport(airport.icao)}
-                    className="text-gray-400 hover:text-red-500 ml-0.5"
+                    className="text-stone-400 hover:text-red-500 ml-0.5"
                   >
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -342,14 +342,14 @@ function MapView() {
           <div className="relative sm:ml-auto" ref={layersPanelRef}>
             <button
               onClick={() => setLayersPanelOpen(!layersPanelOpen)}
-              className="flex items-center gap-1.5 px-3 py-2.5 min-h-[44px] text-xs font-medium rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-2.5 min-h-[44px] text-xs font-medium rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-700 text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-600 transition-colors"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
               </svg>
               Layers
               {enabledCount > 0 && (
-                <span className="bg-blue-600 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px]">
+                <span className="bg-teal-600 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px]">
                   {enabledCount}
                 </span>
               )}
@@ -357,10 +357,10 @@ function MapView() {
 
             {/* Desktop dropdown */}
             {layersPanelOpen && (
-              <div className="hidden sm:block absolute right-0 top-full mt-2 w-72 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50 py-2 max-h-[70vh] overflow-y-auto">
+              <div className="hidden sm:block absolute right-0 top-full mt-2 w-72 bg-white dark:bg-stone-800 rounded-lg shadow-lg border border-stone-200 dark:border-stone-700 z-50 py-2 max-h-[70vh] overflow-y-auto">
                 {['Radar & Precipitation', 'Weather Overlays'].map((group) => (
                   <div key={group}>
-                    <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+                    <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
                       {group}
                     </div>
                     {layers.filter((l) => l.group === group).map((layer) => (
@@ -370,18 +370,18 @@ function MapView() {
                             type="checkbox"
                             checked={layer.enabled}
                             onChange={() => toggleLayer(layer.id)}
-                            className="w-3.5 h-3.5 rounded accent-blue-500"
+                            className="w-3.5 h-3.5 rounded accent-teal-500"
                           />
-                          <span className="text-xs text-gray-700 dark:text-gray-300 font-medium flex-1">
+                          <span className="text-xs text-stone-700 dark:text-stone-300 font-medium flex-1">
                             {layer.label}
                           </span>
-                          <span className="text-[10px] text-gray-400 dark:text-gray-500">
+                          <span className="text-[10px] text-stone-400 dark:text-stone-500">
                             {layer.attribution}
                           </span>
                         </label>
                         {layer.enabled && (
                           <div className="flex items-center gap-2 mt-1 ml-6">
-                            <span className="text-[10px] text-gray-400 w-7">{Math.round(layer.opacity * 100)}%</span>
+                            <span className="text-[10px] text-stone-400 w-7">{Math.round(layer.opacity * 100)}%</span>
                             <input
                               type="range"
                               min={0.1}
@@ -389,7 +389,7 @@ function MapView() {
                               step={0.1}
                               value={layer.opacity}
                               onChange={(e) => setLayerOpacity(layer.id, parseFloat(e.target.value))}
-                              className="flex-1 h-1 accent-blue-500"
+                              className="flex-1 h-1 accent-teal-500"
                             />
                           </div>
                         )}
@@ -398,28 +398,28 @@ function MapView() {
                   </div>
                 ))}
                 <div>
-                  <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+                  <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500">
                     Aviation Data
                   </div>
                   <div className="px-3 py-1.5">
                     <label className="flex items-center gap-2 cursor-pointer">
-                      <input type="checkbox" checked={showPireps} onChange={() => { setShowPireps(!showPireps); if (showPireps) setPireps([]); }} className="w-3.5 h-3.5 rounded accent-blue-500" />
-                      <span className="text-xs text-gray-700 dark:text-gray-300 font-medium flex-1">PIREPs</span>
-                      <span className="text-[10px] text-gray-400 dark:text-gray-500">AWC</span>
+                      <input type="checkbox" checked={showPireps} onChange={() => { setShowPireps(!showPireps); if (showPireps) setPireps([]); }} className="w-3.5 h-3.5 rounded accent-teal-500" />
+                      <span className="text-xs text-stone-700 dark:text-stone-300 font-medium flex-1">PIREPs</span>
+                      <span className="text-[10px] text-stone-400 dark:text-stone-500">AWC</span>
                     </label>
                   </div>
                   <div className="px-3 py-1.5">
                     <label className="flex items-center gap-2 cursor-pointer">
-                      <input type="checkbox" checked={showAirSigmets} onChange={() => { setShowAirSigmets(!showAirSigmets); if (showAirSigmets) setAirSigmets([]); }} className="w-3.5 h-3.5 rounded accent-blue-500" />
-                      <span className="text-xs text-gray-700 dark:text-gray-300 font-medium flex-1">AIRMETs/SIGMETs</span>
-                      <span className="text-[10px] text-gray-400 dark:text-gray-500">AWC</span>
+                      <input type="checkbox" checked={showAirSigmets} onChange={() => { setShowAirSigmets(!showAirSigmets); if (showAirSigmets) setAirSigmets([]); }} className="w-3.5 h-3.5 rounded accent-teal-500" />
+                      <span className="text-xs text-stone-700 dark:text-stone-300 font-medium flex-1">AIRMETs/SIGMETs</span>
+                      <span className="text-[10px] text-stone-400 dark:text-stone-500">AWC</span>
                     </label>
                   </div>
                   <div className="px-3 py-1.5">
                     <label className="flex items-center gap-2 cursor-pointer">
-                      <input type="checkbox" checked={showTfrs} onChange={() => { setShowTfrs(!showTfrs); if (showTfrs) setTfrs([]); }} className="w-3.5 h-3.5 rounded accent-blue-500" />
-                      <span className="text-xs text-gray-700 dark:text-gray-300 font-medium flex-1">TFRs</span>
-                      <span className="text-[10px] text-gray-400 dark:text-gray-500">FAA</span>
+                      <input type="checkbox" checked={showTfrs} onChange={() => { setShowTfrs(!showTfrs); if (showTfrs) setTfrs([]); }} className="w-3.5 h-3.5 rounded accent-teal-500" />
+                      <span className="text-xs text-stone-700 dark:text-stone-300 font-medium flex-1">TFRs</span>
+                      <span className="text-[10px] text-stone-400 dark:text-stone-500">FAA</span>
                     </label>
                   </div>
                 </div>
@@ -435,17 +435,17 @@ function MapView() {
                   onClick={() => setLayersPanelOpen(false)}
                 />
                 {/* Sheet */}
-                <div className="sm:hidden fixed bottom-0 left-0 right-0 z-[1101] max-h-[60vh] bg-white dark:bg-gray-800 rounded-t-2xl shadow-2xl animate-slide-up flex flex-col">
+                <div className="sm:hidden fixed bottom-0 left-0 right-0 z-[1101] max-h-[60vh] bg-white dark:bg-stone-800 rounded-t-2xl shadow-2xl animate-slide-up flex flex-col">
                   {/* Drag handle */}
                   <div className="flex justify-center pt-3 pb-1">
-                    <div className="w-10 h-1 rounded-full bg-gray-300 dark:bg-gray-600" />
+                    <div className="w-10 h-1 rounded-full bg-stone-300 dark:bg-stone-600" />
                   </div>
                   {/* Header */}
-                  <div className="sticky top-0 flex items-center justify-between px-4 pb-3 border-b border-gray-200 dark:border-gray-700">
-                    <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Map Layers</h3>
+                  <div className="sticky top-0 flex items-center justify-between px-4 pb-3 border-b border-stone-200 dark:border-stone-700">
+                    <h3 className="text-sm font-semibold text-stone-900 dark:text-stone-100">Map Layers</h3>
                     <button
                       onClick={() => setLayersPanelOpen(false)}
-                      className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      className="p-2 rounded-lg text-stone-500 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-700"
                     >
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -456,7 +456,7 @@ function MapView() {
                   <div className="overflow-y-auto px-4 py-3">
                     {['Radar & Precipitation', 'Weather Overlays'].map((group) => (
                       <div key={group} className="mb-3">
-                        <div className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1">
+                        <div className="text-[10px] font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500 mb-1">
                           {group}
                         </div>
                         {layers.filter((l) => l.group === group).map((layer) => (
@@ -466,18 +466,18 @@ function MapView() {
                                 type="checkbox"
                                 checked={layer.enabled}
                                 onChange={() => toggleLayer(layer.id)}
-                                className="w-5 h-5 rounded accent-blue-500"
+                                className="w-5 h-5 rounded accent-teal-500"
                               />
-                              <span className="text-sm text-gray-700 dark:text-gray-300 font-medium flex-1">
+                              <span className="text-sm text-stone-700 dark:text-stone-300 font-medium flex-1">
                                 {layer.label}
                               </span>
-                              <span className="text-xs text-gray-400 dark:text-gray-500">
+                              <span className="text-xs text-stone-400 dark:text-stone-500">
                                 {layer.attribution}
                               </span>
                             </label>
                             {layer.enabled && (
                               <div className="flex items-center gap-2 mt-1 ml-8">
-                                <span className="text-xs text-gray-400 w-8">{Math.round(layer.opacity * 100)}%</span>
+                                <span className="text-xs text-stone-400 w-8">{Math.round(layer.opacity * 100)}%</span>
                                 <input
                                   type="range"
                                   min={0.1}
@@ -485,7 +485,7 @@ function MapView() {
                                   step={0.1}
                                   value={layer.opacity}
                                   onChange={(e) => setLayerOpacity(layer.id, parseFloat(e.target.value))}
-                                  className="flex-1 h-1.5 accent-blue-500"
+                                  className="flex-1 h-1.5 accent-teal-500"
                                 />
                               </div>
                             )}
@@ -494,23 +494,23 @@ function MapView() {
                       </div>
                     ))}
                     <div className="mb-3">
-                      <div className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1">
+                      <div className="text-[10px] font-semibold uppercase tracking-wider text-stone-400 dark:text-stone-500 mb-1">
                         Aviation Data
                       </div>
                       <label className="flex items-center gap-3 cursor-pointer min-h-[44px]">
-                        <input type="checkbox" checked={showPireps} onChange={() => { setShowPireps(!showPireps); if (showPireps) setPireps([]); }} className="w-5 h-5 rounded accent-blue-500" />
-                        <span className="text-sm text-gray-700 dark:text-gray-300 font-medium flex-1">PIREPs</span>
-                        <span className="text-xs text-gray-400 dark:text-gray-500">AWC</span>
+                        <input type="checkbox" checked={showPireps} onChange={() => { setShowPireps(!showPireps); if (showPireps) setPireps([]); }} className="w-5 h-5 rounded accent-teal-500" />
+                        <span className="text-sm text-stone-700 dark:text-stone-300 font-medium flex-1">PIREPs</span>
+                        <span className="text-xs text-stone-400 dark:text-stone-500">AWC</span>
                       </label>
                       <label className="flex items-center gap-3 cursor-pointer min-h-[44px]">
-                        <input type="checkbox" checked={showAirSigmets} onChange={() => { setShowAirSigmets(!showAirSigmets); if (showAirSigmets) setAirSigmets([]); }} className="w-5 h-5 rounded accent-blue-500" />
-                        <span className="text-sm text-gray-700 dark:text-gray-300 font-medium flex-1">AIRMETs/SIGMETs</span>
-                        <span className="text-xs text-gray-400 dark:text-gray-500">AWC</span>
+                        <input type="checkbox" checked={showAirSigmets} onChange={() => { setShowAirSigmets(!showAirSigmets); if (showAirSigmets) setAirSigmets([]); }} className="w-5 h-5 rounded accent-teal-500" />
+                        <span className="text-sm text-stone-700 dark:text-stone-300 font-medium flex-1">AIRMETs/SIGMETs</span>
+                        <span className="text-xs text-stone-400 dark:text-stone-500">AWC</span>
                       </label>
                       <label className="flex items-center gap-3 cursor-pointer min-h-[44px]">
-                        <input type="checkbox" checked={showTfrs} onChange={() => { setShowTfrs(!showTfrs); if (showTfrs) setTfrs([]); }} className="w-5 h-5 rounded accent-blue-500" />
-                        <span className="text-sm text-gray-700 dark:text-gray-300 font-medium flex-1">TFRs</span>
-                        <span className="text-xs text-gray-400 dark:text-gray-500">FAA</span>
+                        <input type="checkbox" checked={showTfrs} onChange={() => { setShowTfrs(!showTfrs); if (showTfrs) setTfrs([]); }} className="w-5 h-5 rounded accent-teal-500" />
+                        <span className="text-sm text-stone-700 dark:text-stone-300 font-medium flex-1">TFRs</span>
+                        <span className="text-xs text-stone-400 dark:text-stone-500">FAA</span>
                       </label>
                     </div>
                   </div>
@@ -636,7 +636,7 @@ function MapView() {
                     <div>{pirep.aircraftType}</div>
                     {pirep.turbulence && <div>Turbulence: {pirep.turbulence.intensity}</div>}
                     {pirep.icing && <div>Icing: {pirep.icing.intensity}</div>}
-                    <div className="mt-1 text-gray-500 break-words">{pirep.rawReport}</div>
+                    <div className="mt-1 text-stone-500 break-words">{pirep.rawReport}</div>
                   </div>
                 </Tooltip>
               </CircleMarker>
@@ -668,23 +668,23 @@ function MapView() {
                       <span className="text-lg font-bold">{airport.icao}</span>
                       <FlightCategoryBadge category={category} size="sm" />
                     </div>
-                    <p className="text-sm text-gray-600 mb-2">{airport.weather.airport.name}</p>
+                    <p className="text-sm text-stone-600 mb-2">{airport.weather.airport.name}</p>
                     <div className="space-y-1 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-gray-500">Ceiling:</span>
+                        <span className="text-stone-500">Ceiling:</span>
                         <span className="font-medium">{formatCeiling(conditions.ceiling.value)}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-500">Visibility:</span>
+                        <span className="text-stone-500">Visibility:</span>
                         <span className="font-medium">{formatVisibility(conditions.visibility.value)}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-500">Wind:</span>
+                        <span className="text-stone-500">Wind:</span>
                         <span className="font-medium">{formatWindSpeed(conditions.windSpeed.value)}</span>
                       </div>
                       {airport.weather.part135Status && (
                         <div className="flex justify-between">
-                          <span className="text-gray-500">Part 135:</span>
+                          <span className="text-stone-500">Part 135:</span>
                           <span className={`font-semibold ${
                             airport.weather.part135Status.canDispatch
                               ? 'text-green-600'
@@ -698,7 +698,7 @@ function MapView() {
                     <div className="mt-3 flex gap-2">
                       <button
                         onClick={() => navigate(`/weather/${airport.icao}`)}
-                        className="flex-1 px-3 py-2.5 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors"
+                        className="flex-1 px-3 py-2.5 bg-teal-600 text-white text-sm rounded hover:bg-teal-700 transition-colors"
                       >
                         Details
                       </button>
@@ -707,7 +707,7 @@ function MapView() {
                         className={`px-3 py-2.5 text-sm rounded transition-colors ${
                           isFavorite(airport.icao)
                             ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
-                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
                         }`}
                         title={isFavorite(airport.icao) ? 'Remove from favorites' : 'Add to favorites'}
                       >
@@ -725,7 +725,7 @@ function MapView() {
         {!legendOpen ? (
           <button
             onClick={() => setLegendOpen(true)}
-            className="absolute bottom-4 left-4 z-[900] p-2.5 rounded-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-lg border border-gray-200/50 dark:border-gray-700/50 text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-800 transition-colors"
+            className="absolute bottom-4 left-4 z-[900] p-2.5 rounded-lg bg-white/80 dark:bg-stone-800/80 backdrop-blur-sm shadow-lg border border-stone-200/50 dark:border-stone-700/50 text-stone-700 dark:text-stone-300 hover:bg-white dark:hover:bg-stone-800 transition-colors"
             title="Show legend"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -733,13 +733,13 @@ function MapView() {
             </svg>
           </button>
         ) : (
-          <div className="absolute bottom-4 left-4 z-[900] w-64 sm:w-72 max-h-[50vh] bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-lg shadow-lg border border-gray-200/50 dark:border-gray-700/50 flex flex-col">
+          <div className="absolute bottom-4 left-4 z-[900] w-64 sm:w-72 max-h-[50vh] bg-white/80 dark:bg-stone-800/80 backdrop-blur-sm rounded-lg shadow-lg border border-stone-200/50 dark:border-stone-700/50 flex flex-col">
             {/* Header */}
-            <div className="flex items-center justify-between px-3 py-2 border-b border-gray-200/50 dark:border-gray-700/50 shrink-0">
-              <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">Legend</span>
+            <div className="flex items-center justify-between px-3 py-2 border-b border-stone-200/50 dark:border-stone-700/50 shrink-0">
+              <span className="text-sm font-semibold text-stone-800 dark:text-stone-200">Legend</span>
               <button
                 onClick={() => setLegendOpen(false)}
-                className="p-1 rounded text-gray-500 dark:text-gray-400 hover:bg-gray-200/50 dark:hover:bg-gray-700/50"
+                className="p-1 rounded text-stone-500 dark:text-stone-400 hover:bg-stone-200/50 dark:hover:bg-stone-700/50"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -750,12 +750,12 @@ function MapView() {
             <div className="overflow-y-auto px-3 py-2 space-y-3 text-xs">
               {/* Flight Categories — always shown */}
               <div>
-                <div className="font-semibold text-gray-700 dark:text-gray-300 mb-1">Flight Categories</div>
+                <div className="font-semibold text-stone-700 dark:text-stone-300 mb-1">Flight Categories</div>
                 <div className="grid grid-cols-2 gap-x-4 gap-y-1">
                   {(['VFR', 'MVFR', 'IFR', 'LIFR'] as FlightCategory[]).map((cat) => (
                     <div key={cat} className="flex items-center gap-1.5">
                       <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: FLIGHT_CATEGORY_COLORS[cat] }} />
-                      <span className="text-gray-600 dark:text-gray-400">{cat}</span>
+                      <span className="text-stone-600 dark:text-stone-400">{cat}</span>
                     </div>
                   ))}
                 </div>
@@ -764,9 +764,9 @@ function MapView() {
               {/* NEXRAD Radar */}
               {isLayerEnabled('nexrad') && (
                 <div>
-                  <div className="font-semibold text-gray-700 dark:text-gray-300 mb-1">NEXRAD Radar</div>
+                  <div className="font-semibold text-stone-700 dark:text-stone-300 mb-1">NEXRAD Radar</div>
                   <div className="h-2.5 rounded-full" style={{ background: 'linear-gradient(to right, #22c55e, #eab308, #f97316, #ef4444, #a855f7)' }} />
-                  <div className="flex justify-between mt-0.5 text-[10px] text-gray-500 dark:text-gray-400">
+                  <div className="flex justify-between mt-0.5 text-[10px] text-stone-500 dark:text-stone-400">
                     <span>Light</span><span>Moderate</span><span>Heavy</span><span>Extreme</span>
                   </div>
                 </div>
@@ -775,9 +775,9 @@ function MapView() {
               {/* Echo Tops */}
               {isLayerEnabled('echo-tops') && (
                 <div>
-                  <div className="font-semibold text-gray-700 dark:text-gray-300 mb-1">Echo Tops</div>
+                  <div className="font-semibold text-stone-700 dark:text-stone-300 mb-1">Echo Tops</div>
                   <div className="h-2.5 rounded-full" style={{ background: 'linear-gradient(to right, #9ca3af, #22c55e, #eab308, #ef4444, #d946ef)' }} />
-                  <div className="flex justify-between mt-0.5 text-[10px] text-gray-500 dark:text-gray-400">
+                  <div className="flex justify-between mt-0.5 text-[10px] text-stone-500 dark:text-stone-400">
                     <span>Low</span><span>20kft</span><span>35kft</span><span>50kft+</span>
                   </div>
                 </div>
@@ -786,9 +786,9 @@ function MapView() {
               {/* Precipitation */}
               {(isLayerEnabled('precip-1h') || isLayerEnabled('precip-global')) && (
                 <div>
-                  <div className="font-semibold text-gray-700 dark:text-gray-300 mb-1">Precipitation</div>
+                  <div className="font-semibold text-stone-700 dark:text-stone-300 mb-1">Precipitation</div>
                   <div className="h-2.5 rounded-full" style={{ background: 'linear-gradient(to right, #93c5fd, #3b82f6, #22c55e, #eab308, #ef4444)' }} />
-                  <div className="flex justify-between mt-0.5 text-[10px] text-gray-500 dark:text-gray-400">
+                  <div className="flex justify-between mt-0.5 text-[10px] text-stone-500 dark:text-stone-400">
                     <span>Trace</span><span>Light</span><span>Moderate</span><span>Heavy</span>
                   </div>
                 </div>
@@ -797,9 +797,9 @@ function MapView() {
               {/* Clouds */}
               {isLayerEnabled('clouds') && (
                 <div>
-                  <div className="font-semibold text-gray-700 dark:text-gray-300 mb-1">Clouds</div>
+                  <div className="font-semibold text-stone-700 dark:text-stone-300 mb-1">Clouds</div>
                   <div className="h-2.5 rounded-full" style={{ background: 'linear-gradient(to right, #bfdbfe, #93c5fd, #60a5fa, #6b7280)' }} />
-                  <div className="flex justify-between mt-0.5 text-[10px] text-gray-500 dark:text-gray-400">
+                  <div className="flex justify-between mt-0.5 text-[10px] text-stone-500 dark:text-stone-400">
                     <span>Clear</span><span>Overcast</span>
                   </div>
                 </div>
@@ -808,9 +808,9 @@ function MapView() {
               {/* Temperature */}
               {isLayerEnabled('temp') && (
                 <div>
-                  <div className="font-semibold text-gray-700 dark:text-gray-300 mb-1">Temperature</div>
+                  <div className="font-semibold text-stone-700 dark:text-stone-300 mb-1">Temperature</div>
                   <div className="h-2.5 rounded-full" style={{ background: 'linear-gradient(to right, #7c3aed, #3b82f6, #22c55e, #eab308, #ef4444)' }} />
-                  <div className="flex justify-between mt-0.5 text-[10px] text-gray-500 dark:text-gray-400">
+                  <div className="flex justify-between mt-0.5 text-[10px] text-stone-500 dark:text-stone-400">
                     <span>Cold</span><span>Hot</span>
                   </div>
                 </div>
@@ -819,9 +819,9 @@ function MapView() {
               {/* Wind */}
               {isLayerEnabled('wind') && (
                 <div>
-                  <div className="font-semibold text-gray-700 dark:text-gray-300 mb-1">Wind</div>
+                  <div className="font-semibold text-stone-700 dark:text-stone-300 mb-1">Wind</div>
                   <div className="h-2.5 rounded-full" style={{ background: 'linear-gradient(to right, #bfdbfe, #3b82f6, #eab308, #ef4444)' }} />
-                  <div className="flex justify-between mt-0.5 text-[10px] text-gray-500 dark:text-gray-400">
+                  <div className="flex justify-between mt-0.5 text-[10px] text-stone-500 dark:text-stone-400">
                     <span>Calm</span><span>Strong</span>
                   </div>
                 </div>
@@ -830,9 +830,9 @@ function MapView() {
               {/* Pressure */}
               {isLayerEnabled('pressure') && (
                 <div>
-                  <div className="font-semibold text-gray-700 dark:text-gray-300 mb-1">Pressure</div>
+                  <div className="font-semibold text-stone-700 dark:text-stone-300 mb-1">Pressure</div>
                   <div className="h-2.5 rounded-full" style={{ background: 'linear-gradient(to right, #a855f7, #3b82f6, #22c55e, #f97316, #ef4444)' }} />
-                  <div className="flex justify-between mt-0.5 text-[10px] text-gray-500 dark:text-gray-400">
+                  <div className="flex justify-between mt-0.5 text-[10px] text-stone-500 dark:text-stone-400">
                     <span>Low</span><span>High</span>
                   </div>
                 </div>
@@ -841,7 +841,7 @@ function MapView() {
               {/* PIREPs */}
               {showPireps && (
                 <div>
-                  <div className="font-semibold text-gray-700 dark:text-gray-300 mb-1">PIREPs</div>
+                  <div className="font-semibold text-stone-700 dark:text-stone-300 mb-1">PIREPs</div>
                   <div className="grid grid-cols-2 gap-x-4 gap-y-1">
                     {[
                       { label: 'Negative/Smooth', color: '#22c55e' },
@@ -853,7 +853,7 @@ function MapView() {
                     ].map((item) => (
                       <div key={item.label} className="flex items-center gap-1.5">
                         <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
-                        <span className="text-gray-600 dark:text-gray-400">{item.label}</span>
+                        <span className="text-stone-600 dark:text-stone-400">{item.label}</span>
                       </div>
                     ))}
                   </div>
@@ -863,7 +863,7 @@ function MapView() {
               {/* AIRSIGMETs */}
               {showAirSigmets && (
                 <div>
-                  <div className="font-semibold text-gray-700 dark:text-gray-300 mb-1">AIRMETs/SIGMETs</div>
+                  <div className="font-semibold text-stone-700 dark:text-stone-300 mb-1">AIRMETs/SIGMETs</div>
                   <div className="grid grid-cols-2 gap-x-4 gap-y-1">
                     {[
                       { label: 'Turbulence', color: '#f97316' },
@@ -874,7 +874,7 @@ function MapView() {
                     ].map((item) => (
                       <div key={item.label} className="flex items-center gap-1.5">
                         <span className="w-2.5 h-2.5 rounded shrink-0" style={{ backgroundColor: item.color }} />
-                        <span className="text-gray-600 dark:text-gray-400">{item.label}</span>
+                        <span className="text-stone-600 dark:text-stone-400">{item.label}</span>
                       </div>
                     ))}
                   </div>
@@ -884,7 +884,7 @@ function MapView() {
               {/* TFRs */}
               {showTfrs && (
                 <div>
-                  <div className="font-semibold text-gray-700 dark:text-gray-300 mb-1">TFRs</div>
+                  <div className="font-semibold text-stone-700 dark:text-stone-300 mb-1">TFRs</div>
                   <div className="space-y-1">
                     {[
                       { label: 'Security/VIP', color: '#ef4444' },
@@ -896,7 +896,7 @@ function MapView() {
                         <svg className="w-4 h-1.5 shrink-0" viewBox="0 0 16 6">
                           <line x1="0" y1="3" x2="16" y2="3" stroke={item.color} strokeWidth="2" strokeDasharray="4 2" />
                         </svg>
-                        <span className="text-gray-600 dark:text-gray-400">{item.label}</span>
+                        <span className="text-stone-600 dark:text-stone-400">{item.label}</span>
                       </div>
                     ))}
                   </div>
@@ -908,10 +908,10 @@ function MapView() {
 
         {/* Loading overlay */}
         {loading && airports.length === 0 && (
-          <div className="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-gray-900/50 z-[1000]">
-            <div className="flex items-center gap-3 bg-white dark:bg-gray-800 px-6 py-4 rounded-lg shadow-lg">
-              <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
-              <span className="text-gray-700 dark:text-gray-300">Loading airports...</span>
+          <div className="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-stone-900/50 z-[1000]">
+            <div className="flex items-center gap-3 bg-white dark:bg-stone-800 px-6 py-4 rounded-lg shadow-lg">
+              <div className="w-6 h-6 border-2 border-teal-600 border-t-transparent rounded-full animate-spin" />
+              <span className="text-stone-700 dark:text-stone-300">Loading airports...</span>
             </div>
           </div>
         )}

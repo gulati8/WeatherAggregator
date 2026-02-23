@@ -30,22 +30,22 @@ function ConsensusIndicator({ consensus }: ConsensusIndicatorProps) {
   const style = agreementColors[consensus.overallAgreement];
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 p-6">
-      <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+    <div className="bg-white dark:bg-stone-800 rounded-lg shadow-sm border border-stone-200 dark:border-stone-700 p-6">
+      <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-4">
         Source Consensus
       </h2>
 
       {/* Confidence meter */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          <span className="text-sm font-medium text-stone-700 dark:text-stone-300">
             Confidence Score
           </span>
           <span className={`text-lg font-bold ${style.text}`}>
             {consensus.confidenceScore}%
           </span>
         </div>
-        <div className="w-full h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+        <div className="w-full h-3 bg-stone-200 dark:bg-stone-700 rounded-full overflow-hidden">
           <div
             className={`h-full ${style.bar} transition-all duration-500`}
             style={{ width: `${consensus.confidenceScore}%` }}
@@ -92,7 +92,7 @@ function ConsensusIndicator({ consensus }: ConsensusIndicatorProps) {
       {/* Disagreement areas */}
       {consensus.disagreementAreas.length > 0 ? (
         <div>
-          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <h3 className="text-sm font-medium text-stone-700 dark:text-stone-300 mb-2">
             Disagreement Areas
           </h3>
           <div className="space-y-2">
@@ -119,12 +119,12 @@ function ConsensusIndicator({ consensus }: ConsensusIndicatorProps) {
                     {item.severity}
                   </span>
                 </div>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{item.description}</p>
+                <p className="text-sm text-stone-600 dark:text-stone-400 mt-1">{item.description}</p>
                 <div className="flex flex-wrap gap-2 mt-2">
                   {Object.entries(item.sourceValues).map(([source, value]) => (
                     <span
                       key={source}
-                      className="text-xs bg-white/50 dark:bg-gray-800/50 px-2 py-1 rounded"
+                      className="text-xs bg-white/50 dark:bg-stone-800/50 px-2 py-1 rounded"
                     >
                       {source}: {value}
                     </span>
@@ -135,7 +135,7 @@ function ConsensusIndicator({ consensus }: ConsensusIndicatorProps) {
           </div>
         </div>
       ) : (
-        <p className="text-sm text-gray-600 dark:text-gray-400">
+        <p className="text-sm text-stone-600 dark:text-stone-400">
           All sources are in agreement on the reported weather parameters.
         </p>
       )}

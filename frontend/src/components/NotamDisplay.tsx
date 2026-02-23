@@ -16,7 +16,7 @@ interface Notam {
 const PRIORITY_COLORS: Record<string, string> = {
   high: 'border-red-500 bg-red-50 dark:bg-red-900/20',
   medium: 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20',
-  low: 'border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800',
+  low: 'border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800',
 };
 
 const PRIORITY_LABELS: Record<string, string> = {
@@ -68,18 +68,18 @@ export default function NotamDisplay({ icao }: { icao: string }) {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 p-6">
+    <div className="bg-white dark:bg-stone-800 rounded-lg shadow-sm border border-stone-200 dark:border-stone-700 p-6">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+        <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100">
           NOTAMs
           {notams.length > 0 && (
-            <span className="ml-2 text-sm font-normal text-gray-500">({filtered.length})</span>
+            <span className="ml-2 text-sm font-normal text-stone-500">({filtered.length})</span>
           )}
         </h2>
         <select
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
-          className="text-xs px-2 py-2 min-h-[44px] border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+          className="text-xs px-2 py-2 min-h-[44px] border border-stone-300 dark:border-stone-700 rounded bg-white dark:bg-stone-700 text-stone-700 dark:text-stone-300"
         >
           {CLASSIFICATIONS.map((c) => (
             <option key={c} value={c}>{c}</option>
@@ -88,18 +88,18 @@ export default function NotamDisplay({ icao }: { icao: string }) {
       </div>
 
       {loading && (
-        <div className="flex items-center gap-2 text-sm text-gray-500">
-          <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+        <div className="flex items-center gap-2 text-sm text-stone-500">
+          <div className="w-4 h-4 border-2 border-teal-600 border-t-transparent rounded-full animate-spin" />
           Loading NOTAMs...
         </div>
       )}
 
       {error && (
-        <div className="text-sm text-gray-500 dark:text-gray-400">{error}</div>
+        <div className="text-sm text-stone-500 dark:text-stone-400">{error}</div>
       )}
 
       {!loading && !error && filtered.length === 0 && (
-        <div className="text-sm text-gray-500 dark:text-gray-400">
+        <div className="text-sm text-stone-500 dark:text-stone-400">
           No NOTAMs found.
         </div>
       )}
@@ -118,34 +118,34 @@ export default function NotamDisplay({ icao }: { icao: string }) {
               onClick={() => toggleExpand(notam.id)}
             >
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-xs font-mono font-bold text-gray-700 dark:text-gray-300">
+                <span className="text-xs font-data font-bold text-stone-700 dark:text-stone-300">
                   {notam.id}
                 </span>
-                <span className="text-[11px] sm:text-[10px] px-2 py-1 sm:px-1.5 sm:py-0.5 rounded bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400">
+                <span className="text-[11px] sm:text-[10px] px-2 py-1 sm:px-1.5 sm:py-0.5 rounded bg-stone-200 dark:bg-stone-700 text-stone-600 dark:text-stone-400">
                   {notam.classification}
                 </span>
                 <span className={`text-[11px] sm:text-[10px] px-2 py-1 sm:px-1.5 sm:py-0.5 rounded font-medium ${
                   notam.priority === 'high' ? 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400'
                   : notam.priority === 'medium' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400'
-                  : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
+                  : 'bg-stone-100 text-stone-600 dark:bg-stone-700 dark:text-stone-400'
                 }`}>
                   {PRIORITY_LABELS[notam.priority]}
                 </span>
                 {!notam.isActive && (
-                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-300 text-gray-700">
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-stone-300 text-stone-700">
                     Expired
                   </span>
                 )}
               </div>
               {notam.effectiveStart && (
-                <div className="text-[10px] text-gray-500 dark:text-gray-400 mb-1">
+                <div className="text-[10px] text-stone-500 dark:text-stone-400 mb-1">
                   {new Date(notam.effectiveStart).toLocaleString()}
                   {notam.effectiveEnd && (
                     <> — {new Date(notam.effectiveEnd).toLocaleString()}</>
                   )}
                 </div>
               )}
-              <p className="text-xs text-gray-700 dark:text-gray-300 font-mono whitespace-pre-wrap leading-relaxed break-words">
+              <p className="text-xs text-stone-700 dark:text-stone-300 font-data whitespace-pre-wrap leading-relaxed break-words">
                 {textPreview}
               </p>
             </div>

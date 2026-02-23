@@ -5,12 +5,14 @@ interface FlightCategoryBadgeProps {
   category: FlightCategory;
   size?: 'sm' | 'md' | 'lg';
   showLabel?: boolean;
+  showFriendly?: boolean;
 }
 
 function FlightCategoryBadge({
   category,
   size = 'md',
   showLabel = false,
+  showFriendly = false,
 }: FlightCategoryBadgeProps) {
   const style = FLIGHT_CATEGORY_STYLES[category];
 
@@ -22,7 +24,7 @@ function FlightCategoryBadge({
 
   return (
     <span
-      className={`inline-flex items-center gap-1 font-bold rounded-full ${style.bg} ${style.text} ${sizeClasses[size]}`}
+      className={`inline-flex items-center gap-1.5 font-bold rounded-full ${style.bg} ${style.text} ${sizeClasses[size]}`}
     >
       <span
         className="w-2 h-2 rounded-full"
@@ -30,8 +32,13 @@ function FlightCategoryBadge({
       />
       {category}
       {showLabel && (
-        <span className="font-normal text-gray-600 dark:text-gray-400 ml-1">
+        <span className="font-normal text-stone-600 dark:text-stone-400 ml-1">
           ({style.label})
+        </span>
+      )}
+      {showFriendly && !showLabel && (
+        <span className="font-normal text-stone-500 dark:text-stone-400 ml-0.5 text-xs">
+          {style.friendlyLabel}
         </span>
       )}
     </span>

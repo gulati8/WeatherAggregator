@@ -83,18 +83,18 @@ function TripSummaryPanel({ summary, onShiftTimes, loading }: TripSummaryPanelPr
       case 'caution':
         return 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-300';
       case 'info':
-        return 'bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300';
+        return 'bg-teal-100 dark:bg-teal-900/40 text-teal-800 dark:text-teal-300';
     }
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 p-4">
+    <div className="bg-white dark:bg-stone-800 rounded-lg shadow-sm border border-stone-200 dark:border-stone-700 p-4">
       {/* Main status indicator */}
       <div className={`p-4 rounded-lg border-2 mb-4 ${getStatusStyle()}`}>
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
           <div className="flex items-center gap-3 w-full sm:w-auto">
             {loading ? (
-              <div className="w-8 h-8 border-4 border-gray-300 dark:border-gray-600 border-t-blue-500 rounded-full animate-spin" />
+              <div className="w-8 h-8 border-4 border-stone-300 dark:border-stone-700 border-t-teal-500 rounded-full animate-spin" />
             ) : (
               getStatusIcon()
             )}
@@ -125,10 +125,10 @@ function TripSummaryPanel({ summary, onShiftTimes, loading }: TripSummaryPanelPr
       </div>
 
       {/* Worst conditions */}
-      <div className="flex items-center justify-between mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+      <div className="flex items-center justify-between mb-4 p-3 bg-stone-50 dark:bg-stone-700 rounded-lg">
         <div>
-          <span className="text-sm text-gray-600 dark:text-gray-400">Worst conditions:</span>
-          <span className="ml-2 text-sm text-gray-900 dark:text-gray-100">
+          <span className="text-sm text-stone-600 dark:text-stone-400">Worst conditions:</span>
+          <span className="ml-2 text-sm text-stone-900 dark:text-stone-100">
             Leg {summary.worstLegIndex + 1}
           </span>
         </div>
@@ -137,29 +137,29 @@ function TripSummaryPanel({ summary, onShiftTimes, loading }: TripSummaryPanelPr
 
       {/* Time shift controls */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-4">
-        <span className="text-sm text-gray-600 dark:text-gray-400">Shift all times:</span>
+        <span className="text-sm text-stone-600 dark:text-stone-400">Shift all times:</span>
         <div className="flex flex-wrap gap-1">
           <button
             onClick={() => onShiftTimes(-120)}
-            className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors text-gray-700 dark:text-gray-300"
+            className="px-2 py-1 text-xs bg-stone-100 dark:bg-stone-700 hover:bg-stone-200 dark:hover:bg-stone-600 rounded transition-colors text-stone-700 dark:text-stone-300"
           >
             -2h
           </button>
           <button
             onClick={() => onShiftTimes(-60)}
-            className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors text-gray-700 dark:text-gray-300"
+            className="px-2 py-1 text-xs bg-stone-100 dark:bg-stone-700 hover:bg-stone-200 dark:hover:bg-stone-600 rounded transition-colors text-stone-700 dark:text-stone-300"
           >
             -1h
           </button>
           <button
             onClick={() => onShiftTimes(60)}
-            className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors text-gray-700 dark:text-gray-300"
+            className="px-2 py-1 text-xs bg-stone-100 dark:bg-stone-700 hover:bg-stone-200 dark:hover:bg-stone-600 rounded transition-colors text-stone-700 dark:text-stone-300"
           >
             +1h
           </button>
           <button
             onClick={() => onShiftTimes(120)}
-            className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded transition-colors text-gray-700 dark:text-gray-300"
+            className="px-2 py-1 text-xs bg-stone-100 dark:bg-stone-700 hover:bg-stone-200 dark:hover:bg-stone-600 rounded transition-colors text-stone-700 dark:text-stone-300"
           >
             +2h
           </button>
@@ -169,7 +169,7 @@ function TripSummaryPanel({ summary, onShiftTimes, loading }: TripSummaryPanelPr
       {/* Critical issues */}
       {summary.criticalIssues.length > 0 && (
         <div>
-          <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <h4 className="text-sm font-medium text-stone-700 dark:text-stone-300 mb-2">
             Critical Issues ({summary.criticalIssues.length})
           </h4>
           <div className="space-y-1 max-h-32 overflow-y-auto">

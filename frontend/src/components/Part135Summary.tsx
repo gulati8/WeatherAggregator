@@ -1,6 +1,7 @@
 import { Part135Status } from '../types/weather';
 import FlightCategoryBadge from './FlightCategoryBadge';
 import { formatCeiling, formatVisibility, formatDateTimeDual } from '../utils/formatters';
+import { GO_NOGO_FRIENDLY } from '../utils/personality';
 
 interface Part135SummaryProps {
   status: Part135Status;
@@ -55,14 +56,14 @@ function Part135Summary({ status, isForTargetTime }: Part135SummaryProps) {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 p-6">
+    <div className="card p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+          <h2 className="text-lg font-semibold font-display text-stone-900 dark:text-stone-100">
             Part 135 Status
           </h2>
           {isForTargetTime && (
-            <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">
+            <span className="text-xs text-teal-600 dark:text-teal-400 font-medium">
               At departure time
             </span>
           )}
@@ -72,7 +73,7 @@ function Part135Summary({ status, isForTargetTime }: Part135SummaryProps) {
 
       {/* Go/No-Go indicator */}
       <div
-        className={`p-4 rounded-lg border-2 mb-6 ${
+        className={`p-4 rounded-card border-2 mb-6 ${
           status.canDispatch
             ? 'bg-green-50 dark:bg-green-900/30 border-green-500'
             : 'bg-red-50 dark:bg-red-900/30 border-red-500'
@@ -118,8 +119,8 @@ function Part135Summary({ status, isForTargetTime }: Part135SummaryProps) {
               }`}
             >
               {status.canDispatch
-                ? 'Weather meets Part 135 minimums'
-                : 'Weather below Part 135 minimums'}
+                ? GO_NOGO_FRIENDLY['GO']
+                : GO_NOGO_FRIENDLY['NO-GO']}
             </div>
           </div>
         </div>
@@ -128,9 +129,9 @@ function Part135Summary({ status, isForTargetTime }: Part135SummaryProps) {
       {/* Minimums check */}
       <div className="grid md:grid-cols-2 gap-4 mb-6">
         {/* Ceiling */}
-        <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+        <div className="p-4 bg-stone-50 dark:bg-stone-700 rounded-card">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Ceiling</span>
+            <span className="text-sm font-medium text-stone-700 dark:text-stone-300">Ceiling</span>
             <span
               className={`flex items-center gap-1 ${getMinimumStatusStyle(
                 status.ceilingStatus.status
@@ -141,10 +142,10 @@ function Part135Summary({ status, isForTargetTime }: Part135SummaryProps) {
             </span>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+            <span className="text-2xl font-bold font-data text-stone-900 dark:text-stone-100">
               {formatCeiling(status.ceilingStatus.value)}
             </span>
-            <span className="text-sm text-gray-500 dark:text-gray-400">
+            <span className="text-sm text-stone-500 dark:text-stone-400">
               / min {status.ceilingStatus.minimum} ft
             </span>
           </div>
@@ -162,9 +163,9 @@ function Part135Summary({ status, isForTargetTime }: Part135SummaryProps) {
         </div>
 
         {/* Visibility */}
-        <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+        <div className="p-4 bg-stone-50 dark:bg-stone-700 rounded-card">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            <span className="text-sm font-medium text-stone-700 dark:text-stone-300">
               Visibility
             </span>
             <span
@@ -179,10 +180,10 @@ function Part135Summary({ status, isForTargetTime }: Part135SummaryProps) {
             </span>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+            <span className="text-2xl font-bold font-data text-stone-900 dark:text-stone-100">
               {formatVisibility(status.visibilityStatus.value || 0)}
             </span>
-            <span className="text-sm text-gray-500 dark:text-gray-400">
+            <span className="text-sm text-stone-500 dark:text-stone-400">
               / min {status.visibilityStatus.minimum} SM
             </span>
           </div>
@@ -200,7 +201,7 @@ function Part135Summary({ status, isForTargetTime }: Part135SummaryProps) {
 
       {/* Alternate requirement */}
       {status.alternateRequired && (
-        <div className="p-3 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-700 rounded-lg mb-4">
+        <div className="p-3 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-700 rounded-card mb-4">
           <div className="flex items-center gap-2 text-yellow-800 dark:text-yellow-300">
             <svg
               className="w-5 h-5 text-yellow-500"
@@ -225,10 +226,10 @@ function Part135Summary({ status, isForTargetTime }: Part135SummaryProps) {
 
       {/* Alternate analysis details */}
       {status.alternateAnalysis && (
-        <div className="p-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 rounded-lg mb-4">
-          <div className="flex items-center gap-2 text-blue-800 dark:text-blue-300 mb-1">
+        <div className="p-3 bg-teal-50 dark:bg-teal-900/30 border border-teal-200 dark:border-teal-700 rounded-card mb-4">
+          <div className="flex items-center gap-2 text-teal-800 dark:text-teal-300 mb-1">
             <svg
-              className="w-4 h-4 text-blue-500"
+              className="w-4 h-4 text-teal-500"
               fill="currentColor"
               viewBox="0 0 20 20"
             >
@@ -241,11 +242,11 @@ function Part135Summary({ status, isForTargetTime }: Part135SummaryProps) {
             <span className="text-xs font-semibold">Alternate Analysis</span>
           </div>
           <div className="ml-6 space-y-1">
-            <p className="text-xs text-blue-700 dark:text-blue-400">
+            <p className="text-xs text-teal-700 dark:text-teal-400">
               <span className="font-medium">Regulation:</span>{' '}
               {status.alternateAnalysis.regulation}
             </p>
-            <p className="text-xs text-blue-700 dark:text-blue-400">
+            <p className="text-xs text-teal-700 dark:text-teal-400">
               <span className="font-medium">Method:</span>{' '}
               {status.alternateAnalysis.analysisMethod === 'taf'
                 ? 'TAF forecast analysis'
@@ -255,13 +256,13 @@ function Part135Summary({ status, isForTargetTime }: Part135SummaryProps) {
             </p>
             {status.alternateAnalysis.forecastWindow && (
               <>
-                <p className="text-xs text-blue-700 dark:text-blue-400">
+                <p className="text-xs text-teal-700 dark:text-teal-400">
                   <span className="font-medium">Forecast window:</span>{' '}
                   {formatDateTimeDual(status.alternateAnalysis.forecastWindow.from).utc}
                   {' - '}
                   {formatDateTimeDual(status.alternateAnalysis.forecastWindow.to).utc}
                 </p>
-                <p className="text-xs text-blue-700 dark:text-blue-400">
+                <p className="text-xs text-teal-700 dark:text-teal-400">
                   <span className="font-medium">Worst ceiling:</span>{' '}
                   {formatCeiling(status.alternateAnalysis.forecastWindow.worstCeiling)}
                   {' | '}
@@ -277,7 +278,7 @@ function Part135Summary({ status, isForTargetTime }: Part135SummaryProps) {
       {/* Weather hazards */}
       {status.weatherHazards.length > 0 && (
         <div>
-          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <h3 className="text-sm font-medium text-stone-700 dark:text-stone-300 mb-2">
             Weather Hazards
           </h3>
           <div className="flex flex-wrap gap-2">

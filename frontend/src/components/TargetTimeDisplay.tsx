@@ -30,7 +30,7 @@ function TargetTimeDisplay({ snapshot, onClear }: TargetTimeDisplayProps) {
   };
 
   return (
-    <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg shadow-lg p-6 mb-6 text-white">
+    <div className="bg-gradient-to-r from-teal-600 to-teal-700 rounded-lg shadow-lg p-6 mb-6 text-white">
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-4">
           <div className="bg-white/20 rounded-lg p-3">
@@ -49,13 +49,13 @@ function TargetTimeDisplay({ snapshot, onClear }: TargetTimeDisplayProps) {
             </svg>
           </div>
           <div>
-            <div className="text-sm text-blue-200 font-medium">
+            <div className="text-sm text-teal-200 font-medium">
               Forecast for Departure Time
             </div>
             <div className="text-2xl font-bold">
               {dualTime.localFull}
             </div>
-            <div className="text-lg text-blue-200 font-mono">
+            <div className="text-lg text-teal-200 font-data">
               {dualTime.utcFull}
             </div>
             <div className="flex items-center gap-3 mt-2">
@@ -67,12 +67,12 @@ function TargetTimeDisplay({ snapshot, onClear }: TargetTimeDisplayProps) {
                 {confidenceLabels[snapshot.confidence]}
               </span>
               {snapshot.forecastHoursAhead > 0 && (
-                <span className="text-blue-200 text-sm">
+                <span className="text-teal-200 text-sm">
                   +{Math.round(snapshot.forecastHoursAhead)} hours from now
                 </span>
               )}
               {snapshot.isCurrentObservation && (
-                <span className="text-blue-200 text-sm">
+                <span className="text-teal-200 text-sm">
                   Based on current observation
                 </span>
               )}
@@ -103,26 +103,26 @@ function TargetTimeDisplay({ snapshot, onClear }: TargetTimeDisplayProps) {
       {/* Conditions summary */}
       <div className="mt-6 grid grid-cols-2 md:grid-cols-5 gap-4">
         <div className="bg-white/10 rounded-lg p-3">
-          <div className="text-blue-200 text-xs mb-1">Flight Category</div>
+          <div className="text-teal-200 text-xs mb-1">Flight Category</div>
           <FlightCategoryBadge
             category={conditions.flightCategory.value}
             size="sm"
           />
         </div>
         <div className="bg-white/10 rounded-lg p-3">
-          <div className="text-blue-200 text-xs mb-1">Visibility</div>
+          <div className="text-teal-200 text-xs mb-1">Visibility</div>
           <div className="font-semibold">
             {formatVisibility(conditions.visibility.value)}
           </div>
         </div>
         <div className="bg-white/10 rounded-lg p-3">
-          <div className="text-blue-200 text-xs mb-1">Ceiling</div>
+          <div className="text-teal-200 text-xs mb-1">Ceiling</div>
           <div className="font-semibold">
             {formatCeiling(conditions.ceiling.value)}
           </div>
         </div>
         <div className="bg-white/10 rounded-lg p-3">
-          <div className="text-blue-200 text-xs mb-1">Wind</div>
+          <div className="text-teal-200 text-xs mb-1">Wind</div>
           <div className="font-semibold">
             {conditions.windDirection.value !== null
               ? `${String(conditions.windDirection.value).padStart(3, '0')}° `
@@ -137,7 +137,7 @@ function TargetTimeDisplay({ snapshot, onClear }: TargetTimeDisplayProps) {
           </div>
         </div>
         <div className="bg-white/10 rounded-lg p-3">
-          <div className="text-blue-200 text-xs mb-1">Precip Prob</div>
+          <div className="text-teal-200 text-xs mb-1">Precip Prob</div>
           <div className="font-semibold">
             {conditions.precipitationProbability.value}%
           </div>

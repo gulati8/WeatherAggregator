@@ -62,8 +62,8 @@ function SourceComparison({ sources, current }: SourceComparisonProps) {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 p-6">
-      <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+    <div className="bg-white dark:bg-stone-800 rounded-lg shadow-sm border border-stone-200 dark:border-stone-700 p-6">
+      <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-4">
         Source Comparison
       </h2>
 
@@ -101,18 +101,18 @@ function SourceComparison({ sources, current }: SourceComparisonProps) {
           const labels = { temperature: 'Temperature', windSpeed: 'Wind Speed', visibility: 'Visibility' };
           const formatFns = { temperature: formatTemperature, windSpeed: formatWindSpeed, visibility: formatVisibility };
           return (
-            <div key={param} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
-              <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{labels[param]}</div>
+            <div key={param} className="bg-stone-50 dark:bg-stone-700 rounded-lg p-3">
+              <div className="text-sm font-medium text-stone-700 dark:text-stone-300 mb-2">{labels[param]}</div>
               <div className="space-y-1">
                 {sources.filter((s) => s.status === 'ok').map((source) => (
                   <div key={source.id} className="flex justify-between text-sm">
-                    <span className="text-gray-500 dark:text-gray-400">{sourceNames[source.id]}</span>
-                    <span className="text-gray-900 dark:text-gray-100">{formatValue(source.id, param)}</span>
+                    <span className="text-stone-500 dark:text-stone-400">{sourceNames[source.id]}</span>
+                    <span className="text-stone-900 dark:text-stone-100">{formatValue(source.id, param)}</span>
                   </div>
                 ))}
-                <div className="flex justify-between text-sm font-semibold border-t border-gray-200 dark:border-gray-600 pt-1 mt-1">
-                  <span className="text-gray-700 dark:text-gray-200">Consensus</span>
-                  <span className="text-gray-900 dark:text-gray-100">
+                <div className="flex justify-between text-sm font-semibold border-t border-stone-200 dark:border-stone-700 pt-1 mt-1">
+                  <span className="text-stone-700 dark:text-stone-200">Consensus</span>
+                  <span className="text-stone-900 dark:text-stone-100">
                     {formatFns[param](current[param].value)}
                     {getSpreadIndicator(current[param].spread, param === 'temperature' ? 3 : param === 'windSpeed' ? 5 : 2)}
                   </span>
@@ -127,8 +127,8 @@ function SourceComparison({ sources, current }: SourceComparisonProps) {
       <div className="hidden md:block overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-gray-200 dark:border-gray-600">
-              <th className="text-left py-2 pr-4 font-medium text-gray-700 dark:text-gray-300">
+            <tr className="border-b border-stone-200 dark:border-stone-700">
+              <th className="text-left py-2 pr-4 font-medium text-stone-700 dark:text-stone-300">
                 Parameter
               </th>
               {sources
@@ -136,60 +136,60 @@ function SourceComparison({ sources, current }: SourceComparisonProps) {
                 .map((source) => (
                   <th
                     key={source.id}
-                    className="text-center py-2 px-4 font-medium text-gray-700 dark:text-gray-300"
+                    className="text-center py-2 px-4 font-medium text-stone-700 dark:text-stone-300"
                   >
                     {sourceNames[source.id]}
                   </th>
                 ))}
-              <th className="text-center py-2 pl-4 font-medium text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-gray-700">
+              <th className="text-center py-2 pl-4 font-medium text-stone-900 dark:text-stone-100 bg-stone-50 dark:bg-stone-700">
                 Consensus
               </th>
             </tr>
           </thead>
           <tbody>
             {/* Temperature */}
-            <tr className="border-b border-gray-100 dark:border-gray-700">
-              <td className="py-3 pr-4 text-gray-600 dark:text-gray-400">Temperature</td>
+            <tr className="border-b border-stone-100 dark:border-stone-700">
+              <td className="py-3 pr-4 text-stone-600 dark:text-stone-400">Temperature</td>
               {sources
                 .filter((s) => s.status === 'ok')
                 .map((source) => (
-                  <td key={source.id} className="text-center py-3 px-4 text-gray-900 dark:text-gray-100">
+                  <td key={source.id} className="text-center py-3 px-4 text-stone-900 dark:text-stone-100">
                     {formatValue(source.id, 'temperature')}
                   </td>
                 ))}
-              <td className="text-center py-3 pl-4 font-semibold bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+              <td className="text-center py-3 pl-4 font-semibold bg-stone-50 dark:bg-stone-700 text-stone-900 dark:text-stone-100">
                 {formatTemperature(current.temperature.value)}
                 {getSpreadIndicator(current.temperature.spread, 3)}
               </td>
             </tr>
 
             {/* Wind Speed */}
-            <tr className="border-b border-gray-100 dark:border-gray-700">
-              <td className="py-3 pr-4 text-gray-600 dark:text-gray-400">Wind Speed</td>
+            <tr className="border-b border-stone-100 dark:border-stone-700">
+              <td className="py-3 pr-4 text-stone-600 dark:text-stone-400">Wind Speed</td>
               {sources
                 .filter((s) => s.status === 'ok')
                 .map((source) => (
-                  <td key={source.id} className="text-center py-3 px-4 text-gray-900 dark:text-gray-100">
+                  <td key={source.id} className="text-center py-3 px-4 text-stone-900 dark:text-stone-100">
                     {formatValue(source.id, 'windSpeed')}
                   </td>
                 ))}
-              <td className="text-center py-3 pl-4 font-semibold bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+              <td className="text-center py-3 pl-4 font-semibold bg-stone-50 dark:bg-stone-700 text-stone-900 dark:text-stone-100">
                 {formatWindSpeed(current.windSpeed.value)}
                 {getSpreadIndicator(current.windSpeed.spread, 5)}
               </td>
             </tr>
 
             {/* Visibility */}
-            <tr className="border-b border-gray-100 dark:border-gray-700">
-              <td className="py-3 pr-4 text-gray-600 dark:text-gray-400">Visibility</td>
+            <tr className="border-b border-stone-100 dark:border-stone-700">
+              <td className="py-3 pr-4 text-stone-600 dark:text-stone-400">Visibility</td>
               {sources
                 .filter((s) => s.status === 'ok')
                 .map((source) => (
-                  <td key={source.id} className="text-center py-3 px-4 text-gray-900 dark:text-gray-100">
+                  <td key={source.id} className="text-center py-3 px-4 text-stone-900 dark:text-stone-100">
                     {formatValue(source.id, 'visibility')}
                   </td>
                 ))}
-              <td className="text-center py-3 pl-4 font-semibold bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+              <td className="text-center py-3 pl-4 font-semibold bg-stone-50 dark:bg-stone-700 text-stone-900 dark:text-stone-100">
                 {formatVisibility(current.visibility.value)}
                 {getSpreadIndicator(current.visibility.spread, 2)}
               </td>
@@ -198,7 +198,7 @@ function SourceComparison({ sources, current }: SourceComparisonProps) {
         </table>
       </div>
 
-      <p className="mt-3 text-xs text-gray-500 dark:text-gray-400 hidden md:block">
+      <p className="mt-3 text-xs text-stone-500 dark:text-stone-400 hidden md:block">
         <span className="text-orange-600 dark:text-orange-400">!</span> indicates significant
         disagreement between sources
       </p>

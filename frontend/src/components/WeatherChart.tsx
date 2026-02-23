@@ -149,11 +149,11 @@ function WeatherChart({ forecast, highlightTime }: WeatherChartProps) {
 
   if (chartData.length < 2) {
     return (
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 p-6">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+      <div className="bg-white dark:bg-stone-800 rounded-lg shadow-sm border border-stone-200 dark:border-stone-700 p-6">
+        <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100 mb-4">
           Weather Trends
         </h2>
-        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+        <div className="text-center py-8 text-stone-500 dark:text-stone-400">
           Not enough forecast data to display trends.
         </div>
       </div>
@@ -161,15 +161,15 @@ function WeatherChart({ forecast, highlightTime }: WeatherChartProps) {
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 p-6">
+    <div className="bg-white dark:bg-stone-800 rounded-lg shadow-sm border border-stone-200 dark:border-stone-700 p-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+        <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100">
           24-Hour Weather Trends
         </h2>
 
         <div className="flex flex-wrap items-center gap-4">
           {/* Show sources toggle */}
-          <label className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 cursor-pointer">
+          <label className="flex items-center gap-2 text-sm text-stone-600 dark:text-stone-400 cursor-pointer">
             <input
               type="checkbox"
               checked={showSources}
@@ -180,7 +180,7 @@ function WeatherChart({ forecast, highlightTime }: WeatherChartProps) {
           </label>
 
           {/* Parameter selector */}
-          <div className="flex gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+          <div className="flex gap-1 bg-stone-100 dark:bg-stone-700 rounded-lg p-1">
             {(
               [
                 { key: 'visibility', label: 'Visibility' },
@@ -193,8 +193,8 @@ function WeatherChart({ forecast, highlightTime }: WeatherChartProps) {
                 onClick={() => setSelectedParam(param.key)}
                 className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
                   selectedParam === param.key
-                    ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100 shadow-sm'
-                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                    ? 'bg-white dark:bg-stone-600 text-stone-900 dark:text-stone-100 shadow-sm'
+                    : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
                 }`}
               >
                 {param.label}
@@ -307,8 +307,8 @@ function WeatherChart({ forecast, highlightTime }: WeatherChartProps) {
       </div>
 
       {/* Legend explanation */}
-      <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
-        <div className="flex flex-wrap gap-4 text-xs text-gray-600 dark:text-gray-400">
+      <div className="mt-4 pt-4 border-t border-stone-200 dark:border-stone-700">
+        <div className="flex flex-wrap gap-4 text-xs text-stone-600 dark:text-stone-400">
           {showSources && (
             <>
               <div className="flex items-center gap-2">
@@ -328,13 +328,13 @@ function WeatherChart({ forecast, highlightTime }: WeatherChartProps) {
             </>
           )}
           <div className="flex items-center gap-2">
-            <div className="w-4 h-0.5 bg-gray-800" style={{ borderStyle: 'dashed' }} />
+            <div className="w-4 h-0.5 bg-stone-800" style={{ borderStyle: 'dashed' }} />
             <span>Consensus (Displayed value - AWC preferred)</span>
           </div>
           {selectedParam === 'visibility' && (
             <>
               <div className="flex items-center gap-2">
-                <div className="w-4 h-0.5 bg-blue-500" />
+                <div className="w-4 h-0.5 bg-teal-500" />
                 <span>MVFR threshold (3 SM)</span>
               </div>
               <div className="flex items-center gap-2">

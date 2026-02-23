@@ -24,7 +24,7 @@ interface WindsAloftForecast {
 function WindArrow({ direction }: { direction: number }) {
   return (
     <span
-      className="inline-block w-4 h-4 text-blue-500"
+      className="inline-block w-4 h-4 text-teal-500"
       style={{ transform: `rotate(${direction + 180}deg)` }}
       title={`${direction}°`}
     >
@@ -63,9 +63,9 @@ export default function WindsAloftDisplay({ icao }: { icao: string }) {
   const station = forecast?.stations?.[0];
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 p-6">
+    <div className="bg-white dark:bg-stone-800 rounded-lg shadow-sm border border-stone-200 dark:border-stone-700 p-6">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+        <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100">
           Winds Aloft
         </h2>
         <div className="flex gap-1">
@@ -75,8 +75,8 @@ export default function WindsAloftDisplay({ icao }: { icao: string }) {
               onClick={() => setFcstHour(h)}
               className={`px-3 py-2 min-h-[44px] text-xs font-medium rounded-lg transition-colors ${
                 fcstHour === h
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                  ? 'bg-teal-600 text-white'
+                  : 'bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-600'
               }`}
             >
               {h}hr
@@ -86,37 +86,37 @@ export default function WindsAloftDisplay({ icao }: { icao: string }) {
       </div>
 
       {station && (
-        <div className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+        <div className="text-xs text-stone-500 dark:text-stone-400 mb-3">
           Station: {station.stationId} | Valid: {new Date(forecast!.validTime).toLocaleString()}
         </div>
       )}
 
       {loading && (
-        <div className="flex items-center gap-2 text-sm text-gray-500">
-          <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+        <div className="flex items-center gap-2 text-sm text-stone-500">
+          <div className="w-4 h-4 border-2 border-teal-600 border-t-transparent rounded-full animate-spin" />
           Loading...
         </div>
       )}
 
       {error && (
-        <div className="text-sm text-gray-500 dark:text-gray-400">{error}</div>
+        <div className="text-sm text-stone-500 dark:text-stone-400">{error}</div>
       )}
 
       {station && station.levels.length > 0 && (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-200 dark:border-gray-700">
-                <th className="text-left py-2 px-2 text-gray-500 dark:text-gray-400 font-medium text-xs">
+              <tr className="border-b border-stone-200 dark:border-stone-700">
+                <th className="text-left py-2 px-2 text-stone-500 dark:text-stone-400 font-medium text-xs">
                   Altitude (ft)
                 </th>
-                <th className="text-center py-2 px-2 text-gray-500 dark:text-gray-400 font-medium text-xs">
+                <th className="text-center py-2 px-2 text-stone-500 dark:text-stone-400 font-medium text-xs">
                   Direction
                 </th>
-                <th className="text-center py-2 px-2 text-gray-500 dark:text-gray-400 font-medium text-xs">
+                <th className="text-center py-2 px-2 text-stone-500 dark:text-stone-400 font-medium text-xs">
                   Speed (kts)
                 </th>
-                <th className="text-center py-2 px-2 text-gray-500 dark:text-gray-400 font-medium text-xs">
+                <th className="text-center py-2 px-2 text-stone-500 dark:text-stone-400 font-medium text-xs">
                   Temp (C)
                 </th>
               </tr>
@@ -125,39 +125,39 @@ export default function WindsAloftDisplay({ icao }: { icao: string }) {
               {station.levels.map((level) => (
                 <tr
                   key={level.altitude}
-                  className="border-b border-gray-100 dark:border-gray-700/50"
+                  className="border-b border-stone-100 dark:border-stone-700/50"
                 >
-                  <td className="py-1.5 px-2 font-mono text-gray-900 dark:text-gray-100">
+                  <td className="py-1.5 px-2 font-data text-stone-900 dark:text-stone-100">
                     {level.altitude.toLocaleString()}
                   </td>
-                  <td className="py-1.5 px-2 text-center text-gray-700 dark:text-gray-300">
+                  <td className="py-1.5 px-2 text-center text-stone-700 dark:text-stone-300">
                     {level.lightAndVariable ? (
-                      <span className="text-gray-400 text-xs">L&V</span>
+                      <span className="text-stone-400 text-xs">L&V</span>
                     ) : level.windDirection != null ? (
                       <span className="flex items-center justify-center gap-1">
                         <WindArrow direction={level.windDirection} />
-                        <span className="font-mono">{level.windDirection}°</span>
+                        <span className="font-data">{level.windDirection}°</span>
                       </span>
                     ) : (
-                      <span className="text-gray-400">—</span>
+                      <span className="text-stone-400">—</span>
                     )}
                   </td>
-                  <td className="py-1.5 px-2 text-center font-mono text-gray-700 dark:text-gray-300">
+                  <td className="py-1.5 px-2 text-center font-data text-stone-700 dark:text-stone-300">
                     {level.lightAndVariable ? (
-                      <span className="text-gray-400 text-xs">calm</span>
+                      <span className="text-stone-400 text-xs">calm</span>
                     ) : (
                       <span className={level.windSpeed >= 50 ? 'text-orange-600 font-semibold' : ''}>
                         {level.windSpeed}
                       </span>
                     )}
                   </td>
-                  <td className="py-1.5 px-2 text-center font-mono text-gray-700 dark:text-gray-300">
+                  <td className="py-1.5 px-2 text-center font-data text-stone-700 dark:text-stone-300">
                     {level.temperature != null ? (
-                      <span className={level.temperature <= 0 ? 'text-blue-500' : 'text-red-500'}>
+                      <span className={level.temperature <= 0 ? 'text-teal-500' : 'text-red-500'}>
                         {level.temperature > 0 ? '+' : ''}{level.temperature}
                       </span>
                     ) : (
-                      <span className="text-gray-400">—</span>
+                      <span className="text-stone-400">—</span>
                     )}
                   </td>
                 </tr>
@@ -168,7 +168,7 @@ export default function WindsAloftDisplay({ icao }: { icao: string }) {
       )}
 
       {!loading && !error && !station && (
-        <div className="text-sm text-gray-500 dark:text-gray-400">
+        <div className="text-sm text-stone-500 dark:text-stone-400">
           No winds aloft data available for this station.
         </div>
       )}

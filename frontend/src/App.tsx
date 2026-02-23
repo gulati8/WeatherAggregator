@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import Clock from './components/Clock';
 import InstallPrompt from './components/InstallPrompt';
 import { useDarkMode } from './hooks/useDarkMode';
@@ -24,7 +25,7 @@ function UserMenu() {
     return (
       <Link
         to="/login"
-        className="text-sm text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+        className="text-sm text-stone-600 dark:text-stone-300 hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
       >
         Sign In
       </Link>
@@ -35,26 +36,26 @@ function UserMenu() {
     <div className="relative" ref={menuRef}>
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+        className="flex items-center gap-1 text-sm text-stone-600 dark:text-stone-300 hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
         </svg>
         <span className="hidden sm:inline">{user.name}</span>
-        <span className="text-xs text-gray-400 dark:text-gray-500 hidden sm:inline">({user.role})</span>
+        <span className="text-xs text-stone-400 dark:text-stone-500 hidden sm:inline">({user.role})</span>
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50">
-          <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-700">
-            <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{user.name}</p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">{user.email}</p>
+        <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-stone-800 rounded-card shadow-card-lg border border-stone-200 dark:border-stone-700 py-1 z-50">
+          <div className="px-4 py-2 border-b border-stone-100 dark:border-stone-700">
+            <p className="text-sm font-medium text-stone-900 dark:text-stone-100">{user.name}</p>
+            <p className="text-xs text-stone-500 dark:text-stone-400">{user.email}</p>
           </div>
           {user.role === 'admin' && (
             <Link
               to="/admin"
               onClick={() => setOpen(false)}
-              className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+              className="block w-full text-left px-4 py-2 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700"
             >
               User Management
             </Link>
@@ -64,7 +65,7 @@ function UserMenu() {
               setOpen(false);
               await logout();
             }}
-            className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+            className="w-full text-left px-4 py-2 text-sm text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700"
           >
             Sign Out
           </button>
@@ -101,7 +102,7 @@ function DarkModeToggle({ isDark, toggleDark }: { isDark: boolean; toggleDark: (
   return (
     <button
       onClick={toggleDark}
-      className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+      className="p-2 rounded-lg text-stone-500 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors"
       title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
     >
       {isDark ? (
@@ -121,6 +122,27 @@ function DarkModeToggle({ isDark, toggleDark }: { isDark: boolean; toggleDark: (
   );
 }
 
+function NavLink({ to, children }: { to: string; children: React.ReactNode }) {
+  const location = useLocation();
+  const isActive =
+    to === '/'
+      ? location.pathname === '/' || location.pathname.startsWith('/weather')
+      : location.pathname.startsWith(to);
+
+  return (
+    <Link
+      to={to}
+      className={`text-sm px-3 py-1.5 rounded-full transition-colors ${
+        isActive
+          ? 'bg-teal-50 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300 font-medium'
+          : 'text-stone-600 dark:text-stone-300 hover:text-teal-600 dark:hover:text-teal-400'
+      }`}
+    >
+      {children}
+    </Link>
+  );
+}
+
 function App() {
   const [isDark, toggleDark] = useDarkMode();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -132,17 +154,17 @@ function App() {
   }, [location.pathname]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 overflow-x-hidden">
+    <div className="min-h-screen flex flex-col bg-cream-50 dark:bg-stone-900 overflow-x-hidden">
       <OfflineBanner />
       {/* Header */}
-      <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
+      <header className="bg-white dark:bg-stone-800 border-b border-stone-200 dark:border-stone-700 shadow-card">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Top bar */}
           <div className="flex items-center justify-between h-14 sm:h-16">
             {/* Logo */}
             <Link to="/" className="flex items-center gap-2">
               <svg
-                className="w-8 h-8 text-blue-600"
+                className="w-8 h-8 text-teal-600 dark:text-teal-400"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -154,7 +176,7 @@ function App() {
                   d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"
                 />
               </svg>
-              <span className="text-xl font-bold text-gray-900 dark:text-gray-100">
+              <span className="text-xl font-bold font-display text-stone-900 dark:text-stone-100">
                 Weather Aggregator
               </span>
             </Link>
@@ -164,7 +186,7 @@ function App() {
               <Clock compact />
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                className="p-2 rounded-lg text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors"
                 aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
                 aria-expanded={mobileMenuOpen}
               >
@@ -181,37 +203,17 @@ function App() {
             </div>
 
             {/* Desktop nav */}
-            <div className="hidden sm:flex items-center gap-6">
+            <div className="hidden sm:flex items-center gap-4">
               <Clock />
-              <nav className="flex items-center gap-6">
-                <Link
-                  to="/"
-                  className="text-sm py-2 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-                >
-                  Single Airport
-                </Link>
-                <Link
-                  to="/trip"
-                  className="text-sm py-2 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center gap-1"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-                  </svg>
-                  Trip Planner
-                </Link>
-                <Link
-                  to="/map"
-                  className="text-sm py-2 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center gap-1"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  Map
-                </Link>
+              <nav className="flex items-center gap-2">
+                <NavLink to="/">Single Airport</NavLink>
+                <NavLink to="/trip">Trip Planner</NavLink>
+                <NavLink to="/map">Map</NavLink>
+              </nav>
+              <div className="flex items-center gap-3 ml-2 pl-2 border-l border-stone-200 dark:border-stone-700">
                 <UserMenu />
                 <DarkModeToggle isDark={isDark} toggleDark={toggleDark} />
-              </nav>
+              </div>
             </div>
           </div>
         </div>
@@ -226,21 +228,21 @@ function App() {
             className="fixed inset-0 bg-black/30"
             onClick={() => setMobileMenuOpen(false)}
           />
-          {/* Panel — slides down from top */}
-          <div className="fixed top-0 left-0 right-0 bg-white dark:bg-gray-800 shadow-xl animate-slide-down">
+          {/* Panel */}
+          <div className="fixed top-0 left-0 right-0 bg-white dark:bg-stone-800 shadow-xl animate-slide-down">
             {/* Header row */}
-            <div className="flex items-center justify-between px-4 h-14 border-b border-gray-200 dark:border-gray-700">
+            <div className="flex items-center justify-between px-4 h-14 border-b border-stone-200 dark:border-stone-700">
               <Link to="/" className="flex items-center gap-2">
-                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-8 h-8 text-teal-600 dark:text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
                 </svg>
-                <span className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                <span className="text-xl font-bold font-display text-stone-900 dark:text-stone-100">
                   Weather Aggregator
                 </span>
               </Link>
               <button
                 onClick={() => setMobileMenuOpen(false)}
-                className="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                className="p-2 rounded-lg text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors"
                 aria-label="Close menu"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -252,33 +254,33 @@ function App() {
             <nav className="px-4 py-3">
               <Link
                 to="/"
-                className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-700 rounded-lg transition-colors"
               >
-                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
                 </svg>
                 Single Airport
               </Link>
               <Link
                 to="/trip"
-                className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-700 rounded-lg transition-colors"
               >
-                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
                 </svg>
                 Trip Planner
               </Link>
               <Link
                 to="/map"
-                className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-700 rounded-lg transition-colors"
               >
-                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
                 Map
               </Link>
-              <div className="border-t border-gray-200 dark:border-gray-700 mt-2 pt-2 flex items-center justify-between px-4 py-2">
+              <div className="border-t border-stone-200 dark:border-stone-700 mt-2 pt-2 flex items-center justify-between px-4 py-2">
                 <UserMenu />
                 <DarkModeToggle isDark={isDark} toggleDark={toggleDark} />
               </div>
@@ -289,14 +291,27 @@ function App() {
 
       {/* Main content */}
       <main className="flex-1">
-        <Outlet />
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={location.pathname}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+          >
+            <Outlet />
+          </motion.div>
+        </AnimatePresence>
       </main>
 
       {/* Footer */}
-      <footer className="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 py-4">
+      <footer className="bg-white dark:bg-stone-800 border-t border-stone-200 dark:border-stone-700 py-4">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="text-center text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-center text-sm text-stone-500 dark:text-stone-400">
             Data from Aviation Weather Center, Open-Meteo, and NWS
+          </p>
+          <p className="text-center text-xs text-stone-400 dark:text-stone-500 mt-1">
+            Built for dispatch. Trusted by pilots.
           </p>
         </div>
       </footer>

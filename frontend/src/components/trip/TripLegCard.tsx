@@ -8,34 +8,34 @@ import DualTime from '../DualTime';
 
 function RawReports({ icao, weather }: { icao: string; weather: UnifiedWeatherData }) {
   return (
-    <div className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-600 rounded-lg p-3">
-      <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+    <div className="bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-lg p-3">
+      <h5 className="text-sm font-medium text-stone-700 dark:text-stone-300 mb-2">
         {icao} Raw Reports
       </h5>
 
       {/* Current METAR */}
       {weather.current.rawMetar ? (
         <div className="mb-2">
-          <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">METAR (current)</span>
-          <pre className="mt-0.5 text-xs font-mono text-gray-800 dark:text-gray-200 whitespace-pre-wrap break-all bg-white dark:bg-gray-800 rounded px-2 py-1.5 border border-gray-200 dark:border-gray-700">
+          <span className="text-xs font-semibold text-stone-500 dark:text-stone-400">METAR (current)</span>
+          <pre className="mt-0.5 text-xs font-data text-stone-800 dark:text-stone-200 whitespace-pre-wrap break-all bg-white dark:bg-stone-800 rounded px-2 py-1.5 border border-stone-200 dark:border-stone-700">
             {weather.current.rawMetar}
           </pre>
         </div>
       ) : (
-        <p className="text-xs text-gray-400 dark:text-gray-500 mb-2">No METAR available</p>
+        <p className="text-xs text-stone-400 dark:text-stone-500 mb-2">No METAR available</p>
       )}
 
       {/* Previous METARs */}
       {weather.recentMetars && weather.recentMetars.length > 0 && (
         <div className="mb-2">
-          <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">
+          <span className="text-xs font-semibold text-stone-500 dark:text-stone-400">
             Previous METARs ({weather.recentMetars.length})
           </span>
           <div className="mt-0.5 space-y-1">
             {weather.recentMetars.map((metar, idx) => (
               <pre
                 key={idx}
-                className="text-xs font-mono text-gray-600 dark:text-gray-400 whitespace-pre-wrap break-all bg-white dark:bg-gray-800 rounded px-2 py-1.5 border border-gray-100 dark:border-gray-700"
+                className="text-xs font-data text-stone-600 dark:text-stone-400 whitespace-pre-wrap break-all bg-white dark:bg-stone-800 rounded px-2 py-1.5 border border-stone-100 dark:border-stone-700"
               >
                 {metar}
               </pre>
@@ -47,13 +47,13 @@ function RawReports({ icao, weather }: { icao: string; weather: UnifiedWeatherDa
       {/* TAF */}
       {weather.rawTaf ? (
         <div>
-          <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">TAF</span>
-          <pre className="mt-0.5 text-xs font-mono text-gray-800 dark:text-gray-200 whitespace-pre-wrap break-all bg-white dark:bg-gray-800 rounded px-2 py-1.5 border border-gray-200 dark:border-gray-700">
+          <span className="text-xs font-semibold text-stone-500 dark:text-stone-400">TAF</span>
+          <pre className="mt-0.5 text-xs font-data text-stone-800 dark:text-stone-200 whitespace-pre-wrap break-all bg-white dark:bg-stone-800 rounded px-2 py-1.5 border border-stone-200 dark:border-stone-700">
             {weather.rawTaf}
           </pre>
         </div>
       ) : (
-        <p className="text-xs text-gray-400 dark:text-gray-500">No TAF available</p>
+        <p className="text-xs text-stone-400 dark:text-stone-500">No TAF available</p>
       )}
     </div>
   );
@@ -72,7 +72,7 @@ function TripLegCard({ leg, index }: TripLegCardProps) {
       case 'caution':
         return 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-300 border-yellow-200 dark:border-yellow-700';
       case 'info':
-        return 'bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-700';
+        return 'bg-teal-100 dark:bg-teal-900/40 text-teal-800 dark:text-teal-300 border-teal-200 dark:border-teal-700';
     }
   };
 
@@ -114,16 +114,16 @@ function TripLegCard({ leg, index }: TripLegCardProps) {
   const durationStr = `${hours}h ${mins}m`;
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 overflow-hidden">
+    <div className="bg-white dark:bg-stone-800 rounded-lg shadow-sm border border-stone-200 dark:border-stone-700 overflow-hidden">
       {/* Header */}
-      <div className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600 p-4">
+      <div className="bg-stone-50 dark:bg-stone-700 border-b border-stone-200 dark:border-stone-700 p-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div className="flex flex-wrap items-center gap-2 sm:gap-4">
-            <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Leg {index + 1}</span>
-            <div className="text-lg font-bold text-gray-900 dark:text-gray-100">
+            <span className="text-sm font-medium text-stone-500 dark:text-stone-400">Leg {index + 1}</span>
+            <div className="text-lg font-bold text-stone-900 dark:text-stone-100">
               {leg.departureAirport.icao} → {leg.arrivalAirport.icao}
             </div>
-            <span className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
+            <span className="text-sm text-stone-500 dark:text-stone-400 flex items-center gap-1">
               <DualTime time={leg.departureTime} size="sm" />
               <span>({durationStr})</span>
             </span>
@@ -156,8 +156,8 @@ function TripLegCard({ leg, index }: TripLegCardProps) {
         {/* Part 135 Summary Row */}
         <div className="grid md:grid-cols-2 gap-4 mb-4">
           {/* Departure Part 135 */}
-          <div className="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-3">
-            <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <div className="bg-white dark:bg-stone-700 border border-stone-200 dark:border-stone-700 rounded-lg p-3">
+            <h5 className="text-sm font-medium text-stone-700 dark:text-stone-300 mb-2">
               {leg.departureAirport.icao} Part 135 Status
             </h5>
             <div className="flex flex-wrap items-center gap-2 sm:gap-4">
@@ -176,7 +176,7 @@ function TripLegCard({ leg, index }: TripLegCardProps) {
                 category={leg.legStatus.departureStatus.flightCategory}
                 size="sm"
               />
-              <div className="text-xs text-gray-600 dark:text-gray-400">
+              <div className="text-xs text-stone-600 dark:text-stone-400">
                 <div>Ceiling: {formatCeiling(leg.legStatus.departureStatus.ceilingStatus.value)}</div>
                 <div>Visibility: {formatVisibility(leg.legStatus.departureStatus.visibilityStatus.value || 0)}</div>
               </div>
@@ -184,8 +184,8 @@ function TripLegCard({ leg, index }: TripLegCardProps) {
           </div>
 
           {/* Arrival Part 135 */}
-          <div className="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg p-3">
-            <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <div className="bg-white dark:bg-stone-700 border border-stone-200 dark:border-stone-700 rounded-lg p-3">
+            <h5 className="text-sm font-medium text-stone-700 dark:text-stone-300 mb-2">
               {leg.arrivalAirport.icao} Part 135 Status
             </h5>
             <div className="flex flex-wrap items-center gap-2 sm:gap-4">
@@ -204,7 +204,7 @@ function TripLegCard({ leg, index }: TripLegCardProps) {
                 category={leg.legStatus.arrivalStatus.flightCategory}
                 size="sm"
               />
-              <div className="text-xs text-gray-600 dark:text-gray-400">
+              <div className="text-xs text-stone-600 dark:text-stone-400">
                 <div>Ceiling: {formatCeiling(leg.legStatus.arrivalStatus.ceilingStatus.value)}</div>
                 <div>Visibility: {formatVisibility(leg.legStatus.arrivalStatus.visibilityStatus.value || 0)}</div>
               </div>
@@ -244,7 +244,7 @@ function TripLegCard({ leg, index }: TripLegCardProps) {
         {/* Issues list */}
         {leg.legStatus.issues.length > 0 && (
           <div>
-            <h5 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <h5 className="text-sm font-medium text-stone-700 dark:text-stone-300 mb-2">
               Issues ({leg.legStatus.issues.length})
             </h5>
             <div className="space-y-1">

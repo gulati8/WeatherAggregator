@@ -129,13 +129,13 @@ function SourceComparisonDetailed({
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 p-6">
+    <div className="bg-white dark:bg-stone-800 rounded-lg shadow-sm border border-stone-200 dark:border-stone-700 p-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+        <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100">
           Source-by-Source Comparison
         </h2>
         <div className="flex items-center gap-2">
-          <label className="text-sm text-gray-600 dark:text-gray-400">
+          <label className="text-sm text-stone-600 dark:text-stone-400">
             <input
               type="checkbox"
               checked={showAllSources}
@@ -157,8 +157,8 @@ function SourceComparisonDetailed({
               onClick={() => setSelectedParam(param)}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
                 selectedParam === param
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                  ? 'bg-teal-600 text-white'
+                  : 'bg-stone-100 dark:bg-stone-700 text-stone-700 dark:text-stone-300 hover:bg-stone-200 dark:hover:bg-stone-600'
               }`}
             >
               {param === 'temperature' && 'Temperature'}
@@ -181,8 +181,8 @@ function SourceComparisonDetailed({
       </div>
 
       {/* Current values comparison */}
-      <div className="mb-6 p-3 sm:p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+      <div className="mb-6 p-3 sm:p-4 bg-stone-50 dark:bg-stone-700 rounded-lg">
+        <h3 className="text-sm font-semibold text-stone-700 dark:text-stone-300 mb-3">
           Current {getParamLabel(selectedParam)} by Source
         </h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -191,23 +191,23 @@ function SourceComparisonDetailed({
             return (
               <div
                 key={source.id}
-                className="p-3 bg-white dark:bg-gray-800 rounded-lg border-l-4"
+                className="p-3 bg-white dark:bg-stone-800 rounded-lg border-l-4"
                 style={{ borderColor: SOURCE_COLORS[source.id] }}
               >
-                <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                <div className="text-xs text-stone-500 dark:text-stone-400 mb-1">
                   {SOURCE_NAMES[source.id]}
                 </div>
-                <div className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                <div className="text-xl font-bold text-stone-900 dark:text-stone-100">
                   {formatValue(value as number, selectedParam)}
                 </div>
               </div>
             );
           })}
-          <div className="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg border-l-4 border-blue-600">
-            <div className="text-xs text-blue-600 dark:text-blue-400 mb-1 font-semibold">
+          <div className="p-3 bg-teal-50 dark:bg-teal-900/30 rounded-lg border-l-4 border-teal-600">
+            <div className="text-xs text-teal-600 dark:text-teal-400 mb-1 font-semibold">
               CONSENSUS
             </div>
-            <div className="text-xl font-bold text-blue-900 dark:text-blue-100">
+            <div className="text-xl font-bold text-teal-900 dark:text-teal-100">
               {formatValue(current[selectedParam].value, selectedParam)}
             </div>
           </div>
@@ -236,7 +236,7 @@ function SourceComparisonDetailed({
 
       {/* Multi-source forecast chart */}
       <div>
-        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+        <h3 className="text-sm font-semibold text-stone-700 dark:text-stone-300 mb-3">
           Forecast Comparison: {getParamLabel(selectedParam)}
         </h3>
         <div className="h-48 sm:h-56 md:h-64">
@@ -289,8 +289,8 @@ function SourceComparisonDetailed({
       </div>
 
       {/* Source legend with descriptions */}
-      <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-600">
-        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+      <div className="mt-6 pt-4 border-t border-stone-200 dark:border-stone-700">
+        <h3 className="text-sm font-semibold text-stone-700 dark:text-stone-300 mb-3">
           About the Sources
         </h3>
         <div className="grid md:grid-cols-2 gap-3 text-sm">
@@ -300,8 +300,8 @@ function SourceComparisonDetailed({
               style={{ backgroundColor: SOURCE_COLORS.awc }}
             />
             <div>
-              <span className="font-medium text-gray-900 dark:text-gray-100">Aviation Weather Center</span>
-              <p className="text-gray-500 dark:text-gray-400">
+              <span className="font-medium text-stone-900 dark:text-stone-100">Aviation Weather Center</span>
+              <p className="text-stone-500 dark:text-stone-400">
                 Official FAA source. METAR (current) and TAF (forecast). Most reliable for aviation decisions.
               </p>
             </div>
@@ -312,8 +312,8 @@ function SourceComparisonDetailed({
               style={{ backgroundColor: SOURCE_COLORS.openmeteo }}
             />
             <div>
-              <span className="font-medium text-gray-900 dark:text-gray-100">Open-Meteo</span>
-              <p className="text-gray-500 dark:text-gray-400">
+              <span className="font-medium text-stone-900 dark:text-stone-100">Open-Meteo</span>
+              <p className="text-stone-500 dark:text-stone-400">
                 Global weather model data. Provides extended hourly forecasts beyond TAF validity.
               </p>
             </div>
@@ -324,8 +324,8 @@ function SourceComparisonDetailed({
               style={{ backgroundColor: SOURCE_COLORS.nws }}
             />
             <div>
-              <span className="font-medium text-gray-900 dark:text-gray-100">National Weather Service</span>
-              <p className="text-gray-500 dark:text-gray-400">
+              <span className="font-medium text-stone-900 dark:text-stone-100">National Weather Service</span>
+              <p className="text-stone-500 dark:text-stone-400">
                 US weather alerts and watches. SIGMETs, AIRMETs, and severe weather warnings.
               </p>
             </div>
@@ -336,8 +336,8 @@ function SourceComparisonDetailed({
               style={{ backgroundColor: '#1f2937' }}
             />
             <div>
-              <span className="font-medium text-gray-900 dark:text-gray-100">Consensus (Displayed Value)</span>
-              <p className="text-gray-500 dark:text-gray-400">
+              <span className="font-medium text-stone-900 dark:text-stone-100">Consensus (Displayed Value)</span>
+              <p className="text-stone-500 dark:text-stone-400">
                 Primary value shown in dashboard. Uses AWC when available, falls back to other sources.
               </p>
             </div>

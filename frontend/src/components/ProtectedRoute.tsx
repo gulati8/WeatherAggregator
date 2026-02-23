@@ -13,7 +13,7 @@ export default function ProtectedRoute({ children, roles }: ProtectedRouteProps)
   if (loading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
-        <div className="text-gray-500 dark:text-gray-400">Loading...</div>
+        <div className="text-stone-500 dark:text-stone-400">Loading...</div>
       </div>
     );
   }
@@ -26,8 +26,8 @@ export default function ProtectedRoute({ children, roles }: ProtectedRouteProps)
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">Access Denied</h2>
-          <p className="text-gray-600 dark:text-gray-400">You don't have permission to view this page.</p>
+          <h2 className="text-xl font-bold text-stone-900 dark:text-stone-100 mb-2">Access Denied</h2>
+          <p className="text-stone-600 dark:text-stone-400">You don't have permission to view this page.</p>
         </div>
       </div>
     );

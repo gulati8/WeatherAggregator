@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useTripBuilder, useTripWeather, useSavedTrips } from '../hooks/useTrip';
 import {
   TripBuilder,
@@ -8,7 +9,9 @@ import {
   TripSummaryPanel,
 } from '../components/trip';
 import DualTime from '../components/DualTime';
+import Card from '../components/ui/Card';
 import { Trip } from '../types/trip';
+import { GO_NOGO_FRIENDLY } from '../utils/personality';
 
 function TripPlanner() {
   const { tripId } = useParams();
@@ -176,16 +179,37 @@ function TripPlanner() {
     };
   }, [trip.legs]);
 
+  // Trip health summary from weather data
+  const tripHealth = useMemo(() => {
+    if (!tripWeather || tripWeather.legs.length === 0) return null;
+    const firstLeg = tripWeather.legs[0];
+    const lastLeg = tripWeather.legs[tripWeather.legs.length - 1];
+    return {
+      departure: {
+        icao: firstLeg.departureAirport.icao,
+        canDispatch: firstLeg.legStatus.departureStatus.canDispatch,
+      },
+      enRoute: {
+        worstCategory: tripWeather.summary.worstFlightCategory,
+        issues: tripWeather.summary.criticalIssues.length,
+      },
+      arrival: {
+        icao: lastLeg.arrivalAirport.icao,
+        canDispatch: lastLeg.legStatus.arrivalStatus.canDispatch,
+      },
+    };
+  }, [tripWeather]);
+
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+    <div className="min-h-screen bg-cream-50 dark:bg-stone-900">
       {/* Header */}
-      <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+      <header className="bg-white dark:bg-stone-800 shadow-card border-b border-stone-200 dark:border-stone-700">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-2 sm:gap-4">
-              <h1 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100">Trip Planner</h1>
+              <h1 className="text-lg sm:text-xl font-bold font-display text-stone-900 dark:text-stone-100">Trip Planner</h1>
               {trip.name && (
-                <span className="text-gray-500 dark:text-gray-400 text-sm sm:text-base truncate max-w-[120px] sm:max-w-none">- {trip.name}</span>
+                <span className="text-stone-500 dark:text-stone-400 text-sm sm:text-base truncate max-w-[120px] sm:max-w-none">- {trip.name}</span>
               )}
             </div>
             <div className="flex items-center gap-2 flex-wrap">
@@ -200,11 +224,11 @@ function TripPlanner() {
               <button
                 onClick={exportTrip}
                 disabled={trip.legs.length === 0}
-                className="px-3 sm:px-4 py-2 text-sm border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="px-3 sm:px-4 py-2 text-sm border border-stone-300 dark:border-stone-600 text-stone-700 dark:text-stone-300 rounded-md hover:bg-stone-50 dark:hover:bg-stone-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 Export
               </button>
-              <label className="px-3 sm:px-4 py-2 text-sm border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer">
+              <label className="px-3 sm:px-4 py-2 text-sm border border-stone-300 dark:border-stone-600 text-stone-700 dark:text-stone-300 rounded-md hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors cursor-pointer">
                 Import
                 <input
                   ref={importInputRef}
@@ -214,16 +238,17 @@ function TripPlanner() {
                   className="hidden"
                 />
               </label>
-              <button
+              <motion.button
+                whileTap={{ scale: 0.98 }}
                 onClick={handleSave}
                 disabled={trip.legs.length === 0}
-                className="px-3 sm:px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-300 dark:disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors"
+                className="px-3 sm:px-4 py-2 text-sm bg-teal-600 text-white rounded-md hover:bg-teal-700 disabled:bg-stone-300 dark:disabled:bg-stone-600 disabled:cursor-not-allowed transition-colors"
               >
                 Save
-              </button>
+              </motion.button>
               <button
                 onClick={handleNewTrip}
-                className="px-3 sm:px-4 py-2 text-sm border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                className="px-3 sm:px-4 py-2 text-sm border border-stone-300 dark:border-stone-600 text-stone-700 dark:text-stone-300 rounded-md hover:bg-stone-50 dark:hover:bg-stone-700 transition-colors"
               >
                 New
               </button>
@@ -235,8 +260,8 @@ function TripPlanner() {
       <main className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6 space-y-4 sm:space-y-6">
         {/* Saved trips selector */}
         {trips.length > 0 && !tripId && (
-          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 p-4">
-            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+          <Card padding="md">
+            <h3 className="text-sm font-semibold text-stone-700 dark:text-stone-300 mb-3">
               Saved Trips
             </h3>
             <div className="flex flex-wrap gap-2">
@@ -244,16 +269,16 @@ function TripPlanner() {
                 <button
                   key={t.tripId}
                   onClick={() => navigate(`/trip/${t.tripId}`)}
-                  className="px-3 py-2 text-sm bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-md transition-colors text-gray-900 dark:text-gray-100"
+                  className="px-3 py-2 text-sm bg-stone-100 dark:bg-stone-700 hover:bg-stone-200 dark:hover:bg-stone-600 rounded-md transition-colors text-stone-900 dark:text-stone-100"
                 >
                   {t.name || `Trip ${t.tripId.slice(0, 8)}`}
-                  <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">
+                  <span className="ml-2 text-xs text-stone-500 dark:text-stone-400">
                     ({t.legs.length} legs)
                   </span>
                 </button>
               ))}
             </div>
-          </div>
+          </Card>
         )}
 
         {/* Trip Builder */}
@@ -268,11 +293,11 @@ function TripPlanner() {
 
         {/* ETD/ETA Display */}
         {tripTimes && tripTimes.departureAirport && tripTimes.arrivalAirport && (
-          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 p-4">
+          <Card padding="md">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {/* ETD */}
               <div className="flex flex-col">
-                <span className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">
+                <span className="text-xs text-stone-500 dark:text-stone-400 uppercase tracking-wide mb-1">
                   ETD - {tripTimes.departureAirport}
                 </span>
                 <DualTime time={tripTimes.etd} layout="stacked" size="md" />
@@ -280,7 +305,7 @@ function TripPlanner() {
 
               {/* ETA */}
               <div className="flex flex-col">
-                <span className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">
+                <span className="text-xs text-stone-500 dark:text-stone-400 uppercase tracking-wide mb-1">
                   ETA - {tripTimes.arrivalAirport}
                 </span>
                 <DualTime time={tripTimes.eta} layout="stacked" size="md" />
@@ -288,34 +313,35 @@ function TripPlanner() {
 
               {/* Flight Time */}
               <div className="flex flex-col">
-                <span className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">
+                <span className="text-xs text-stone-500 dark:text-stone-400 uppercase tracking-wide mb-1">
                   Total Flight Time
                 </span>
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <span className="text-sm font-medium font-data text-stone-700 dark:text-stone-300">
                   {Math.floor(tripTimes.totalFlightMinutes / 60)}h {tripTimes.totalFlightMinutes % 60}m
                 </span>
               </div>
 
               {/* Trip Duration */}
               <div className="flex flex-col">
-                <span className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">
+                <span className="text-xs text-stone-500 dark:text-stone-400 uppercase tracking-wide mb-1">
                   Trip Duration
                 </span>
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <span className="text-sm font-medium font-data text-stone-700 dark:text-stone-300">
                   {Math.floor(tripTimes.totalTripMinutes / 60)}h {tripTimes.totalTripMinutes % 60}m
                 </span>
               </div>
             </div>
-          </div>
+          </Card>
         )}
 
         {/* Get Weather button */}
         {trip.legs.length > 0 && (
           <div className="flex items-center justify-between">
-            <button
+            <motion.button
+              whileTap={{ scale: 0.98 }}
               onClick={refresh}
               disabled={loading || !isValidTrip()}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 disabled:bg-gray-300 dark:disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+              className="px-6 py-3 bg-teal-600 text-white rounded-card font-semibold hover:bg-teal-700 disabled:bg-stone-300 dark:disabled:bg-stone-600 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
             >
               {loading ? (
                 <>
@@ -340,7 +366,7 @@ function TripPlanner() {
                   Get Weather
                 </>
               )}
-            </button>
+            </motion.button>
             {!isValidTrip() && (
               <span className="text-sm text-yellow-600 dark:text-yellow-400">
                 Fill in all airport codes to get weather
@@ -351,7 +377,7 @@ function TripPlanner() {
 
         {/* Error display */}
         {error && (
-          <div className="p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-lg text-red-700 dark:text-red-300">
+          <div className="p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-card text-red-700 dark:text-red-300">
             <div className="flex items-center gap-2">
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                 <path
@@ -362,6 +388,47 @@ function TripPlanner() {
               </svg>
               <span>{error}</span>
             </div>
+          </div>
+        )}
+
+        {/* Trip Health Cards */}
+        {tripHealth && (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <Card hover padding="md">
+              <div className="text-xs text-stone-500 dark:text-stone-400 uppercase tracking-wide mb-1">Departure</div>
+              <div className="font-data font-bold text-lg text-stone-900 dark:text-stone-100">{tripHealth.departure.icao}</div>
+              <div className={`text-sm font-medium mt-1 ${tripHealth.departure.canDispatch ? 'text-green-600' : 'text-red-600'}`}>
+                {tripHealth.departure.canDispatch ? 'GO' : 'NO-GO'}
+              </div>
+              <div className="text-xs text-stone-400 mt-0.5">
+                {tripHealth.departure.canDispatch
+                  ? GO_NOGO_FRIENDLY['GO']
+                  : GO_NOGO_FRIENDLY['NO-GO']}
+              </div>
+            </Card>
+            <Card hover padding="md">
+              <div className="text-xs text-stone-500 dark:text-stone-400 uppercase tracking-wide mb-1">En Route</div>
+              <div className="font-data font-bold text-lg text-stone-900 dark:text-stone-100">
+                Worst: {tripHealth.enRoute.worstCategory}
+              </div>
+              <div className="text-sm text-stone-500 dark:text-stone-400 mt-1">
+                {tripHealth.enRoute.issues === 0
+                  ? 'No critical issues'
+                  : `${tripHealth.enRoute.issues} issue${tripHealth.enRoute.issues !== 1 ? 's' : ''}`}
+              </div>
+            </Card>
+            <Card hover padding="md">
+              <div className="text-xs text-stone-500 dark:text-stone-400 uppercase tracking-wide mb-1">Arrival</div>
+              <div className="font-data font-bold text-lg text-stone-900 dark:text-stone-100">{tripHealth.arrival.icao}</div>
+              <div className={`text-sm font-medium mt-1 ${tripHealth.arrival.canDispatch ? 'text-green-600' : 'text-red-600'}`}>
+                {tripHealth.arrival.canDispatch ? 'GO' : 'NO-GO'}
+              </div>
+              <div className="text-xs text-stone-400 mt-0.5">
+                {tripHealth.arrival.canDispatch
+                  ? GO_NOGO_FRIENDLY['GO']
+                  : GO_NOGO_FRIENDLY['NO-GO']}
+              </div>
+            </Card>
           </div>
         )}
 
@@ -399,9 +466,9 @@ function TripPlanner() {
 
         {/* Empty state with instructions */}
         {trip.legs.length === 0 && (
-          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 p-8 text-center">
+          <Card padding="lg" className="text-center">
             <svg
-              className="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600 mb-4"
+              className="w-16 h-16 mx-auto text-stone-300 dark:text-stone-600 mb-4"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -413,21 +480,22 @@ function TripPlanner() {
                 d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
               />
             </svg>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+            <h3 className="text-lg font-semibold font-display text-stone-900 dark:text-stone-100 mb-2">
               Plan Your Multi-Leg Trip
             </h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-4 max-w-md mx-auto">
+            <p className="text-stone-600 dark:text-stone-400 mb-4 max-w-md mx-auto">
               Add flight legs to see weather conditions at each departure and
               arrival airport. Get GO/NO-GO guidance based on Part 135 minimums
               and compare data from multiple weather sources.
             </p>
-            <button
+            <motion.button
+              whileTap={{ scale: 0.98 }}
               onClick={() => addLeg()}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+              className="px-6 py-3 bg-teal-600 text-white rounded-card font-semibold hover:bg-teal-700 transition-colors"
             >
               Add First Leg
-            </button>
-          </div>
+            </motion.button>
+          </Card>
         )}
       </main>
     </div>

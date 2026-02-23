@@ -8,6 +8,7 @@ export const FLIGHT_CATEGORY_STYLES: Record<
     border: string;
     hex: string;
     label: string;
+    friendlyLabel: string;
   }
 > = {
   VFR: {
@@ -16,6 +17,7 @@ export const FLIGHT_CATEGORY_STYLES: Record<
     border: 'border-vfr',
     hex: '#22c55e',
     label: 'Visual Flight Rules',
+    friendlyLabel: 'Clear for takeoff!',
   },
   MVFR: {
     bg: 'bg-mvfr-light',
@@ -23,6 +25,7 @@ export const FLIGHT_CATEGORY_STYLES: Record<
     border: 'border-mvfr',
     hex: '#3b82f6',
     label: 'Marginal VFR',
+    friendlyLabel: 'Reduced visibility',
   },
   IFR: {
     bg: 'bg-ifr-light',
@@ -30,6 +33,7 @@ export const FLIGHT_CATEGORY_STYLES: Record<
     border: 'border-ifr',
     hex: '#ef4444',
     label: 'Instrument Flight Rules',
+    friendlyLabel: 'Instruments required',
   },
   LIFR: {
     bg: 'bg-lifr-light',
@@ -37,6 +41,7 @@ export const FLIGHT_CATEGORY_STYLES: Record<
     border: 'border-lifr',
     hex: '#a855f7',
     label: 'Low IFR',
+    friendlyLabel: 'Severe low visibility',
   },
 };
 

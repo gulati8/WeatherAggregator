@@ -11,8 +11,8 @@ const ROLE_LABELS: Record<string, string> = {
 
 const ROLE_COLORS: Record<string, string> = {
   admin: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300',
-  dispatcher: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300',
-  viewer: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
+  dispatcher: 'bg-teal-100 text-teal-800 dark:bg-teal-900/40 dark:text-teal-300',
+  viewer: 'bg-stone-100 text-stone-800 dark:bg-stone-700 dark:text-stone-300',
 };
 
 export default function AdminDashboard() {
@@ -73,7 +73,7 @@ export default function AdminDashboard() {
   if (loading) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-8">
-        <div className="text-gray-500 dark:text-gray-400">Loading users...</div>
+        <div className="text-stone-500 dark:text-stone-400">Loading users...</div>
       </div>
     );
   }
@@ -91,8 +91,8 @@ export default function AdminDashboard() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">User Management</h1>
-        <span className="text-sm text-gray-500 dark:text-gray-400">{users.length} user{users.length !== 1 ? 's' : ''}</span>
+        <h1 className="text-2xl font-bold text-stone-900 dark:text-stone-100">User Management</h1>
+        <span className="text-sm text-stone-500 dark:text-stone-400">{users.length} user{users.length !== 1 ? 's' : ''}</span>
       </div>
 
       {actionError && (
@@ -101,28 +101,28 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div className="bg-white dark:bg-stone-800 rounded-lg shadow-sm border border-stone-200 dark:border-stone-700 overflow-hidden">
         <table className="w-full">
           <thead>
-            <tr className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
-              <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">User</th>
-              <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Role</th>
-              <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden sm:table-cell">Joined</th>
-              <th className="text-right px-4 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+            <tr className="border-b border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800">
+              <th className="text-left px-4 py-3 text-xs font-medium text-stone-500 dark:text-stone-400 uppercase tracking-wider">User</th>
+              <th className="text-left px-4 py-3 text-xs font-medium text-stone-500 dark:text-stone-400 uppercase tracking-wider">Role</th>
+              <th className="text-left px-4 py-3 text-xs font-medium text-stone-500 dark:text-stone-400 uppercase tracking-wider hidden sm:table-cell">Joined</th>
+              <th className="text-right px-4 py-3 text-xs font-medium text-stone-500 dark:text-stone-400 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+          <tbody className="divide-y divide-stone-200 dark:divide-stone-700">
             {users.map((u) => {
               const isSelf = u.id === currentUser?.id;
               return (
-                <tr key={u.id} className={isSelf ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''}>
+                <tr key={u.id} className={isSelf ? 'bg-teal-50/50 dark:bg-teal-900/10' : ''}>
                   <td className="px-4 py-3">
                     <div>
-                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                      <p className="text-sm font-medium text-stone-900 dark:text-stone-100">
                         {u.name}
-                        {isSelf && <span className="ml-2 text-xs text-blue-600 dark:text-blue-400">(you)</span>}
+                        {isSelf && <span className="ml-2 text-xs text-teal-600 dark:text-teal-400">(you)</span>}
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">{u.email}</p>
+                      <p className="text-xs text-stone-500 dark:text-stone-400">{u.email}</p>
                     </div>
                   </td>
                   <td className="px-4 py-3">
@@ -134,7 +134,7 @@ export default function AdminDashboard() {
                       <select
                         value={u.role}
                         onChange={(e) => handleRoleChange(u.id, e.target.value)}
-                        className="text-xs border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="text-xs border border-stone-300 dark:border-stone-700 rounded px-2 py-1 bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                       >
                         <option value="admin">Admin</option>
                         <option value="dispatcher">Dispatcher</option>
@@ -143,13 +143,13 @@ export default function AdminDashboard() {
                     )}
                   </td>
                   <td className="px-4 py-3 hidden sm:table-cell">
-                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                    <span className="text-xs text-stone-500 dark:text-stone-400">
                       {u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '—'}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-right">
                     {isSelf ? (
-                      <span className="text-xs text-gray-400">—</span>
+                      <span className="text-xs text-stone-400">—</span>
                     ) : confirmDelete === u.id ? (
                       <div className="flex items-center justify-end gap-2">
                         <button
@@ -160,7 +160,7 @@ export default function AdminDashboard() {
                         </button>
                         <button
                           onClick={() => setConfirmDelete(null)}
-                          className="text-xs px-2 py-1 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+                          className="text-xs px-2 py-1 text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200"
                         >
                           Cancel
                         </button>

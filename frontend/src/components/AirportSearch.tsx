@@ -95,7 +95,7 @@ function AirportSearch({
       <div className="relative flex">
         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
           <svg
-            className="h-5 w-5 text-gray-400"
+            className="h-5 w-5 text-stone-400"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -120,17 +120,17 @@ function AirportSearch({
           }}
           placeholder="Search airport code, city, or name"
           className="flex-1"
-          inputClassName={`block w-full pl-12 pr-4 py-4 text-lg font-mono border rounded-l-lg shadow-sm
-            focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-            bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
-            ${error ? 'border-red-300 dark:border-red-600' : 'border-gray-300 dark:border-gray-600'}
+          inputClassName={`block w-full pl-12 pr-4 py-4 text-lg font-data border rounded-l-lg shadow-sm
+            focus:ring-2 focus:ring-teal-500 focus:border-teal-500
+            bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100
+            ${error ? 'border-red-300 dark:border-red-600' : 'border-stone-300 dark:border-stone-700'}
           `}
           autoFocus
         />
         <button
           type="submit"
-          className="px-6 bg-blue-600 text-white font-semibold rounded-r-lg
-            hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+          className="px-6 bg-teal-600 text-white font-semibold rounded-r-lg
+            hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2
             transition-colors"
         >
           Search
@@ -138,11 +138,11 @@ function AirportSearch({
       </div>
 
       {/* Departure time picker - always visible */}
-      <div className="flex flex-wrap items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
-        <span className="text-sm text-gray-600 dark:text-gray-300 font-medium">Departure:</span>
+      <div className="flex flex-wrap items-center gap-3 p-3 bg-stone-50 dark:bg-stone-700 rounded-lg border border-stone-200 dark:border-stone-700">
+        <span className="text-sm text-stone-600 dark:text-stone-300 font-medium">Departure:</span>
         <div className="flex items-center gap-2">
           <svg
-            className="w-4 h-4 text-gray-500 dark:text-gray-400"
+            className="w-4 h-4 text-stone-500 dark:text-stone-400"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -160,12 +160,12 @@ function AirportSearch({
             onChange={(e) => setSelectedDate(e.target.value)}
             min={today}
             max={maxDate}
-            className="px-2 py-2.5 border border-gray-300 dark:border-gray-600 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+            className="px-2 py-2.5 border border-stone-300 dark:border-stone-700 rounded text-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100"
           />
         </div>
         <div className="flex items-center gap-2">
           <svg
-            className="w-4 h-4 text-gray-500 dark:text-gray-400"
+            className="w-4 h-4 text-stone-500 dark:text-stone-400"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -181,14 +181,14 @@ function AirportSearch({
             type="time"
             value={selectedTime}
             onChange={(e) => setSelectedTime(e.target.value)}
-            className="px-2 py-2.5 border border-gray-300 dark:border-gray-600 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+            className="px-2 py-2.5 border border-stone-300 dark:border-stone-700 rounded text-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100"
           />
         </div>
         <span className="text-sm flex items-center gap-1 flex-wrap">
-          <span className="text-gray-700 dark:text-gray-300">{formatDisplayTime().local}</span>
-          <span className="text-gray-400">/</span>
-          <span className="text-blue-600 dark:text-blue-400 font-mono">{formatDisplayTime().utc}</span>
-          <span className="text-gray-500 dark:text-gray-400">{formatDisplayTime().suffix}</span>
+          <span className="text-stone-700 dark:text-stone-300">{formatDisplayTime().local}</span>
+          <span className="text-stone-400">/</span>
+          <span className="text-teal-600 dark:text-teal-400 font-data">{formatDisplayTime().utc}</span>
+          <span className="text-stone-500 dark:text-stone-400">{formatDisplayTime().suffix}</span>
         </span>
       </div>
 
