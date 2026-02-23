@@ -159,6 +159,7 @@ function MapView() {
   const [initialLoaded, setInitialLoaded] = useState(false);
   const [layers, setLayers] = useState<WeatherLayer[]>(DEFAULT_LAYERS);
   const [layersPanelOpen, setLayersPanelOpen] = useState(false);
+  const [legendOpen, setLegendOpen] = useState(false);
   const layersPanelRef = useRef<HTMLDivElement>(null);
   const [showPireps, setShowPireps] = useState(false);
   const [showAirSigmets, setShowAirSigmets] = useState(false);
@@ -199,6 +200,7 @@ function MapView() {
   }, [showTfrs]);
 
   const enabledCount = layers.filter((l) => l.enabled).length;
+  const isLayerEnabled = (id: string) => layers.some((l) => l.id === id && l.enabled);
 
   // Fetch weather for an airport
   const fetchAirportWeather = useCallback(async (icao: string): Promise<MapAirport | null> => {
@@ -517,25 +519,6 @@ function MapView() {
             )}
           </div>
 
-          {/* Legend */}
-          <div className="hidden sm:flex items-center gap-3 text-xs text-gray-600 dark:text-gray-400">
-            <div className="flex items-center gap-1">
-              <span className="w-3 h-3 rounded-full" style={{ backgroundColor: FLIGHT_CATEGORY_COLORS.VFR }} />
-              <span>VFR</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <span className="w-3 h-3 rounded-full" style={{ backgroundColor: FLIGHT_CATEGORY_COLORS.MVFR }} />
-              <span>MVFR</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <span className="w-3 h-3 rounded-full" style={{ backgroundColor: FLIGHT_CATEGORY_COLORS.IFR }} />
-              <span>IFR</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <span className="w-3 h-3 rounded-full" style={{ backgroundColor: FLIGHT_CATEGORY_COLORS.LIFR }} />
-              <span>LIFR</span>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -737,6 +720,191 @@ function MapView() {
             );
           })}
         </MapContainer>
+
+        {/* Legend overlay */}
+        {!legendOpen ? (
+          <button
+            onClick={() => setLegendOpen(true)}
+            className="absolute bottom-4 left-4 z-[900] p-2.5 rounded-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-lg border border-gray-200/50 dark:border-gray-700/50 text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-800 transition-colors"
+            title="Show legend"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </button>
+        ) : (
+          <div className="absolute bottom-4 left-4 z-[900] w-64 sm:w-72 max-h-[50vh] bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-lg shadow-lg border border-gray-200/50 dark:border-gray-700/50 flex flex-col">
+            {/* Header */}
+            <div className="flex items-center justify-between px-3 py-2 border-b border-gray-200/50 dark:border-gray-700/50 shrink-0">
+              <span className="text-sm font-semibold text-gray-800 dark:text-gray-200">Legend</span>
+              <button
+                onClick={() => setLegendOpen(false)}
+                className="p-1 rounded text-gray-500 dark:text-gray-400 hover:bg-gray-200/50 dark:hover:bg-gray-700/50"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            {/* Content */}
+            <div className="overflow-y-auto px-3 py-2 space-y-3 text-xs">
+              {/* Flight Categories — always shown */}
+              <div>
+                <div className="font-semibold text-gray-700 dark:text-gray-300 mb-1">Flight Categories</div>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                  {(['VFR', 'MVFR', 'IFR', 'LIFR'] as FlightCategory[]).map((cat) => (
+                    <div key={cat} className="flex items-center gap-1.5">
+                      <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: FLIGHT_CATEGORY_COLORS[cat] }} />
+                      <span className="text-gray-600 dark:text-gray-400">{cat}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* NEXRAD Radar */}
+              {isLayerEnabled('nexrad') && (
+                <div>
+                  <div className="font-semibold text-gray-700 dark:text-gray-300 mb-1">NEXRAD Radar</div>
+                  <div className="h-2.5 rounded-full" style={{ background: 'linear-gradient(to right, #22c55e, #eab308, #f97316, #ef4444, #a855f7)' }} />
+                  <div className="flex justify-between mt-0.5 text-[10px] text-gray-500 dark:text-gray-400">
+                    <span>Light</span><span>Moderate</span><span>Heavy</span><span>Extreme</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Echo Tops */}
+              {isLayerEnabled('echo-tops') && (
+                <div>
+                  <div className="font-semibold text-gray-700 dark:text-gray-300 mb-1">Echo Tops</div>
+                  <div className="h-2.5 rounded-full" style={{ background: 'linear-gradient(to right, #9ca3af, #22c55e, #eab308, #ef4444, #d946ef)' }} />
+                  <div className="flex justify-between mt-0.5 text-[10px] text-gray-500 dark:text-gray-400">
+                    <span>Low</span><span>20kft</span><span>35kft</span><span>50kft+</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Precipitation */}
+              {(isLayerEnabled('precip-1h') || isLayerEnabled('precip-global')) && (
+                <div>
+                  <div className="font-semibold text-gray-700 dark:text-gray-300 mb-1">Precipitation</div>
+                  <div className="h-2.5 rounded-full" style={{ background: 'linear-gradient(to right, #93c5fd, #3b82f6, #22c55e, #eab308, #ef4444)' }} />
+                  <div className="flex justify-between mt-0.5 text-[10px] text-gray-500 dark:text-gray-400">
+                    <span>Trace</span><span>Light</span><span>Moderate</span><span>Heavy</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Clouds */}
+              {isLayerEnabled('clouds') && (
+                <div>
+                  <div className="font-semibold text-gray-700 dark:text-gray-300 mb-1">Clouds</div>
+                  <div className="h-2.5 rounded-full" style={{ background: 'linear-gradient(to right, #bfdbfe, #93c5fd, #60a5fa, #6b7280)' }} />
+                  <div className="flex justify-between mt-0.5 text-[10px] text-gray-500 dark:text-gray-400">
+                    <span>Clear</span><span>Overcast</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Temperature */}
+              {isLayerEnabled('temp') && (
+                <div>
+                  <div className="font-semibold text-gray-700 dark:text-gray-300 mb-1">Temperature</div>
+                  <div className="h-2.5 rounded-full" style={{ background: 'linear-gradient(to right, #7c3aed, #3b82f6, #22c55e, #eab308, #ef4444)' }} />
+                  <div className="flex justify-between mt-0.5 text-[10px] text-gray-500 dark:text-gray-400">
+                    <span>Cold</span><span>Hot</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Wind */}
+              {isLayerEnabled('wind') && (
+                <div>
+                  <div className="font-semibold text-gray-700 dark:text-gray-300 mb-1">Wind</div>
+                  <div className="h-2.5 rounded-full" style={{ background: 'linear-gradient(to right, #bfdbfe, #3b82f6, #eab308, #ef4444)' }} />
+                  <div className="flex justify-between mt-0.5 text-[10px] text-gray-500 dark:text-gray-400">
+                    <span>Calm</span><span>Strong</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Pressure */}
+              {isLayerEnabled('pressure') && (
+                <div>
+                  <div className="font-semibold text-gray-700 dark:text-gray-300 mb-1">Pressure</div>
+                  <div className="h-2.5 rounded-full" style={{ background: 'linear-gradient(to right, #a855f7, #3b82f6, #22c55e, #f97316, #ef4444)' }} />
+                  <div className="flex justify-between mt-0.5 text-[10px] text-gray-500 dark:text-gray-400">
+                    <span>Low</span><span>High</span>
+                  </div>
+                </div>
+              )}
+
+              {/* PIREPs */}
+              {showPireps && (
+                <div>
+                  <div className="font-semibold text-gray-700 dark:text-gray-300 mb-1">PIREPs</div>
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                    {[
+                      { label: 'Negative/Smooth', color: '#22c55e' },
+                      { label: 'Light', color: '#3b82f6' },
+                      { label: 'Light-Mod', color: '#eab308' },
+                      { label: 'Moderate', color: '#f97316' },
+                      { label: 'Mod-Severe', color: '#ef4444' },
+                      { label: 'Extreme', color: '#a855f7' },
+                    ].map((item) => (
+                      <div key={item.label} className="flex items-center gap-1.5">
+                        <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
+                        <span className="text-gray-600 dark:text-gray-400">{item.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* AIRSIGMETs */}
+              {showAirSigmets && (
+                <div>
+                  <div className="font-semibold text-gray-700 dark:text-gray-300 mb-1">AIRMETs/SIGMETs</div>
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                    {[
+                      { label: 'Turbulence', color: '#f97316' },
+                      { label: 'Icing', color: '#06b6d4' },
+                      { label: 'IFR/Convective', color: '#ef4444' },
+                      { label: 'Mountain', color: '#a855f7' },
+                      { label: 'Other', color: '#eab308' },
+                    ].map((item) => (
+                      <div key={item.label} className="flex items-center gap-1.5">
+                        <span className="w-2.5 h-2.5 rounded shrink-0" style={{ backgroundColor: item.color }} />
+                        <span className="text-gray-600 dark:text-gray-400">{item.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* TFRs */}
+              {showTfrs && (
+                <div>
+                  <div className="font-semibold text-gray-700 dark:text-gray-300 mb-1">TFRs</div>
+                  <div className="space-y-1">
+                    {[
+                      { label: 'Security/VIP', color: '#ef4444' },
+                      { label: 'Hazard', color: '#f97316' },
+                      { label: 'Space Ops', color: '#3b82f6' },
+                      { label: 'Other', color: '#eab308' },
+                    ].map((item) => (
+                      <div key={item.label} className="flex items-center gap-1.5">
+                        <svg className="w-4 h-1.5 shrink-0" viewBox="0 0 16 6">
+                          <line x1="0" y1="3" x2="16" y2="3" stroke={item.color} strokeWidth="2" strokeDasharray="4 2" />
+                        </svg>
+                        <span className="text-gray-600 dark:text-gray-400">{item.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Loading overlay */}
         {loading && airports.length === 0 && (
