@@ -1,6 +1,8 @@
-import { Router } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import https from 'https';
 import { config } from '../config';
+import { aviationWeatherService } from '../services/aviation-weather';
+import { weatherAggregator } from '../services/weather-aggregator';
 
 const router = Router();
 
@@ -34,6 +36,41 @@ router.get('/owm/:layer/:z/:x/:y.png', (req, res) => {
   }).on('error', () => {
     res.status(502).end();
   });
+});
+
+// GET /api/map/pireps?bbox=minLon,minLat,maxLon,maxLat — PIREPs in viewport
+router.get('/pireps', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const bboxStr = req.query.bbox as string;
+    if (!bboxStr) {
+      return res.status(400).json({ error: 'bbox query parameter required (minLon,minLat,maxLon,maxLat)' });
+    }
+
+    const parts = bboxStr.split(',').map(Number);
+    if (parts.length !== 4 || parts.some(isNaN)) {
+      return res.status(400).json({ error: 'bbox must be 4 comma-separated numbers' });
+    }
+
+    const [minLon, minLat, maxLon, maxLat] = parts;
+    const rawPireps = await aviationWeatherService.getPirepsByBbox(minLon, minLat, maxLon, maxLat);
+    const pireps = weatherAggregator.convertPireps(rawPireps);
+
+    res.json(pireps);
+  } catch (error) {
+    next(error);
+  }
+});
+
+// GET /api/map/airsigmets — All active AIR/SIGMETs
+router.get('/airsigmets', async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    const rawAirSigmets = await aviationWeatherService.getAllAirSigmets();
+    const airSigmets = weatherAggregator.convertAirSigmets(rawAirSigmets);
+
+    res.json(airSigmets);
+  } catch (error) {
+    next(error);
+  }
 });
 
 export default router;

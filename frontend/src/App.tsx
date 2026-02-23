@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Outlet, Link } from 'react-router-dom';
 import Clock from './components/Clock';
+import InstallPrompt from './components/InstallPrompt';
 import { useDarkMode } from './hooks/useDarkMode';
 import { useAuth } from './contexts/AuthContext';
 
@@ -73,11 +74,35 @@ function UserMenu() {
   );
 }
 
+function OfflineBanner() {
+  const [offline, setOffline] = useState(!navigator.onLine);
+
+  useEffect(() => {
+    const goOffline = () => setOffline(true);
+    const goOnline = () => setOffline(false);
+    window.addEventListener('offline', goOffline);
+    window.addEventListener('online', goOnline);
+    return () => {
+      window.removeEventListener('offline', goOffline);
+      window.removeEventListener('online', goOnline);
+    };
+  }, []);
+
+  if (!offline) return null;
+
+  return (
+    <div className="bg-yellow-500 text-yellow-900 text-center text-sm py-1.5 px-4 font-medium">
+      You are offline. Some data may be stale.
+    </div>
+  );
+}
+
 function App() {
   const [isDark, toggleDark] = useDarkMode();
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
+      <OfflineBanner />
       {/* Header */}
       <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -195,6 +220,8 @@ function App() {
           </p>
         </div>
       </footer>
+
+      <InstallPrompt />
     </div>
   );
 }

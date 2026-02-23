@@ -1,8 +1,8 @@
 import { useState, useCallback, useRef, useEffect, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from 'react-leaflet';
-import { weatherApi } from '../api/client';
-import { UnifiedWeatherData, FlightCategory } from '../types/weather';
+import { MapContainer, TileLayer, CircleMarker, Popup, Polygon, Tooltip, useMap, useMapEvents } from 'react-leaflet';
+import { weatherApi, mapApi, tfrApi, Tfr } from '../api/client';
+import { UnifiedWeatherData, FlightCategory, PirepReport, AirSigmet } from '../types/weather';
 import FlightCategoryBadge from '../components/FlightCategoryBadge';
 import AirportAutocomplete from '../components/AirportAutocomplete';
 import { useFavorites } from '../hooks/useWeather';
@@ -22,6 +22,50 @@ const FLIGHT_CATEGORY_COLORS: Record<FlightCategory, string> = {
 };
 
 const FALLBACK_AIRPORTS: string[] = [];
+
+// PIREP intensity color: green → blue → yellow → orange → red → purple
+const PIREP_INTENSITY_COLORS: Record<string, string> = {
+  NEG: '#22c55e',
+  SMTH: '#22c55e',
+  LGT: '#3b82f6',
+  'LGT-MOD': '#eab308',
+  MOD: '#f97316',
+  'MOD-SEV': '#ef4444',
+  SEV: '#ef4444',
+  EXTRM: '#a855f7',
+};
+
+function getPirepColor(pirep: PirepReport): string {
+  const turbInt = pirep.turbulence?.intensity || '';
+  const iceInt = pirep.icing?.intensity || '';
+  // Use worst
+  const order = ['NEG', 'SMTH', 'LGT', 'LGT-MOD', 'MOD', 'MOD-SEV', 'SEV', 'EXTRM'];
+  const tIdx = order.indexOf(turbInt);
+  const iIdx = order.indexOf(iceInt);
+  const worstKey = tIdx >= iIdx ? turbInt : iceInt;
+  return PIREP_INTENSITY_COLORS[worstKey] || '#3b82f6';
+}
+
+// AIRSIGMET hazard colors
+function getAirSigmetColor(hazard: string): string {
+  const h = hazard.toUpperCase();
+  if (h.includes('TURB')) return '#f97316'; // orange
+  if (h.includes('ICE') || h.includes('ICING')) return '#06b6d4'; // cyan
+  if (h.includes('IFR') || h.includes('CONV')) return '#ef4444'; // red
+  if (h.includes('MTN')) return '#a855f7'; // purple
+  return '#eab308'; // yellow default
+}
+
+// TFR type colors
+function getTfrColor(type: Tfr['type']): string {
+  switch (type) {
+    case 'Security': return '#ef4444'; // red
+    case 'VIP': return '#ef4444'; // red
+    case 'Hazard': return '#f97316'; // orange
+    case 'Space Operations': return '#3b82f6'; // blue
+    default: return '#eab308'; // yellow
+  }
+}
 
 interface WeatherLayer {
   id: string;
@@ -65,6 +109,46 @@ function MapBounds({ airports }: { airports: MapAirport[] }) {
   return null;
 }
 
+// Fetches PIREPs when map viewport changes
+function MapDataLoader({
+  showPireps,
+  onPirepsLoaded,
+}: {
+  showPireps: boolean;
+  onPirepsLoaded: (pireps: PirepReport[]) => void;
+}) {
+  const fetchRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useMapEvents({
+    moveend: (e) => {
+      if (!showPireps) return;
+      // Debounce
+      if (fetchRef.current) clearTimeout(fetchRef.current);
+      fetchRef.current = setTimeout(async () => {
+        const bounds = e.target.getBounds();
+        const bbox = `${bounds.getWest()},${bounds.getSouth()},${bounds.getEast()},${bounds.getNorth()}`;
+        try {
+          const pireps = await mapApi.getPireps(bbox);
+          onPirepsLoaded(pireps);
+        } catch {
+          // ignore
+        }
+      }, 500);
+    },
+  });
+
+  // Fetch on toggle enable
+  const map = useMap();
+  useEffect(() => {
+    if (!showPireps) return;
+    const bounds = map.getBounds();
+    const bbox = `${bounds.getWest()},${bounds.getSouth()},${bounds.getEast()},${bounds.getNorth()}`;
+    mapApi.getPireps(bbox).then(onPirepsLoaded).catch(() => {});
+  }, [showPireps]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  return null;
+}
+
 function MapView() {
   const navigate = useNavigate();
   const { favorites, addFavorite, removeFavorite, isFavorite } = useFavorites();
@@ -76,6 +160,12 @@ function MapView() {
   const [layers, setLayers] = useState<WeatherLayer[]>(DEFAULT_LAYERS);
   const [layersPanelOpen, setLayersPanelOpen] = useState(false);
   const layersPanelRef = useRef<HTMLDivElement>(null);
+  const [showPireps, setShowPireps] = useState(false);
+  const [showAirSigmets, setShowAirSigmets] = useState(false);
+  const [showTfrs, setShowTfrs] = useState(false);
+  const [pireps, setPireps] = useState<PirepReport[]>([]);
+  const [airSigmets, setAirSigmets] = useState<AirSigmet[]>([]);
+  const [tfrs, setTfrs] = useState<Tfr[]>([]);
 
   // Close layers panel on outside click
   useEffect(() => {
@@ -95,6 +185,18 @@ function MapView() {
   const setLayerOpacity = (id: string, opacity: number) => {
     setLayers((prev) => prev.map((l) => l.id === id ? { ...l, opacity } : l));
   };
+
+  // Fetch AIRSIGMETs when toggle enabled
+  useEffect(() => {
+    if (!showAirSigmets) return;
+    mapApi.getAirSigmets().then(setAirSigmets).catch(() => {});
+  }, [showAirSigmets]);
+
+  // Fetch TFRs when toggle enabled
+  useEffect(() => {
+    if (!showTfrs) return;
+    tfrApi.getAll().then(setTfrs).catch(() => {});
+  }, [showTfrs]);
 
   const enabledCount = layers.filter((l) => l.enabled).length;
 
@@ -252,7 +354,7 @@ function MapView() {
             </button>
 
             {layersPanelOpen && (
-              <div className="absolute right-0 top-full mt-2 w-72 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50 py-2">
+              <div className="absolute right-0 top-full mt-2 w-72 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50 py-2 max-h-[70vh] overflow-y-auto">
                 {['Radar & Precipitation', 'Weather Overlays'].map((group) => (
                   <div key={group}>
                     <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
@@ -292,6 +394,54 @@ function MapView() {
                     ))}
                   </div>
                 ))}
+                {/* Aviation Data group */}
+                <div>
+                  <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+                    Aviation Data
+                  </div>
+                  <div className="px-3 py-1.5">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={showPireps}
+                        onChange={() => { setShowPireps(!showPireps); if (showPireps) setPireps([]); }}
+                        className="w-3.5 h-3.5 rounded accent-blue-500"
+                      />
+                      <span className="text-xs text-gray-700 dark:text-gray-300 font-medium flex-1">
+                        PIREPs
+                      </span>
+                      <span className="text-[10px] text-gray-400 dark:text-gray-500">AWC</span>
+                    </label>
+                  </div>
+                  <div className="px-3 py-1.5">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={showAirSigmets}
+                        onChange={() => { setShowAirSigmets(!showAirSigmets); if (showAirSigmets) setAirSigmets([]); }}
+                        className="w-3.5 h-3.5 rounded accent-blue-500"
+                      />
+                      <span className="text-xs text-gray-700 dark:text-gray-300 font-medium flex-1">
+                        AIRMETs/SIGMETs
+                      </span>
+                      <span className="text-[10px] text-gray-400 dark:text-gray-500">AWC</span>
+                    </label>
+                  </div>
+                  <div className="px-3 py-1.5">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={showTfrs}
+                        onChange={() => { setShowTfrs(!showTfrs); if (showTfrs) setTfrs([]); }}
+                        className="w-3.5 h-3.5 rounded accent-blue-500"
+                      />
+                      <span className="text-xs text-gray-700 dark:text-gray-300 font-medium flex-1">
+                        TFRs
+                      </span>
+                      <span className="text-[10px] text-gray-400 dark:text-gray-500">FAA</span>
+                    </label>
+                  </div>
+                </div>
               </div>
             )}
           </div>
@@ -342,6 +492,102 @@ function MapView() {
           ))}
 
           <MapBounds airports={airports} />
+          <MapDataLoader showPireps={showPireps} onPirepsLoaded={setPireps} />
+
+          {/* AIRSIGMET polygons */}
+          {showAirSigmets && airSigmets.map((sigmet) => {
+            if (!sigmet.coordinates || sigmet.coordinates.length < 3) return null;
+            const positions = sigmet.coordinates.map((c) => [c.lat, c.lon] as [number, number]);
+            const color = getAirSigmetColor(sigmet.hazard);
+            return (
+              <Polygon
+                key={`sigmet-${sigmet.id}`}
+                positions={positions}
+                pathOptions={{
+                  color,
+                  fillColor: color,
+                  fillOpacity: 0.15,
+                  weight: 2,
+                  opacity: 0.7,
+                }}
+              >
+                <Tooltip>
+                  <div className="text-xs">
+                    <div className="font-bold">{sigmet.type}: {sigmet.hazard}</div>
+                    <div>Severity: {sigmet.severity}</div>
+                    {sigmet.altitudeLow != null && sigmet.altitudeHigh != null && (
+                      <div>FL{sigmet.altitudeLow} - FL{sigmet.altitudeHigh}</div>
+                    )}
+                    <div>Valid: {new Date(sigmet.validFrom).toLocaleTimeString()} - {new Date(sigmet.validTo).toLocaleTimeString()}</div>
+                  </div>
+                </Tooltip>
+              </Polygon>
+            );
+          })}
+
+          {/* TFR polygons */}
+          {showTfrs && tfrs.map((tfr) => {
+            if (!tfr.coordinates || tfr.coordinates.length < 3) return null;
+            const positions = tfr.coordinates.map((c) => [c.lat, c.lon] as [number, number]);
+            const color = getTfrColor(tfr.type);
+            return (
+              <Polygon
+                key={`tfr-${tfr.id}`}
+                positions={positions}
+                pathOptions={{
+                  color,
+                  fillColor: color,
+                  fillOpacity: 0.2,
+                  weight: 2,
+                  opacity: 0.8,
+                  dashArray: '8 4',
+                }}
+              >
+                <Tooltip>
+                  <div className="text-xs max-w-[250px]">
+                    <div className="font-bold">{tfr.type} TFR</div>
+                    <div>{tfr.notamNumber}</div>
+                    {tfr.description && <div className="mt-1">{tfr.description.slice(0, 150)}</div>}
+                    {(tfr.altitudeLow != null || tfr.altitudeHigh != null) && (
+                      <div className="mt-1">
+                        {tfr.altitudeLow != null && <span>From: {tfr.altitudeLow} ft</span>}
+                        {tfr.altitudeHigh != null && <span> To: {tfr.altitudeHigh} ft</span>}
+                      </div>
+                    )}
+                  </div>
+                </Tooltip>
+              </Polygon>
+            );
+          })}
+
+          {/* PIREP markers */}
+          {showPireps && pireps.map((pirep) => {
+            const color = getPirepColor(pirep);
+            return (
+              <CircleMarker
+                key={`pirep-${pirep.id}`}
+                center={[pirep.location.lat, pirep.location.lon]}
+                radius={6}
+                pathOptions={{
+                  fillColor: color,
+                  fillOpacity: 0.8,
+                  color,
+                  weight: 1,
+                  opacity: 1,
+                }}
+              >
+                <Tooltip>
+                  <div className="text-xs max-w-[250px]">
+                    <div className="font-bold">PIREP - FL{Math.round(pirep.altitude / 100)}</div>
+                    <div>{pirep.aircraftType}</div>
+                    {pirep.turbulence && <div>Turbulence: {pirep.turbulence.intensity}</div>}
+                    {pirep.icing && <div>Icing: {pirep.icing.intensity}</div>}
+                    <div className="mt-1 text-gray-500 break-words">{pirep.rawReport}</div>
+                  </div>
+                </Tooltip>
+              </CircleMarker>
+            );
+          })}
 
           {airports.map((airport) => {
             const { latitude, longitude } = airport.weather.airport;

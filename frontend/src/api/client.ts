@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { UnifiedWeatherData } from '../types/weather';
+import { UnifiedWeatherData, PirepReport, AirSigmet } from '../types/weather';
 import { Trip, TripInput, TripLegInput, TripWeatherResponse } from '../types/trip';
 import { UserProfile, AuthTokens, LoginResponse } from '../types/auth';
 import { AirportRecord } from '../types/airport';
@@ -67,11 +67,59 @@ const tripToInput = (trip: Trip): TripInput => ({
   })),
 });
 
+export interface RouteWeatherPoint {
+  lat: number;
+  lon: number;
+  distanceNm: number;
+  temperature: number;
+  windSpeed: number;
+  windDirection: number;
+  visibility: number;
+  cloudCover: number;
+  precipitationProb: number;
+  flightCategory: 'VFR' | 'MVFR' | 'IFR' | 'LIFR';
+  hazards: string[];
+}
+
+export interface RouteHazardSegment {
+  fromDistanceNm: number;
+  toDistanceNm: number;
+  hazard: string;
+}
+
+export interface RouteWeather {
+  departure: { icao: string; lat: number; lon: number };
+  arrival: { icao: string; lat: number; lon: number };
+  totalDistanceNm: number;
+  points: RouteWeatherPoint[];
+  summary: {
+    worstCategory: 'VFR' | 'MVFR' | 'IFR' | 'LIFR';
+    hasThunderstorms: boolean;
+    hasIcing: boolean;
+    hasTurbulence: boolean;
+    hazardSegments: RouteHazardSegment[];
+  };
+}
+
 export const tripApi = {
   // Get weather for a multi-leg trip
   getTripWeather: async (trip: Trip): Promise<TripWeatherResponse> => {
     const input = tripToInput(trip);
     const response = await api.post<TripWeatherResponse>('/trip', input);
+    return response.data;
+  },
+
+  // Get en-route weather for a single leg
+  getRouteWeather: async (
+    departureIcao: string,
+    arrivalIcao: string,
+    departureTime?: string
+  ): Promise<RouteWeather> => {
+    const response = await api.post<RouteWeather>('/trip/route-weather', {
+      departureIcao,
+      arrivalIcao,
+      departureTime,
+    });
     return response.data;
   },
 };
@@ -190,6 +238,49 @@ export const airportsApi = {
   search: async (query: string, limit = 8): Promise<AirportRecord[]> => {
     const response = await api.get<AirportRecord[]>('/airports/search', {
       params: { q: query, limit },
+    });
+    return response.data;
+  },
+};
+
+export const mapApi = {
+  getPireps: async (bbox: string): Promise<PirepReport[]> => {
+    const response = await api.get<PirepReport[]>('/map/pireps', {
+      params: { bbox },
+    });
+    return response.data;
+  },
+
+  getAirSigmets: async (): Promise<AirSigmet[]> => {
+    const response = await api.get<AirSigmet[]>('/map/airsigmets');
+    return response.data;
+  },
+};
+
+export interface Tfr {
+  id: string;
+  notamNumber: string;
+  type: 'Security' | 'Hazard' | 'VIP' | 'Space Operations' | 'Special';
+  description: string;
+  effectiveStart: string;
+  effectiveEnd: string;
+  altitudeLow: number | null;
+  altitudeHigh: number | null;
+  center: { lat: number; lon: number } | null;
+  radius: number | null;
+  coordinates: Array<{ lat: number; lon: number }>;
+  isActive: boolean;
+}
+
+export const tfrApi = {
+  getAll: async (): Promise<Tfr[]> => {
+    const response = await api.get<Tfr[]>('/tfrs');
+    return response.data;
+  },
+
+  getNearby: async (lat: number, lon: number, radius = 100): Promise<Tfr[]> => {
+    const response = await api.get<Tfr[]>('/tfrs', {
+      params: { lat, lon, radius },
     });
     return response.data;
   },

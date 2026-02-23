@@ -311,6 +311,57 @@ class AviationWeatherService {
       return [];
     }
   }
+
+  async getPirepsByBbox(minLon: number, minLat: number, maxLon: number, maxLat: number): Promise<AwcPirep[]> {
+    const cacheKey = `pireps:bbox:${minLon.toFixed(1)},${minLat.toFixed(1)},${maxLon.toFixed(1)},${maxLat.toFixed(1)}`;
+    const cached = await cacheService.get<AwcPirep[]>(cacheKey);
+    if (cached) return cached;
+
+    try {
+      await awcRateLimiter.acquire();
+      const response = await axios.get<AwcPirep[]>(
+        `${this.baseUrl}/pirep`,
+        {
+          params: {
+            bbox: `${minLon},${minLat},${maxLon},${maxLat}`,
+            format: 'json',
+          },
+          timeout: 10000,
+        }
+      );
+
+      const result = response.data && Array.isArray(response.data) ? response.data : [];
+      await cacheService.set(cacheKey, result, 120); // 2 min cache
+      return result;
+    } catch (error) {
+      console.error('AWC PIREP bbox fetch error:', error);
+      return [];
+    }
+  }
+
+  async getAllAirSigmets(): Promise<AwcAirSigmet[]> {
+    const cacheKey = 'airsigmets:all';
+    const cached = await cacheService.get<AwcAirSigmet[]>(cacheKey);
+    if (cached) return cached;
+
+    try {
+      await awcRateLimiter.acquire();
+      const response = await axios.get<AwcAirSigmet[]>(
+        `${this.baseUrl}/airsigmet`,
+        {
+          params: { format: 'json' },
+          timeout: 10000,
+        }
+      );
+
+      const result = response.data && Array.isArray(response.data) ? response.data : [];
+      await cacheService.set(cacheKey, result, 300); // 5 min cache
+      return result;
+    } catch (error) {
+      console.error('AWC AirSigmet all fetch error:', error);
+      return [];
+    }
+  }
 }
 
 export const aviationWeatherService = new AviationWeatherService();

@@ -14,6 +14,8 @@ import AlertDisplay from '../components/AlertDisplay';
 import PirepDisplay from '../components/PirepDisplay';
 import AirSigmetDisplay from '../components/AirSigmetDisplay';
 import TargetTimeDisplay from '../components/TargetTimeDisplay';
+import WindsAloftDisplay from '../components/WindsAloftDisplay';
+import NotamDisplay from '../components/NotamDisplay';
 import { formatRelativeTime } from '../utils/formatters';
 import { useEffect, useMemo } from 'react';
 
@@ -253,6 +255,16 @@ function AirportWeather() {
               forecast={data.forecast}
               highlightTime={data.atTargetTime?.targetTime}
             />
+          </div>
+
+          {/* NOTAMs */}
+          <div className="mb-6">
+            <NotamDisplay icao={data.airport.icao} />
+          </div>
+
+          {/* Winds Aloft */}
+          <div className="mb-6">
+            <WindsAloftDisplay icao={data.airport.icao} />
           </div>
 
           {/* Weather charts */}

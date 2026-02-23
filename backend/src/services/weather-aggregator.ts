@@ -858,7 +858,7 @@ class WeatherAggregator {
     return aviationWeatherService.getAirSigmets(metar.lat, metar.lon);
   }
 
-  private convertPireps(rawPireps: AwcPirep[]): PirepReport[] {
+  convertPireps(rawPireps: AwcPirep[]): PirepReport[] {
     return rawPireps.map((pirep) => {
       const report: PirepReport = {
         id: pirep.pirepId,
@@ -904,7 +904,7 @@ class WeatherAggregator {
     });
   }
 
-  private convertAirSigmets(rawAirSigmets: AwcAirSigmet[]): AirSigmet[] {
+  convertAirSigmets(rawAirSigmets: AwcAirSigmet[]): AirSigmet[] {
     return rawAirSigmets.map((item) => {
       let type: AirSigmet['type'];
       const typeUpper = item.airSigmetType?.toUpperCase() || '';

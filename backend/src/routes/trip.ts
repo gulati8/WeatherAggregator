@@ -1,6 +1,8 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { eq, and } from 'drizzle-orm';
 import { tripService } from '../services/trip-service';
+import { routeWeatherService } from '../services/route-weather-service';
+import { airportSearch } from '../services/airport-search';
 import { TripInput, MAX_TRIP_LEGS, MAX_FUTURE_DAYS } from '../types/trip';
 import { authenticate, requireRole } from '../middleware/auth';
 import { getDb } from '../db/connection';
@@ -117,6 +119,55 @@ router.post(
       const tripWeather = await tripService.getTripWeather(input);
 
       res.json(tripWeather);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// POST /api/trip/route-weather - Get en-route weather for a leg (public)
+router.post(
+  '/route-weather',
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { departureIcao, arrivalIcao, departureTime } = req.body;
+
+      if (!departureIcao || !arrivalIcao) {
+        return res.status(400).json({
+          error: 'departureIcao and arrivalIcao are required',
+        });
+      }
+
+      if (!/^[A-Z]{4}$/i.test(departureIcao) || !/^[A-Z]{4}$/i.test(arrivalIcao)) {
+        return res.status(400).json({
+          error: 'Invalid ICAO code format (must be 4 letters)',
+        });
+      }
+
+      // Look up airport coordinates
+      const depResults = airportSearch.search(departureIcao, 1);
+      const arrResults = airportSearch.search(arrivalIcao, 1);
+
+      if (depResults.length === 0 || depResults[0].icao.toUpperCase() !== departureIcao.toUpperCase()) {
+        return res.status(404).json({ error: `Airport not found: ${departureIcao}` });
+      }
+      if (arrResults.length === 0 || arrResults[0].icao.toUpperCase() !== arrivalIcao.toUpperCase()) {
+        return res.status(404).json({ error: `Airport not found: ${arrivalIcao}` });
+      }
+
+      const dep = depResults[0];
+      const arr = arrResults[0];
+
+      const targetTime = departureTime ? new Date(departureTime) : undefined;
+
+      const routeWeather = await routeWeatherService.getRouteWeather(
+        dep.lat, dep.lon,
+        arr.lat, arr.lon,
+        departureIcao, arrivalIcao,
+        targetTime
+      );
+
+      res.json(routeWeather);
     } catch (error) {
       next(error);
     }

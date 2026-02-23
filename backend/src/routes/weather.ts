@@ -3,6 +3,8 @@ import { weatherAggregator } from '../services/weather-aggregator';
 import { aviationWeatherService } from '../services/aviation-weather';
 import { flightReleaseService } from '../services/flight-release-service';
 import { cacheService } from '../services/cache';
+import { windsAloftService } from '../services/winds-aloft-service';
+import { notamService } from '../services/notam-service';
 
 const router = Router();
 
@@ -182,6 +184,67 @@ router.get(
       const weather = await weatherAggregator.getAggregatedWeather(icao, targetTime);
       const release = flightReleaseService.generate(weather);
       res.json(release);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// GET /api/weather/:icao/notams - Get NOTAMs for an airport
+router.get(
+  '/:icao/notams',
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { icao } = req.params;
+
+      if (!validateIcao(icao)) {
+        return res.status(400).json({ error: 'Invalid ICAO code' });
+      }
+
+      const notams = await notamService.getNotamsForAirport(icao);
+
+      res.json({
+        icao: icao.toUpperCase(),
+        notams,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+// GET /api/weather/:icao/winds-aloft - Get winds aloft forecast for nearest station
+router.get(
+  '/:icao/winds-aloft',
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { icao } = req.params;
+      const fcst = (req.query.fcst as string) || '06';
+
+      if (!validateIcao(icao)) {
+        return res.status(400).json({
+          error: 'Invalid ICAO code',
+        });
+      }
+
+      if (!['06', '12', '24'].includes(fcst)) {
+        return res.status(400).json({
+          error: 'Invalid forecast hour',
+          message: 'fcst must be 06, 12, or 24',
+        });
+      }
+
+      const forecast = await windsAloftService.getForecast(icao, fcst);
+
+      if (!forecast) {
+        return res.status(404).json({
+          error: 'Winds aloft not found',
+          message: `No winds aloft data available for ${icao.toUpperCase()}`,
+        });
+      }
+
+      res.json(forecast);
     } catch (error) {
       next(error);
     }

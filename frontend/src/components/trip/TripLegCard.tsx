@@ -2,6 +2,7 @@ import { TripLegWeather, TripLegIssue } from '../../types/trip';
 import { UnifiedWeatherData } from '../../types/weather';
 import { formatCeiling, formatVisibility } from '../../utils/formatters';
 import FlightCategoryBadge from '../FlightCategoryBadge';
+import RouteWeatherDisplay from '../RouteWeatherDisplay';
 import TripSourceComparison from './TripSourceComparison';
 import DualTime from '../DualTime';
 
@@ -228,6 +229,15 @@ function TripLegCard({ leg, index }: TripLegCardProps) {
           <RawReports
             icao={leg.arrivalAirport.icao}
             weather={leg.arrivalAirport.weather}
+          />
+        </div>
+
+        {/* En-Route Weather */}
+        <div className="mb-4">
+          <RouteWeatherDisplay
+            departureIcao={leg.departureAirport.icao}
+            arrivalIcao={leg.arrivalAirport.icao}
+            departureTime={leg.departureTime}
           />
         </div>
 
