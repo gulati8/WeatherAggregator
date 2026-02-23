@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e40af"/>
+      <stop offset="100%" stop-color="#3b82f6"/>
+    </linearGradient>
+    <linearGradient id="cloud" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#e2e8f0"/>
+    </linearGradient>
+    <linearGradient id="plane" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+  </defs>
+  <!-- Rounded square background -->
+  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
+  <!-- Cloud shape -->
+  <ellipse cx="248" cy="310" rx="140" ry="70" fill="url(#cloud)" opacity="0.95"/>
+  <circle cx="190" cy="270" r="72" fill="url(#cloud)" opacity="0.95"/>
+  <circle cx="280" cy="250" r="85" fill="url(#cloud)" opacity="0.95"/>
+  <circle cx="340" cy="285" r="55" fill="url(#cloud)" opacity="0.95"/>
+  <!-- Small accent cloud behind -->
+  <ellipse cx="350" cy="200" rx="50" ry="25" fill="#ffffff" opacity="0.3"/>
+  <circle cx="330" cy="188" r="28" fill="#ffffff" opacity="0.3"/>
+  <circle cx="365" cy="185" r="22" fill="#ffffff" opacity="0.3"/>
+  <!-- Airplane silhouette -->
+  <g transform="translate(245, 155) rotate(-15)">
+    <!-- Fuselage -->
+    <path d="M-60,0 L50,0 L65,-4 L70,0 L65,4 L50,0" fill="url(#plane)" stroke="#d97706" stroke-width="1"/>
+    <ellipse cx="-5" cy="0" rx="65" ry="7" fill="url(#plane)"/>
+    <!-- Wings -->
+    <path d="M-5,-6 L-20,-38 L10,-38 L15,-6" fill="url(#plane)" stroke="#d97706" stroke-width="1"/>
+    <path d="M-5,6 L-20,38 L10,38 L15,6" fill="url(#plane)" stroke="#d97706" stroke-width="1"/>
+    <!-- Tail -->
+    <path d="M-55,-6 L-68,-22 L-48,-22 L-45,-6" fill="url(#plane)" stroke="#d97706" stroke-width="1"/>
+    <path d="M-55,6 L-68,22 L-48,22 L-45,6" fill="url(#plane)" stroke="#d97706" stroke-width="1"/>
+    <!-- Nose highlight -->
+    <ellipse cx="55" cy="0" rx="12" ry="5" fill="#fcd34d" opacity="0.6"/>
+  </g>
+  <!-- Wind lines (motion) -->
+  <line x1="100" y1="145" x2="155" y2="140" stroke="#93c5fd" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
+  <line x1="90" y1="165" x2="140" y2="162" stroke="#93c5fd" stroke-width="3" stroke-linecap="round" opacity="0.4"/>
+  <line x1="105" y1="185" x2="145" y2="183" stroke="#93c5fd" stroke-width="3" stroke-linecap="round" opacity="0.3"/>
+</svg>
