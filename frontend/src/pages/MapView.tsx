@@ -282,8 +282,8 @@ function MapView() {
     <div className="flex flex-col h-[calc(100vh-4rem)]">
       {/* Search bar */}
       <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 relative z-[1001]">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center gap-3">
-          <form onSubmit={handleSearch} className="flex items-center gap-2">
+        <div className="max-w-7xl mx-auto flex flex-wrap items-center gap-2 sm:gap-3">
+          <form onSubmit={handleSearch} className="flex items-center gap-2 w-full sm:w-auto">
             <AirportAutocomplete
               value={searchValue}
               onChange={(v) => {
@@ -291,13 +291,13 @@ function MapView() {
                 setError(null);
               }}
               placeholder="Airport code or city"
-              className="w-48"
+              className="flex-1 sm:w-48 sm:flex-none"
               inputClassName="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-mono bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
+              className="px-4 py-3 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
             >
               {loading ? 'Loading...' : 'Add'}
             </button>
@@ -308,13 +308,13 @@ function MapView() {
           )}
 
           {/* Airport chips */}
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 w-full sm:w-auto order-3 sm:order-none">
             {airports.map((airport) => {
               const category = getCategory(airport);
               return (
                 <div
                   key={airport.icao}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-gray-100 dark:bg-gray-700 rounded-full text-sm"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-2 bg-gray-100 dark:bg-gray-700 rounded-full text-sm"
                 >
                   <span
                     className="w-2.5 h-2.5 rounded-full"
@@ -337,10 +337,10 @@ function MapView() {
           </div>
 
           {/* Layers button + panel */}
-          <div className="relative" ref={layersPanelRef}>
+          <div className="relative sm:ml-auto" ref={layersPanelRef}>
             <button
               onClick={() => setLayersPanelOpen(!layersPanelOpen)}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-2.5 min-h-[44px] text-xs font-medium rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
@@ -354,7 +354,7 @@ function MapView() {
             </button>
 
             {layersPanelOpen && (
-              <div className="absolute right-0 top-full mt-2 w-72 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50 py-2 max-h-[70vh] overflow-y-auto">
+              <div className="absolute left-0 sm:left-auto sm:right-0 top-full mt-2 w-[calc(100vw-2rem)] sm:w-72 max-w-[288px] bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50 py-2 max-h-[70vh] overflow-y-auto">
                 {['Radar & Precipitation', 'Weather Overlays'].map((group) => (
                   <div key={group}>
                     <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
@@ -447,7 +447,7 @@ function MapView() {
           </div>
 
           {/* Legend */}
-          <div className="flex items-center gap-3 ml-auto text-xs text-gray-600 dark:text-gray-400">
+          <div className="hidden sm:flex items-center gap-3 text-xs text-gray-600 dark:text-gray-400">
             <div className="flex items-center gap-1">
               <span className="w-3 h-3 rounded-full" style={{ backgroundColor: FLIGHT_CATEGORY_COLORS.VFR }} />
               <span>VFR</span>
@@ -609,7 +609,7 @@ function MapView() {
                 }}
               >
                 <Popup>
-                  <div className="min-w-[200px]">
+                  <div className="min-w-[180px] max-w-[calc(100vw-4rem)]">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-lg font-bold">{airport.icao}</span>
                       <FlightCategoryBadge category={category} size="sm" />
@@ -644,13 +644,13 @@ function MapView() {
                     <div className="mt-3 flex gap-2">
                       <button
                         onClick={() => navigate(`/weather/${airport.icao}`)}
-                        className="flex-1 px-3 py-1.5 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors"
+                        className="flex-1 px-3 py-2.5 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors"
                       >
                         Details
                       </button>
                       <button
                         onClick={() => isFavorite(airport.icao) ? removeFavorite(airport.icao) : addFavorite(airport.icao)}
-                        className={`px-3 py-1.5 text-sm rounded transition-colors ${
+                        className={`px-3 py-2.5 text-sm rounded transition-colors ${
                           isFavorite(airport.icao)
                             ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
                             : 'bg-gray-100 text-gray-600 hover:bg-gray-200'

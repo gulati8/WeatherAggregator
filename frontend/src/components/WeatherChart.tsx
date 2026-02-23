@@ -149,11 +149,11 @@ function WeatherChart({ forecast, highlightTime }: WeatherChartProps) {
 
   if (chartData.length < 2) {
     return (
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 p-6">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
           Weather Trends
         </h2>
-        <div className="text-center py-8 text-gray-500">
+        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
           Not enough forecast data to display trends.
         </div>
       </div>
@@ -161,15 +161,15 @@ function WeatherChart({ forecast, highlightTime }: WeatherChartProps) {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 p-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-        <h2 className="text-lg font-semibold text-gray-900">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
           24-Hour Weather Trends
         </h2>
 
         <div className="flex flex-wrap items-center gap-4">
           {/* Show sources toggle */}
-          <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
+          <label className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 cursor-pointer">
             <input
               type="checkbox"
               checked={showSources}
@@ -180,7 +180,7 @@ function WeatherChart({ forecast, highlightTime }: WeatherChartProps) {
           </label>
 
           {/* Parameter selector */}
-          <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
+          <div className="flex gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
             {(
               [
                 { key: 'visibility', label: 'Visibility' },
@@ -193,8 +193,8 @@ function WeatherChart({ forecast, highlightTime }: WeatherChartProps) {
                 onClick={() => setSelectedParam(param.key)}
                 className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
                   selectedParam === param.key
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100 shadow-sm'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                 }`}
               >
                 {param.label}
@@ -205,7 +205,7 @@ function WeatherChart({ forecast, highlightTime }: WeatherChartProps) {
       </div>
 
       {/* Chart */}
-      <div className="h-72">
+      <div className="h-48 sm:h-64 md:h-72">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -307,8 +307,8 @@ function WeatherChart({ forecast, highlightTime }: WeatherChartProps) {
       </div>
 
       {/* Legend explanation */}
-      <div className="mt-4 pt-4 border-t border-gray-200">
-        <div className="flex flex-wrap gap-4 text-xs text-gray-600">
+      <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
+        <div className="flex flex-wrap gap-4 text-xs text-gray-600 dark:text-gray-400">
           {showSources && (
             <>
               <div className="flex items-center gap-2">

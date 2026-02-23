@@ -79,7 +79,7 @@ export default function NotamDisplay({ icao }: { icao: string }) {
         <select
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
-          className="text-xs px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300"
+          className="text-xs px-2 py-2 min-h-[44px] border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300"
         >
           {CLASSIFICATIONS.map((c) => (
             <option key={c} value={c}>{c}</option>
@@ -104,7 +104,7 @@ export default function NotamDisplay({ icao }: { icao: string }) {
         </div>
       )}
 
-      <div className="space-y-2 max-h-[400px] overflow-y-auto">
+      <div className="space-y-2 max-h-[250px] sm:max-h-[350px] md:max-h-[400px] overflow-y-auto">
         {filtered.map((notam) => {
           const isExpanded = expandedIds.has(notam.id);
           const textPreview = notam.text.length > 120 && !isExpanded
@@ -121,10 +121,10 @@ export default function NotamDisplay({ icao }: { icao: string }) {
                 <span className="text-xs font-mono font-bold text-gray-700 dark:text-gray-300">
                   {notam.id}
                 </span>
-                <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400">
+                <span className="text-[11px] sm:text-[10px] px-2 py-1 sm:px-1.5 sm:py-0.5 rounded bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400">
                   {notam.classification}
                 </span>
-                <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
+                <span className={`text-[11px] sm:text-[10px] px-2 py-1 sm:px-1.5 sm:py-0.5 rounded font-medium ${
                   notam.priority === 'high' ? 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400'
                   : notam.priority === 'medium' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400'
                   : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
@@ -145,7 +145,7 @@ export default function NotamDisplay({ icao }: { icao: string }) {
                   )}
                 </div>
               )}
-              <p className="text-xs text-gray-700 dark:text-gray-300 font-mono whitespace-pre-wrap leading-relaxed">
+              <p className="text-xs text-gray-700 dark:text-gray-300 font-mono whitespace-pre-wrap leading-relaxed break-words">
                 {textPreview}
               </p>
             </div>

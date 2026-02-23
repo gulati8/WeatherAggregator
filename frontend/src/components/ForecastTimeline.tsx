@@ -108,7 +108,7 @@ function ForecastTimeline({ forecast, highlightTime }: ForecastTimelineProps) {
             <div className="flex gap-1">
               <button
                 onClick={() => setFilterSource('all')}
-                className={`px-2 py-1 text-xs font-medium rounded transition-colors ${
+                className={`px-3 py-2 text-xs font-medium rounded transition-colors ${
                   filterSource === 'all'
                     ? 'bg-gray-800 dark:bg-gray-200 text-white dark:text-gray-900'
                     : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
@@ -120,7 +120,7 @@ function ForecastTimeline({ forecast, highlightTime }: ForecastTimelineProps) {
                 <button
                   key={source}
                   onClick={() => setFilterSource(source)}
-                  className={`px-2 py-1 text-xs font-medium rounded transition-colors ${
+                  className={`px-3 py-2 text-xs font-medium rounded transition-colors ${
                     filterSource === source
                       ? `${SOURCE_COLORS[source].bg} ${SOURCE_COLORS[source].text} ring-1 ring-current`
                       : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
@@ -138,7 +138,7 @@ function ForecastTimeline({ forecast, highlightTime }: ForecastTimelineProps) {
               <button
                 key={option.hours}
                 onClick={() => setSelectedHours(option.hours)}
-                className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
+                className={`px-3 py-2 text-sm font-medium rounded-md transition-colors ${
                   selectedHours === option.hours
                     ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-gray-100 shadow-sm'
                     : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
@@ -173,7 +173,7 @@ function ForecastTimeline({ forecast, highlightTime }: ForecastTimelineProps) {
             return (
               <div
                 key={index}
-                className={`relative flex items-start gap-4 p-4 rounded-lg border-l-4 transition-colors ${
+                className={`relative flex flex-col sm:flex-row items-start gap-2 sm:gap-4 p-3 sm:p-4 rounded-lg border-l-4 transition-colors ${
                   isHighlighted
                     ? 'bg-blue-100 dark:bg-blue-900/40 border-blue-500 ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-gray-800'
                     : `${sourceStyle.bg} ${sourceStyle.border}`
@@ -187,7 +187,7 @@ function ForecastTimeline({ forecast, highlightTime }: ForecastTimelineProps) {
                   </div>
                 )}
                 {/* Source badge */}
-                <div className="flex-shrink-0 w-20">
+                <div className="flex-shrink-0 sm:w-20">
                   <span
                     className={`inline-block px-2 py-0.5 text-xs font-bold rounded ${sourceStyle.text} bg-white/50 dark:bg-gray-800/50`}
                   >
@@ -196,7 +196,7 @@ function ForecastTimeline({ forecast, highlightTime }: ForecastTimelineProps) {
                 </div>
 
                 {/* Time column */}
-                <div className="flex-shrink-0 w-32">
+                <div className="flex-shrink-0 sm:w-32">
                   <DualTime time={period.validFrom} showDate={false} size="sm" layout="stacked" />
                   <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                     to <DualTime time={period.validTo} showDate={false} size="sm" />
@@ -218,7 +218,7 @@ function ForecastTimeline({ forecast, highlightTime }: ForecastTimelineProps) {
                 </div>
 
                 {/* Weather details */}
-                <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 text-sm">
                   <div>
                     <span className="text-gray-500 dark:text-gray-400">Wind</span>
                     <div className="font-medium text-gray-900 dark:text-gray-100">

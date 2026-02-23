@@ -95,8 +95,36 @@ function SourceComparison({ sources, current }: SourceComparisonProps) {
         ))}
       </div>
 
-      {/* Comparison table */}
-      <div className="overflow-x-auto">
+      {/* Mobile card view */}
+      <div className="md:hidden space-y-3">
+        {(['temperature', 'windSpeed', 'visibility'] as const).map((param) => {
+          const labels = { temperature: 'Temperature', windSpeed: 'Wind Speed', visibility: 'Visibility' };
+          const formatFns = { temperature: formatTemperature, windSpeed: formatWindSpeed, visibility: formatVisibility };
+          return (
+            <div key={param} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
+              <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{labels[param]}</div>
+              <div className="space-y-1">
+                {sources.filter((s) => s.status === 'ok').map((source) => (
+                  <div key={source.id} className="flex justify-between text-sm">
+                    <span className="text-gray-500 dark:text-gray-400">{sourceNames[source.id]}</span>
+                    <span className="text-gray-900 dark:text-gray-100">{formatValue(source.id, param)}</span>
+                  </div>
+                ))}
+                <div className="flex justify-between text-sm font-semibold border-t border-gray-200 dark:border-gray-600 pt-1 mt-1">
+                  <span className="text-gray-700 dark:text-gray-200">Consensus</span>
+                  <span className="text-gray-900 dark:text-gray-100">
+                    {formatFns[param](current[param].value)}
+                    {getSpreadIndicator(current[param].spread, param === 'temperature' ? 3 : param === 'windSpeed' ? 5 : 2)}
+                  </span>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Comparison table (desktop) */}
+      <div className="hidden md:block overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-gray-200 dark:border-gray-600">
@@ -170,7 +198,7 @@ function SourceComparison({ sources, current }: SourceComparisonProps) {
         </table>
       </div>
 
-      <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">
+      <p className="mt-3 text-xs text-gray-500 dark:text-gray-400 hidden md:block">
         <span className="text-orange-600 dark:text-orange-400">!</span> indicates significant
         disagreement between sources
       </p>

@@ -93,7 +93,7 @@ function TripLegInput({
                 onUpdate(leg.legId, { departureAirport: v })
               }
               placeholder="ICAO or city"
-              inputClassName={`w-full px-3 py-2 border rounded-md font-mono text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 ${
+              inputClassName={`w-full px-3 py-3 border rounded-md font-mono text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 ${
                 depError ? 'border-red-300 dark:border-red-600' : 'border-gray-300 dark:border-gray-600'
               }`}
             />
@@ -110,7 +110,7 @@ function TripLegInput({
                 onUpdate(leg.legId, { arrivalAirport: v })
               }
               placeholder="ICAO or city"
-              inputClassName={`w-full px-3 py-2 border rounded-md font-mono text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 ${
+              inputClassName={`w-full px-3 py-3 border rounded-md font-mono text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 ${
                 arrError ? 'border-red-300 dark:border-red-600' : 'border-gray-300 dark:border-gray-600'
               }`}
             />

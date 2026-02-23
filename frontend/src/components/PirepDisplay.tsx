@@ -51,8 +51,8 @@ function PirepDisplay({ pireps }: PirepDisplayProps) {
   );
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-      <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 p-6">
+      <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
         <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
             d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
@@ -73,18 +73,18 @@ function PirepDisplay({ pireps }: PirepDisplayProps) {
           return (
             <div
               key={pirep.id}
-              className="border border-gray-200 rounded-lg overflow-hidden"
+              className="border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden"
             >
               <button
                 onClick={() => setExpandedId(isExpanded ? null : pirep.id)}
-                className="w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors"
+                className="w-full text-left px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3 flex-wrap">
-                    <span className="text-sm font-medium text-gray-700">
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                       FL{Math.round(pirep.altitude / 100).toString().padStart(3, '0')}
                     </span>
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
                       {pirep.aircraftType}
                     </span>
                     {turbStyle && (
@@ -118,7 +118,7 @@ function PirepDisplay({ pireps }: PirepDisplayProps) {
               </button>
 
               {isExpanded && (
-                <div className="px-4 py-3 bg-gray-50 border-t border-gray-200">
+                <div className="px-4 py-3 bg-gray-50 dark:bg-gray-700 border-t border-gray-200 dark:border-gray-600">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                     <div>
                       <span className="text-gray-500">Altitude:</span>{' '}
@@ -157,7 +157,7 @@ function PirepDisplay({ pireps }: PirepDisplayProps) {
                       </div>
                     )}
                   </div>
-                  <div className="mt-3 p-2 bg-gray-100 rounded font-mono text-xs text-gray-700 break-all">
+                  <div className="mt-3 p-2 bg-gray-100 dark:bg-gray-800 rounded font-mono text-xs text-gray-700 dark:text-gray-300 break-all">
                     {pirep.rawReport}
                   </div>
                 </div>

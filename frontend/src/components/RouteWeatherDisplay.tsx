@@ -151,7 +151,7 @@ function RouteWeatherDisplay({ departureIcao, arrivalIcao, departureTime }: Rout
       {/* Waypoint table */}
       <div className="px-4 pb-4">
         <div className="overflow-x-auto">
-          <table className="w-full text-xs">
+          <table className="w-full text-xs min-w-[500px]">
             <thead>
               <tr className="border-b border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400">
                 <th className="text-left py-1.5 pr-3 font-medium">Dist (NM)</th>

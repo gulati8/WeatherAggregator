@@ -63,10 +63,10 @@ function FratDisplay({ frat }: FratDisplayProps) {
   const gaugePercent = Math.min((frat.totalScore / 50) * 100, 100);
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-gray-900">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
           Flight Risk Assessment
         </h2>
         <span
@@ -79,12 +79,12 @@ function FratDisplay({ frat }: FratDisplayProps) {
       {/* Score gauge */}
       <div className="mb-4">
         <div className="flex items-center justify-between mb-1">
-          <span className="text-sm font-medium text-gray-700">Risk Score</span>
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Risk Score</span>
           <span className={`text-2xl font-bold ${colors.text}`}>
             {frat.totalScore}
           </span>
         </div>
-        <div className="w-full bg-gray-200 rounded-full h-3">
+        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
           <div
             className={`h-3 rounded-full transition-all duration-500 ${colors.bar}`}
             style={{ width: `${gaugePercent}%` }}
@@ -120,7 +120,7 @@ function FratDisplay({ frat }: FratDisplayProps) {
         <div>
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="w-full flex items-center justify-between py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+            className="w-full flex items-center justify-between py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
           >
             <span>
               {frat.factors.length} risk factor{frat.factors.length !== 1 ? 's' : ''}{' '}
@@ -147,24 +147,24 @@ function FratDisplay({ frat }: FratDisplayProps) {
             <div className="mt-2 space-y-4">
               {Object.entries(groupedFactors).map(([category, factors]) => (
                 <div key={category}>
-                  <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                  <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
                     {category}
                   </h4>
                   <div className="space-y-2">
                     {factors.map((factor, index) => (
                       <div
                         key={index}
-                        className="flex items-start justify-between p-2 bg-gray-50 rounded"
+                        className="flex items-start justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded"
                       >
                         <div className="flex-1 min-w-0 mr-2">
-                          <p className="text-sm font-medium text-gray-800">
+                          <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
                             {factor.factor}
                           </p>
-                          <p className="text-xs text-gray-500 mt-0.5">
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                             {factor.description}
                           </p>
                         </div>
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-gray-200 text-gray-700 whitespace-nowrap">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 whitespace-nowrap">
                           +{factor.points}
                         </span>
                       </div>

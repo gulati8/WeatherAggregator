@@ -73,7 +73,7 @@ export default function WindsAloftDisplay({ icao }: { icao: string }) {
             <button
               key={h}
               onClick={() => setFcstHour(h)}
-              className={`px-3 py-1 text-xs font-medium rounded-lg transition-colors ${
+              className={`px-3 py-2 min-h-[44px] text-xs font-medium rounded-lg transition-colors ${
                 fcstHour === h
                   ? 'bg-blue-600 text-white'
                   : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'

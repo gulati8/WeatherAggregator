@@ -19,7 +19,7 @@ interface CurrentConditionsProps {
 function CurrentConditions({ conditions, targetTimeLabel }: CurrentConditionsProps) {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 p-6">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-6">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
           {targetTimeLabel ? 'Conditions at Target Time' : 'Current Conditions'}
         </h2>
@@ -38,7 +38,7 @@ function CurrentConditions({ conditions, targetTimeLabel }: CurrentConditionsPro
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
         {/* Temperature */}
         <div className="text-center">
-          <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+          <div className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">
             {formatTemperature(conditions.temperature.value)}
           </div>
           <div className="text-sm text-gray-500 dark:text-gray-400">Temperature</div>
@@ -49,7 +49,7 @@ function CurrentConditions({ conditions, targetTimeLabel }: CurrentConditionsPro
 
         {/* Wind */}
         <div className="text-center">
-          <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+          <div className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">
             {formatWindSpeed(conditions.windSpeed.value)}
           </div>
           <div className="text-sm text-gray-500 dark:text-gray-400">
@@ -64,7 +64,7 @@ function CurrentConditions({ conditions, targetTimeLabel }: CurrentConditionsPro
 
         {/* Visibility */}
         <div className="text-center">
-          <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+          <div className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">
             {formatVisibility(conditions.visibility.value)}
           </div>
           <div className="text-sm text-gray-500 dark:text-gray-400">Visibility</div>
@@ -72,7 +72,7 @@ function CurrentConditions({ conditions, targetTimeLabel }: CurrentConditionsPro
 
         {/* Ceiling */}
         <div className="text-center">
-          <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+          <div className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">
             {formatCeiling(conditions.ceiling.value)}
           </div>
           <div className="text-sm text-gray-500 dark:text-gray-400">Ceiling</div>

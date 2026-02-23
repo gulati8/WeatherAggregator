@@ -113,8 +113,58 @@ function TripTimeline({ legs, selectedLegId, onSelectLeg }: TripTimelineProps) {
     <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 p-4">
       <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Trip Timeline</h3>
 
-      {/* Timeline container - horizontal scroll on mobile */}
-      <div className="relative overflow-x-auto">
+      {/* Mobile vertical leg buttons */}
+      <div className="md:hidden space-y-2 mb-4">
+        {legs.map((leg, index) => {
+          const depCategory = leg.legStatus.departureStatus.flightCategory;
+          const arrCategory = leg.legStatus.arrivalStatus.flightCategory;
+          const isSelected = selectedLegId === leg.legId;
+          return (
+            <button
+              key={leg.legId}
+              onClick={() => onSelectLeg(leg.legId)}
+              className={`w-full text-left p-3 rounded-lg border transition-colors ${
+                isSelected
+                  ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30'
+                  : 'border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Leg {index + 1}: {leg.departureAirport.icao} → {leg.arrivalAirport.icao}
+                </span>
+                <div className="flex items-center gap-2">
+                  <span
+                    className="w-3 h-3 rounded-full"
+                    style={{ backgroundColor: getCategoryColor(depCategory) }}
+                    title={depCategory}
+                  />
+                  <span className="text-xs text-gray-400">→</span>
+                  <span
+                    className="w-3 h-3 rounded-full"
+                    style={{ backgroundColor: getCategoryColor(arrCategory) }}
+                    title={arrCategory}
+                  />
+                  <span className={`w-2.5 h-2.5 rounded-full ml-1 ${
+                    !leg.legStatus.canDispatch ? 'bg-red-500'
+                    : leg.legStatus.issues.some(i => i.severity === 'warning') ? 'bg-red-400'
+                    : leg.legStatus.issues.some(i => i.severity === 'caution') ? 'bg-yellow-400'
+                    : 'bg-green-500'
+                  }`} />
+                </div>
+              </div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                {new Date(leg.departureTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+                {' → '}
+                {new Date(leg.arrivalTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Timeline container - horizontal scroll on desktop/tablet */}
+      <div className="relative overflow-x-auto hidden md:block">
         {/* Time header */}
         <div className="flex border-b border-gray-200 dark:border-gray-600 pb-2 mb-2">
           <div className="w-16 flex-shrink-0" /> {/* Label column spacer */}

@@ -133,13 +133,13 @@ function App() {
               <nav className="flex items-center gap-4 sm:gap-6">
                 <Link
                   to="/"
-                  className="text-sm text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                  className="text-sm py-2 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                 >
                   Single Airport
                 </Link>
                 <Link
                   to="/trip"
-                  className="text-sm text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center gap-1"
+                  className="text-sm py-2 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center gap-1"
                 >
                   <svg
                     className="w-4 h-4"
@@ -158,7 +158,7 @@ function App() {
                 </Link>
                 <Link
                   to="/map"
-                  className="text-sm text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center gap-1"
+                  className="text-sm py-2 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center gap-1"
                 >
                   <svg
                     className="w-4 h-4"

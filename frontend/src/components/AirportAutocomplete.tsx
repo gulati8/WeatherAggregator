@@ -109,7 +109,7 @@ export default function AirportAutocomplete({
       {showDropdown && (
         <ul
           ref={listRef}
-          className="absolute z-50 left-0 right-0 mt-1 max-h-60 overflow-y-auto bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg"
+          className="absolute z-50 left-0 right-0 mt-1 max-h-48 sm:max-h-60 overflow-y-auto bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg"
         >
           {loading && results.length === 0 && (
             <li className="px-3 py-2 text-sm text-gray-400 dark:text-gray-500">
@@ -129,7 +129,7 @@ export default function AirportAutocomplete({
                 selectAirport(airport.icao);
               }}
               onMouseEnter={() => setHighlightIndex(i)}
-              className={`px-3 py-2 cursor-pointer text-sm flex items-center gap-2 ${
+              className={`px-3 py-3 cursor-pointer text-sm flex items-center gap-2 ${
                 i === highlightIndex
                   ? 'bg-blue-50 dark:bg-blue-900/30'
                   : 'hover:bg-gray-50 dark:hover:bg-gray-700'

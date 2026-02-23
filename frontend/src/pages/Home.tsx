@@ -12,10 +12,10 @@ function Home() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-12">
+    <div className="max-w-4xl mx-auto px-4 py-6 sm:py-12">
       {/* Hero section */}
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+      <div className="text-center mb-6 sm:mb-12">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">
           Aviation Weather Aggregator
         </h1>
         <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
@@ -26,12 +26,12 @@ function Home() {
       </div>
 
       {/* Search */}
-      <div className="max-w-md mx-auto mb-12">
+      <div className="max-w-md mx-auto mb-6 sm:mb-12">
         <AirportSearch onSearch={handleSearch} />
       </div>
 
       {/* Quick access sections */}
-      <div className="grid md:grid-cols-2 gap-8">
+      <div className="grid md:grid-cols-2 gap-4 sm:gap-8">
         {/* Favorites */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600 p-6">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
@@ -111,7 +111,7 @@ function Home() {
                 <button
                   key={icao}
                   onClick={() => handleSearch(icao)}
-                  className="px-3 py-1.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full font-mono text-sm font-semibold text-gray-700 dark:text-gray-300 transition-colors"
+                  className="px-4 py-2.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full font-mono text-sm font-semibold text-gray-700 dark:text-gray-300 transition-colors"
                 >
                   {icao}
                 </button>
