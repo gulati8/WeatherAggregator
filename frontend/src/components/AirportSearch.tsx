@@ -1,5 +1,6 @@
 import { useState, FormEvent } from 'react';
 import { formatDateTimeDual } from '../utils/formatters';
+import AirportAutocomplete from './AirportAutocomplete';
 
 interface AirportSearchProps {
   onSearch: (icao: string, targetTime: Date | null) => void;
@@ -91,8 +92,8 @@ function AirportSearch({
   return (
     <form onSubmit={handleSubmit} className="w-full space-y-3">
       {/* Main search row */}
-      <div className="relative">
-        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+      <div className="relative flex">
+        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
           <svg
             className="h-5 w-5 text-gray-400"
             fill="none"
@@ -107,26 +108,28 @@ function AirportSearch({
             />
           </svg>
         </div>
-        <input
-          type="text"
+        <AirportAutocomplete
           value={value}
-          onChange={(e) => {
-            setValue(e.target.value.toUpperCase());
+          onChange={(v) => {
+            setValue(v);
             setError(null);
           }}
-          placeholder="Enter ICAO code (e.g., KJFK)"
-          className={`block w-full pl-12 pr-24 py-4 text-lg font-mono border rounded-lg shadow-sm
+          onSelect={(icao) => {
+            setValue(icao);
+            setError(null);
+          }}
+          placeholder="Search airport code, city, or name"
+          className="flex-1"
+          inputClassName={`block w-full pl-12 pr-4 py-4 text-lg font-mono border rounded-l-lg shadow-sm
             focus:ring-2 focus:ring-blue-500 focus:border-blue-500
             bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
             ${error ? 'border-red-300 dark:border-red-600' : 'border-gray-300 dark:border-gray-600'}
           `}
-          maxLength={4}
-          autoComplete="off"
           autoFocus
         />
         <button
           type="submit"
-          className="absolute inset-y-0 right-0 px-6 bg-blue-600 text-white font-semibold rounded-r-lg
+          className="px-6 bg-blue-600 text-white font-semibold rounded-r-lg
             hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
             transition-colors"
         >

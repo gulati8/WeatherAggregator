@@ -1,5 +1,6 @@
 import { TripLeg } from '../../types/trip';
 import DualTime from '../DualTime';
+import AirportAutocomplete from '../AirportAutocomplete';
 
 interface TripLegInputProps {
   leg: TripLeg;
@@ -86,17 +87,13 @@ function TripLegInput({
             <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
               From
             </label>
-            <input
-              type="text"
+            <AirportAutocomplete
               value={leg.departureAirport}
-              onChange={(e) =>
-                onUpdate(leg.legId, {
-                  departureAirport: e.target.value.toUpperCase(),
-                })
+              onChange={(v) =>
+                onUpdate(leg.legId, { departureAirport: v })
               }
-              placeholder="ICAO"
-              maxLength={4}
-              className={`w-full px-3 py-2 border rounded-md font-mono text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 ${
+              placeholder="ICAO or city"
+              inputClassName={`w-full px-3 py-2 border rounded-md font-mono text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 ${
                 depError ? 'border-red-300 dark:border-red-600' : 'border-gray-300 dark:border-gray-600'
               }`}
             />
@@ -107,17 +104,13 @@ function TripLegInput({
             <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
               To
             </label>
-            <input
-              type="text"
+            <AirportAutocomplete
               value={leg.arrivalAirport}
-              onChange={(e) =>
-                onUpdate(leg.legId, {
-                  arrivalAirport: e.target.value.toUpperCase(),
-                })
+              onChange={(v) =>
+                onUpdate(leg.legId, { arrivalAirport: v })
               }
-              placeholder="ICAO"
-              maxLength={4}
-              className={`w-full px-3 py-2 border rounded-md font-mono text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 ${
+              placeholder="ICAO or city"
+              inputClassName={`w-full px-3 py-2 border rounded-md font-mono text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 ${
                 arrError ? 'border-red-300 dark:border-red-600' : 'border-gray-300 dark:border-gray-600'
               }`}
             />

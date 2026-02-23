@@ -2,6 +2,7 @@ import axios from 'axios';
 import { UnifiedWeatherData } from '../types/weather';
 import { Trip, TripInput, TripLegInput, TripWeatherResponse } from '../types/trip';
 import { UserProfile, AuthTokens, LoginResponse } from '../types/auth';
+import { AirportRecord } from '../types/airport';
 
 const api = axios.create({
   baseURL: '/api',
@@ -182,6 +183,15 @@ export const usersApi = {
 
   delete: async (userId: string): Promise<void> => {
     await api.delete(`/users/${userId}`);
+  },
+};
+
+export const airportsApi = {
+  search: async (query: string, limit = 8): Promise<AirportRecord[]> => {
+    const response = await api.get<AirportRecord[]>('/airports/search', {
+      params: { q: query, limit },
+    });
+    return response.data;
   },
 };
 

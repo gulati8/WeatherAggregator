@@ -10,6 +10,8 @@ import authRoutes from './routes/auth';
 import usersRoutes from './routes/users';
 import favoritesRoutes from './routes/favorites';
 import preferencesRoutes from './routes/preferences';
+import airportsRoutes from './routes/airports';
+import { airportSearch } from './services/airport-search';
 
 const app = express();
 
@@ -43,6 +45,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/favorites', favoritesRoutes);
 app.use('/api/preferences', preferencesRoutes);
+app.use('/api/airports', airportsRoutes);
 
 // Error handling
 app.use(
@@ -78,6 +81,9 @@ async function start() {
 
     await runMigrations();
     console.log('Database migrations complete');
+
+    // Load airport search data
+    await airportSearch.init();
 
     const port = config.port;
     app.listen(port, () => {
