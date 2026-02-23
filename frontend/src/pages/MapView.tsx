@@ -353,8 +353,9 @@ function MapView() {
               )}
             </button>
 
+            {/* Desktop dropdown */}
             {layersPanelOpen && (
-              <div className="absolute left-0 sm:left-auto sm:right-0 top-full mt-2 w-[calc(100vw-2rem)] sm:w-72 max-w-[288px] bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50 py-2 max-h-[70vh] overflow-y-auto">
+              <div className="hidden sm:block absolute right-0 top-full mt-2 w-72 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50 py-2 max-h-[70vh] overflow-y-auto">
                 {['Radar & Precipitation', 'Weather Overlays'].map((group) => (
                   <div key={group}>
                     <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
@@ -394,55 +395,125 @@ function MapView() {
                     ))}
                   </div>
                 ))}
-                {/* Aviation Data group */}
                 <div>
                   <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
                     Aviation Data
                   </div>
                   <div className="px-3 py-1.5">
                     <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={showPireps}
-                        onChange={() => { setShowPireps(!showPireps); if (showPireps) setPireps([]); }}
-                        className="w-3.5 h-3.5 rounded accent-blue-500"
-                      />
-                      <span className="text-xs text-gray-700 dark:text-gray-300 font-medium flex-1">
-                        PIREPs
-                      </span>
+                      <input type="checkbox" checked={showPireps} onChange={() => { setShowPireps(!showPireps); if (showPireps) setPireps([]); }} className="w-3.5 h-3.5 rounded accent-blue-500" />
+                      <span className="text-xs text-gray-700 dark:text-gray-300 font-medium flex-1">PIREPs</span>
                       <span className="text-[10px] text-gray-400 dark:text-gray-500">AWC</span>
                     </label>
                   </div>
                   <div className="px-3 py-1.5">
                     <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={showAirSigmets}
-                        onChange={() => { setShowAirSigmets(!showAirSigmets); if (showAirSigmets) setAirSigmets([]); }}
-                        className="w-3.5 h-3.5 rounded accent-blue-500"
-                      />
-                      <span className="text-xs text-gray-700 dark:text-gray-300 font-medium flex-1">
-                        AIRMETs/SIGMETs
-                      </span>
+                      <input type="checkbox" checked={showAirSigmets} onChange={() => { setShowAirSigmets(!showAirSigmets); if (showAirSigmets) setAirSigmets([]); }} className="w-3.5 h-3.5 rounded accent-blue-500" />
+                      <span className="text-xs text-gray-700 dark:text-gray-300 font-medium flex-1">AIRMETs/SIGMETs</span>
                       <span className="text-[10px] text-gray-400 dark:text-gray-500">AWC</span>
                     </label>
                   </div>
                   <div className="px-3 py-1.5">
                     <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={showTfrs}
-                        onChange={() => { setShowTfrs(!showTfrs); if (showTfrs) setTfrs([]); }}
-                        className="w-3.5 h-3.5 rounded accent-blue-500"
-                      />
-                      <span className="text-xs text-gray-700 dark:text-gray-300 font-medium flex-1">
-                        TFRs
-                      </span>
+                      <input type="checkbox" checked={showTfrs} onChange={() => { setShowTfrs(!showTfrs); if (showTfrs) setTfrs([]); }} className="w-3.5 h-3.5 rounded accent-blue-500" />
+                      <span className="text-xs text-gray-700 dark:text-gray-300 font-medium flex-1">TFRs</span>
                       <span className="text-[10px] text-gray-400 dark:text-gray-500">FAA</span>
                     </label>
                   </div>
                 </div>
               </div>
+            )}
+
+            {/* Mobile bottom sheet */}
+            {layersPanelOpen && (
+              <>
+                {/* Backdrop */}
+                <div
+                  className="sm:hidden fixed inset-0 bg-black/30 z-[1100]"
+                  onClick={() => setLayersPanelOpen(false)}
+                />
+                {/* Sheet */}
+                <div className="sm:hidden fixed bottom-0 left-0 right-0 z-[1101] max-h-[60vh] bg-white dark:bg-gray-800 rounded-t-2xl shadow-2xl animate-slide-up flex flex-col">
+                  {/* Drag handle */}
+                  <div className="flex justify-center pt-3 pb-1">
+                    <div className="w-10 h-1 rounded-full bg-gray-300 dark:bg-gray-600" />
+                  </div>
+                  {/* Header */}
+                  <div className="sticky top-0 flex items-center justify-between px-4 pb-3 border-b border-gray-200 dark:border-gray-700">
+                    <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Map Layers</h3>
+                    <button
+                      onClick={() => setLayersPanelOpen(false)}
+                      className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                  {/* Content */}
+                  <div className="overflow-y-auto px-4 py-3">
+                    {['Radar & Precipitation', 'Weather Overlays'].map((group) => (
+                      <div key={group} className="mb-3">
+                        <div className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1">
+                          {group}
+                        </div>
+                        {layers.filter((l) => l.group === group).map((layer) => (
+                          <div key={layer.id} className="py-1">
+                            <label className="flex items-center gap-3 cursor-pointer min-h-[44px]">
+                              <input
+                                type="checkbox"
+                                checked={layer.enabled}
+                                onChange={() => toggleLayer(layer.id)}
+                                className="w-5 h-5 rounded accent-blue-500"
+                              />
+                              <span className="text-sm text-gray-700 dark:text-gray-300 font-medium flex-1">
+                                {layer.label}
+                              </span>
+                              <span className="text-xs text-gray-400 dark:text-gray-500">
+                                {layer.attribution}
+                              </span>
+                            </label>
+                            {layer.enabled && (
+                              <div className="flex items-center gap-2 mt-1 ml-8">
+                                <span className="text-xs text-gray-400 w-8">{Math.round(layer.opacity * 100)}%</span>
+                                <input
+                                  type="range"
+                                  min={0.1}
+                                  max={0.9}
+                                  step={0.1}
+                                  value={layer.opacity}
+                                  onChange={(e) => setLayerOpacity(layer.id, parseFloat(e.target.value))}
+                                  className="flex-1 h-1.5 accent-blue-500"
+                                />
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                    <div className="mb-3">
+                      <div className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1">
+                        Aviation Data
+                      </div>
+                      <label className="flex items-center gap-3 cursor-pointer min-h-[44px]">
+                        <input type="checkbox" checked={showPireps} onChange={() => { setShowPireps(!showPireps); if (showPireps) setPireps([]); }} className="w-5 h-5 rounded accent-blue-500" />
+                        <span className="text-sm text-gray-700 dark:text-gray-300 font-medium flex-1">PIREPs</span>
+                        <span className="text-xs text-gray-400 dark:text-gray-500">AWC</span>
+                      </label>
+                      <label className="flex items-center gap-3 cursor-pointer min-h-[44px]">
+                        <input type="checkbox" checked={showAirSigmets} onChange={() => { setShowAirSigmets(!showAirSigmets); if (showAirSigmets) setAirSigmets([]); }} className="w-5 h-5 rounded accent-blue-500" />
+                        <span className="text-sm text-gray-700 dark:text-gray-300 font-medium flex-1">AIRMETs/SIGMETs</span>
+                        <span className="text-xs text-gray-400 dark:text-gray-500">AWC</span>
+                      </label>
+                      <label className="flex items-center gap-3 cursor-pointer min-h-[44px]">
+                        <input type="checkbox" checked={showTfrs} onChange={() => { setShowTfrs(!showTfrs); if (showTfrs) setTfrs([]); }} className="w-5 h-5 rounded accent-blue-500" />
+                        <span className="text-sm text-gray-700 dark:text-gray-300 font-medium flex-1">TFRs</span>
+                        <span className="text-xs text-gray-400 dark:text-gray-500">FAA</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </>
             )}
           </div>
 
