@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jetstream — See the weather. Fly through data.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ================================================================
+   RESET
+   ================================================================ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* ================================================================
+   DESIGN TOKENS — DARK (default, map-centric)
+   ================================================================ */
+:root {
+  --bg: #111318;
+  --surface: #1A1D25;
+  --surface-glass: rgba(26,29,37,0.88);
+  --surface-glass-hover: rgba(26,29,37,0.94);
+  --text-primary: #E4E7ED;
+  --text-secondary: #8B91A0;
+  --text-tertiary: #4A5066;
+  --border: #2A2E3A;
+  --border-light: rgba(255,255,255,0.06);
+  --border-glow: rgba(255,255,255,0.04);
+  --accent: #22D3EE;
+  --accent-secondary: #818CF8;
+  --accent-tertiary: #F472B6;
+  --success: #4ADE80;
+  --warning: #FBBF24;
+  --danger: #F87171;
+  --vfr: #22C55E;
+  --mvfr: #3B82F6;
+  --ifr: #EF4444;
+  --lifr: #A855F7;
+  --panel-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.04);
+  --glass-blur: blur(16px) saturate(1.5);
+  --data-glow: 0 0 12px rgba(34,211,238,0.3);
+  --data-glow-strong: 0 0 20px rgba(34,211,238,0.5);
+  --map-bg-1: #0D1117;
+  --map-bg-2: #111827;
+  --map-bg-3: #0F1923;
+  --map-coast: rgba(34,211,238,0.06);
+  --map-grid: rgba(255,255,255,0.02);
+  --wind-color: rgba(34,211,238,0.12);
+  --wind-dot-color: rgba(34,211,238,0.2);
+  --scanline-opacity: 0.02;
+  --input-bg: rgba(0,0,0,0.3);
+  --land-opacity: 0.06;
+  --atmo-opacity: 0.035;
+  --coord-opacity: 0.45;
+  --city-opacity: 0.3;
+  --tooltip-arrow: rgba(26,29,37,0.95);
+}
+
+/* ================================================================
+   DESIGN TOKENS — LIGHT
+   ================================================================ */
+[data-theme="light"] {
+  --bg: #F0F2F5;
+  --surface: #FFFFFF;
+  --surface-glass: rgba(255,255,255,0.92);
+  --surface-glass-hover: rgba(255,255,255,0.96);
+  --text-primary: #111318;
+  --text-secondary: #4A5066;
+  --text-tertiary: #8B91A0;
+  --border: #D1D5DE;
+  --border-light: rgba(0,0,0,0.06);
+  --border-glow: rgba(0,0,0,0.04);
+  --accent: #0891B2;
+  --accent-secondary: #6366F1;
+  --accent-tertiary: #DB2777;
+  --panel-shadow: 0 8px 32px rgba(0,0,0,0.1), 0 0 0 1px rgba(0,0,0,0.05);
+  --data-glow: 0 0 12px rgba(8,145,178,0.2);
+  --data-glow-strong: 0 0 20px rgba(8,145,178,0.35);
+  --map-bg-1: #C8D6E5;
+  --map-bg-2: #B8C9DC;
+  --map-bg-3: #D5DFE9;
+  --map-coast: rgba(8,145,178,0.12);
+  --map-grid: rgba(0,0,0,0.04);
+  --wind-color: rgba(8,145,178,0.15);
+  --wind-dot-color: rgba(8,145,178,0.25);
+  --scanline-opacity: 0.01;
+  --input-bg: rgba(0,0,0,0.04);
+  --land-opacity: 0.1;
+  --atmo-opacity: 0.05;
+  --coord-opacity: 0.5;
+  --city-opacity: 0.4;
+  --tooltip-arrow: rgba(255,255,255,0.95);
+}
+
+/* ================================================================
+   BASE
+   ================================================================ */
+html, body {
+  height: 100%;
+  overflow: hidden;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.mono { font-family: 'JetBrains Mono', 'SF Mono', monospace; }
+
+/* ================================================================
+   GLASS PANEL MIXIN
+   ================================================================ */
+.glass {
+  background: var(--surface-glass);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border-light);
+  box-shadow: var(--panel-shadow);
+  border-radius: 8px;
+}
+
+/* ================================================================
+   LAYOUT SHELL
+   ================================================================ */
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+/* ================================================================
+   TOP BAR — compact, 48px
+   ================================================================ */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 48px;
+  padding: 0 16px;
+  background: var(--surface-glass);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-bottom: 1px solid var(--border-light);
+  z-index: 200;
+  flex-shrink: 0;
+}
+
+.topbar-left { display: flex; align-items: center; gap: 28px; }
+.topbar-right { display: flex; align-items: center; gap: 16px; }
+
+/* Logo */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: var(--text-primary);
+}
+.logo-mark {
+  width: 24px; height: 24px;
+  border: 2px solid var(--accent);
+  border-radius: 5px;
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+}
+.logo-mark svg { width: 14px; height: 14px; }
+.logo-name {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 15px; font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--accent);
+  text-shadow: var(--data-glow);
+}
+.logo-sub {
+  font-size: 12px; font-weight: 400;
+  color: var(--text-tertiary);
+  margin-left: 2px;
+}
+
+/* Nav tabs */
+.nav-tabs { display: flex; gap: 2px; }
+.nav-tab {
+  padding: 6px 14px;
+  font-size: 13px; font-weight: 500;
+  color: var(--text-secondary);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none; background: none;
+  position: relative;
+}
+.nav-tab:hover { color: var(--text-primary); background: rgba(255,255,255,0.04); }
+[data-theme="light"] .nav-tab:hover { background: rgba(0,0,0,0.04); }
+.nav-tab.active { color: var(--accent); background: rgba(34,211,238,0.08); }
+[data-theme="light"] .nav-tab.active { background: rgba(8,145,178,0.08); }
+.nav-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px; left: 50%; transform: translateX(-50%);
+  width: 16px; height: 2px;
+  background: var(--accent);
+  border-radius: 1px;
+  box-shadow: var(--data-glow);
+}
+
+/* Status dot */
+.status-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--success);
+  box-shadow: 0 0 6px var(--success);
+  animation: pulse-status 2s ease-in-out infinite;
+}
+@keyframes pulse-status {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Zulu clock */
+.zulu-time {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px; font-weight: 500;
+  color: var(--accent);
+  text-shadow: var(--data-glow);
+}
+
+/* Theme toggle */
+.theme-toggle {
+  width: 32px; height: 32px; border-radius: 4px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+.theme-toggle:hover { color: var(--accent); border-color: var(--accent); }
+.theme-toggle svg { width: 16px; height: 16px; }
+.theme-icon-dark, .theme-icon-light { display: none; }
+[data-theme="dark"] .theme-icon-dark { display: block; }
+[data-theme="light"] .theme-icon-light { display: block; }
+
+/* User avatar */
+.user-avatar {
+  width: 28px; height: 28px; border-radius: 4px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; font-weight: 700;
+  color: #111318; cursor: pointer;
+}
+
+/* ================================================================
+   MAP CONTAINER
+   ================================================================ */
+.map-container {
+  flex: 1; position: relative; overflow: hidden;
+  background:
+    radial-gradient(ellipse 120% 80% at 50% 40%, var(--map-bg-2), transparent),
+    radial-gradient(ellipse 80% 50% at 30% 60%, var(--map-bg-3), transparent),
+    radial-gradient(ellipse 60% 40% at 70% 50%, rgba(15,25,35,0.8), transparent),
+    var(--map-bg-1);
+}
+
+/* Scanlines */
+.map-container::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent, transparent 2px,
+    rgba(255,255,255,var(--scanline-opacity)) 2px,
+    rgba(255,255,255,var(--scanline-opacity)) 3px
+  );
+  pointer-events: none; z-index: 1;
+}
+
+/* Grid */
+.map-grid {
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(90deg, var(--map-grid) 1px, transparent 1px),
+    linear-gradient(0deg, var(--map-grid) 1px, transparent 1px);
+  background-size: 100px 100px;
+  pointer-events: none; z-index: 1;
+}
+
+/* Atmosphere blobs */
+.atmosphere { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+.atmo-blob {
+  position: absolute; border-radius: 50%;
+  filter: blur(120px);
+  opacity: var(--atmo-opacity);
+}
+
+/* Landmass shapes */
+.map-land { position: absolute; inset: 0; pointer-events: none; z-index: 2; }
+.land-shape {
+  position: absolute; border-radius: 40%;
+  background: var(--text-secondary);
+  opacity: var(--land-opacity);
+}
+
+/* Coastlines (border-only shapes) */
+.coastline { position: absolute; inset: 0; pointer-events: none; z-index: 2; }
+.coast-shape {
+  position: absolute;
+  border: 1px solid var(--map-coast);
+  border-radius: 40% 60% 50% 45%;
+  opacity: 0.7;
+}
+
+/* Coordinate labels */
+.coord-label {
+  position: absolute;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-tertiary);
+  opacity: var(--coord-opacity);
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* City dots */
+.city-dot {
+  position: absolute;
+  width: 3px; height: 3px; border-radius: 50%;
+  background: var(--text-tertiary);
+  opacity: var(--city-opacity);
+  z-index: 3;
+}
+.city-label {
+  position: absolute;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--text-tertiary);
+  opacity: 0.35;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 3;
+}
+
+/* ================================================================
+   WIND PARTICLES (CSS-only animation)
+   ================================================================ */
+.wind-particles { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 4; }
+
+/* Streaks */
+.wind-line {
+  position: absolute;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--wind-color), transparent);
+  border-radius: 1px;
+  animation: wind-drift linear infinite;
+}
+
+@keyframes wind-drift {
+  0%   { transform: translateX(-100px) translateY(0); opacity: 0; }
+  8%   { opacity: 1; }
+  92%  { opacity: 1; }
+  100% { transform: translateX(calc(100vw + 100px)) translateY(-50px); opacity: 0; }
+}
+
+/* Dots */
+.wind-dot {
+  position: absolute;
+  width: 2px; height: 2px;
+  background: var(--wind-dot-color);
+  border-radius: 50%;
+  animation: wind-dot-drift linear infinite;
+}
+
+@keyframes wind-dot-drift {
+  0%   { transform: translateX(-20px) translateY(0); opacity: 0; }
+  12%  { opacity: 0.7; }
+  88%  { opacity: 0.7; }
+  100% { transform: translateX(calc(100vw + 20px)) translateY(-70px); opacity: 0; }
+}
+
+/* Particle instances — streaks */
+.wl-1  { top: 12%; width: 70px;  animation-duration: 11s; animation-delay: 0s; }
+.wl-2  { top: 22%; width: 55px;  animation-duration: 14s; animation-delay: 2.1s; }
+.wl-3  { top: 30%; width: 85px;  animation-duration: 10s; animation-delay: 4.3s; }
+.wl-4  { top: 38%; width: 60px;  animation-duration: 16s; animation-delay: 1.2s; }
+.wl-5  { top: 46%; width: 90px;  animation-duration: 12s; animation-delay: 5.5s; }
+.wl-6  { top: 54%; width: 50px;  animation-duration: 15s; animation-delay: 0.8s; }
+.wl-7  { top: 62%; width: 75px;  animation-duration: 13s; animation-delay: 3.6s; }
+.wl-8  { top: 70%; width: 65px;  animation-duration: 17s; animation-delay: 6.1s; }
+.wl-9  { top: 78%; width: 80px;  animation-duration: 11s; animation-delay: 2.7s; }
+.wl-10 { top: 85%; width: 45px;  animation-duration: 14s; animation-delay: 7.2s; }
+.wl-11 { top: 18%; width: 95px;  animation-duration: 18s; animation-delay: 8.0s; }
+.wl-12 { top: 42%; width: 40px;  animation-duration: 10s; animation-delay: 3.0s; }
+.wl-13 { top: 58%; width: 70px;  animation-duration: 19s; animation-delay: 1.5s; }
+.wl-14 { top: 91%; width: 55px;  animation-duration: 12s; animation-delay: 4.8s; }
+
+/* Particle instances — dots */
+.wd-1  { top: 15%; animation-duration: 20s; animation-delay: 0s; }
+.wd-2  { top: 27%; animation-duration: 24s; animation-delay: 3s; }
+.wd-3  { top: 35%; animation-duration: 17s; animation-delay: 6s; }
+.wd-4  { top: 48%; animation-duration: 22s; animation-delay: 1.5s; }
+.wd-5  { top: 56%; animation-duration: 19s; animation-delay: 4.5s; }
+.wd-6  { top: 65%; animation-duration: 25s; animation-delay: 7s; }
+.wd-7  { top: 74%; animation-duration: 16s; animation-delay: 2.5s; }
+.wd-8  { top: 82%; animation-duration: 21s; animation-delay: 5.5s; }
+.wd-9  { top: 20%; animation-duration: 23s; animation-delay: 8.5s; }
+.wd-10 { top: 90%; animation-duration: 18s; animation-delay: 9s; }
+
+/* ================================================================
+   AIRPORT PINS
+   ================================================================ */
+.airport-pins { position: absolute; inset: 0; z-index: 10; pointer-events: none; }
+
+.airport-pin {
+  position: absolute;
+  pointer-events: auto;
+  cursor: pointer;
+  display: flex; flex-direction: column; align-items: center;
+  transform: translate(-50%, -50%);
+  transition: transform 0.2s ease;
+}
+.airport-pin:hover {
+  transform: translate(-50%, -50%) scale(1.2);
+  z-index: 20;
+}
+.airport-pin:hover .pin-glow { opacity: 0.55; transform: scale(1.8); }
+.airport-pin:hover .pin-label-bg { opacity: 1; }
+.airport-pin:hover .pin-tooltip { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); pointer-events: auto; }
+
+.pin-dot-wrap { position: relative; width: 12px; height: 12px; }
+
+.pin-dot {
+  width: 12px; height: 12px; border-radius: 50%;
+  position: absolute; top: 0; left: 0;
+  z-index: 2;
+}
+
+.pin-glow {
+  position: absolute;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  top: 50%; left: 50%;
+  transform: scale(1);
+  margin-top: -18px; margin-left: -18px;
+  opacity: 0.25;
+  transition: all 0.3s ease;
+  z-index: 1;
+  animation: pin-pulse 3s ease-in-out infinite;
+}
+
+@keyframes pin-pulse {
+  0%, 100% { opacity: 0.25; transform: scale(1); }
+  50%      { opacity: 0.38; transform: scale(1.3); }
+}
+
+.pin-label-bg {
+  margin-top: 3px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; font-weight: 600;
+  color: var(--text-primary);
+  padding: 1px 5px;
+  border-radius: 2px;
+  background: rgba(0,0,0,0.55);
+  opacity: 0.75;
+  transition: opacity 0.2s;
+  white-space: nowrap;
+  letter-spacing: 0.03em;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+}
+[data-theme="light"] .pin-label-bg {
+  background: rgba(255,255,255,0.7);
+  color: var(--text-primary);
+  text-shadow: none;
+}
+
+/* Category colors */
+.pin-vfr  .pin-dot  { background: var(--vfr);  box-shadow: 0 0 8px var(--vfr); }
+.pin-vfr  .pin-glow { background: var(--vfr); }
+.pin-mvfr .pin-dot  { background: var(--mvfr); box-shadow: 0 0 8px var(--mvfr); }
+.pin-mvfr .pin-glow { background: var(--mvfr); }
+.pin-ifr  .pin-dot  { background: var(--ifr);  box-shadow: 0 0 8px var(--ifr); }
+.pin-ifr  .pin-glow { background: var(--ifr); }
+.pin-lifr .pin-dot  { background: var(--lifr); box-shadow: 0 0 8px var(--lifr); }
+.pin-lifr .pin-glow { background: var(--lifr); }
+
+/* Pin positions (approx US continental) */
+.pos-kjfk { top: 32%; left: 78%; }
+.pos-kbos { top: 26%; left: 82%; }
+.pos-kord { top: 31%; left: 56%; }
+.pos-katl { top: 52%; left: 65%; }
+.pos-klax { top: 50%; left: 13%; }
+.pos-kden { top: 39%; left: 35%; }
+.pos-klas { top: 47%; left: 21%; }
+.pos-kmia { top: 70%; left: 73%; }
+
+/* ================================================================
+   PIN TOOLTIP (glass, appears above pin on hover)
+   ================================================================ */
+.pin-tooltip {
+  position: absolute;
+  bottom: calc(100% + 16px);
+  left: 50%;
+  transform: translateX(-50%) translateY(6px) scale(0.96);
+  padding: 10px 14px;
+  background: var(--surface-glass);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  box-shadow: var(--panel-shadow);
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  z-index: 100;
+}
+.pin-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: var(--tooltip-arrow);
+}
+
+.tt-header { display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px; }
+.tt-icao {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px; font-weight: 700;
+  color: var(--text-primary);
+}
+.tt-name { font-size: 11px; color: var(--text-secondary); }
+
+.tt-grid { display: flex; gap: 14px; }
+.tt-cell { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.tt-label {
+  font-size: 9px; font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.tt-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px; font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* ================================================================
+   LEFT PANEL — SEARCH + LAYERS (glass overlay)
+   ================================================================ */
+.panel-left {
+  position: absolute;
+  top: 12px; left: 12px;
+  width: 248px;
+  z-index: 50;
+  display: flex; flex-direction: column; gap: 8px;
+  animation: slide-in-left 0.5s ease-out both;
+}
+@keyframes slide-in-left {
+  from { transform: translateX(-20px); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+
+/* Search */
+.search-box { padding: 12px; }
+.search-input-wrap {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 8px 10px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.search-input-wrap:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(34,211,238,0.1), var(--data-glow);
+}
+[data-theme="light"] .search-input-wrap:focus-within {
+  box-shadow: 0 0 0 2px rgba(8,145,178,0.1), var(--data-glow);
+}
+.search-caret {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px; font-weight: 700;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.search-input {
+  border: none; background: none;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px; color: var(--text-primary);
+  outline: none; width: 100%;
+}
+.search-input::placeholder { color: var(--text-tertiary); }
+
+/* Layers */
+.layers-box { padding: 12px; }
+.section-label {
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  margin-bottom: 10px;
+  display: block;
+}
+
+.layer-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 5px 0;
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color 0.15s;
+  user-select: none;
+}
+.layer-row:hover { color: var(--text-primary); }
+.layer-row.on { color: var(--text-primary); }
+.layer-row.on .layer-box { background: var(--accent); border-color: var(--accent); }
+.layer-row.on .layer-check { display: block; }
+
+.layer-box {
+  width: 14px; height: 14px;
+  border-radius: 3px;
+  border: 1.5px solid var(--border);
+  background: transparent;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.layer-check {
+  display: none;
+  width: 10px; height: 10px;
+  stroke: #111318;
+  fill: none;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ================================================================
+   RIGHT PANEL — FAVORITES + RECENT (glass overlay)
+   ================================================================ */
+.panel-right {
+  position: absolute;
+  top: 12px; right: 12px;
+  width: 268px;
+  z-index: 50;
+  display: flex; flex-direction: column; gap: 8px;
+  animation: slide-in-right 0.5s ease-out 0.1s both;
+}
+@keyframes slide-in-right {
+  from { transform: translateX(20px); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+
+.favorites-box { padding: 12px; }
+.fav-row {
+  display: flex; align-items: center;
+  padding: 5px 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.fav-row:hover { background: rgba(255,255,255,0.04); }
+[data-theme="light"] .fav-row:hover { background: rgba(0,0,0,0.04); }
+
+.fav-icao {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px; font-weight: 600;
+  color: var(--text-primary);
+  width: 52px; flex-shrink: 0;
+}
+.fav-cat {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; font-weight: 600;
+  padding: 1px 6px; border-radius: 2px;
+  width: 48px; text-align: center; flex-shrink: 0;
+}
+.cat-vfr  { color: var(--vfr);  background: rgba(34,197,94,0.12); }
+.cat-mvfr { color: var(--mvfr); background: rgba(59,130,246,0.12); }
+.cat-ifr  { color: var(--ifr);  background: rgba(239,68,68,0.12); }
+.cat-lifr { color: var(--lifr); background: rgba(168,85,247,0.12); }
+
+.fav-temp, .fav-wind {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; color: var(--text-secondary);
+  width: 50px; text-align: right; flex-shrink: 0;
+}
+.fav-wind { width: 42px; }
+
+/* Recent */
+.recent-box { padding: 12px; }
+.recent-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+.recent-pill {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+[data-theme="light"] .recent-pill { background: rgba(0,0,0,0.03); }
+.recent-pill:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: rgba(34,211,238,0.06);
+}
+[data-theme="light"] .recent-pill:hover {
+  background: rgba(8,145,178,0.06);
+}
+
+/* ================================================================
+   LEGEND (bottom-right area, above timeline)
+   ================================================================ */
+.legend-bar {
+  position: absolute;
+  bottom: 72px; right: 284px;
+  z-index: 45;
+  display: flex; gap: 14px;
+  padding: 6px 14px;
+  animation: slide-up 0.5s ease-out 0.35s both;
+}
+.legend-item { display: flex; align-items: center; gap: 5px; }
+.legend-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+}
+.ld-vfr  { background: var(--vfr);  box-shadow: 0 0 6px var(--vfr); }
+.ld-mvfr { background: var(--mvfr); box-shadow: 0 0 6px var(--mvfr); }
+.ld-ifr  { background: var(--ifr);  box-shadow: 0 0 6px var(--ifr); }
+.ld-lifr { background: var(--lifr); box-shadow: 0 0 6px var(--lifr); }
+.legend-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; color: var(--text-tertiary);
+}
+
+/* ================================================================
+   TIMELINE SCRUBBER (bottom center)
+   ================================================================ */
+.timeline {
+  position: absolute;
+  bottom: 12px;
+  left: 268px; right: 284px;
+  z-index: 50;
+  padding: 10px 16px 14px 16px;
+  display: flex; flex-direction: column; gap: 8px;
+  animation: slide-up 0.5s ease-out 0.25s both;
+}
+@keyframes slide-up {
+  from { transform: translateY(16px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+.tl-header { display: flex; align-items: center; justify-content: space-between; }
+.tl-date {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; font-weight: 500;
+  color: var(--text-secondary);
+}
+.tl-now-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; font-weight: 600;
+  color: var(--accent);
+  text-shadow: var(--data-glow);
+  padding: 2px 8px;
+  background: rgba(34,211,238,0.1);
+  border-radius: 3px;
+  border: 1px solid rgba(34,211,238,0.2);
+}
+[data-theme="light"] .tl-now-badge {
+  background: rgba(8,145,178,0.1);
+  border-color: rgba(8,145,178,0.2);
+}
+
+.tl-track { position: relative; height: 32px; display: flex; align-items: center; }
+.tl-rail {
+  position: absolute;
+  left: 0; right: 0;
+  height: 3px;
+  background: var(--border);
+  border-radius: 2px;
+}
+.tl-progress {
+  position: absolute;
+  left: 0; width: 18%;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-secondary));
+  border-radius: 2px;
+  box-shadow: 0 0 10px rgba(34,211,238,0.3);
+}
+.tl-thumb {
+  position: absolute;
+  left: 18%;
+  top: 50%; transform: translate(-50%, -50%);
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--bg);
+  box-shadow: var(--data-glow-strong), 0 0 4px rgba(34,211,238,0.3);
+  cursor: grab;
+  z-index: 3;
+  transition: box-shadow 0.2s;
+}
+.tl-thumb:hover {
+  box-shadow: 0 0 24px rgba(34,211,238,0.7), 0 0 8px rgba(34,211,238,0.4);
+}
+.tl-thumb::after {
+  content: 'NOW';
+  position: absolute;
+  top: -18px; left: 50%; transform: translateX(-50%);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 1px;
+  text-shadow: var(--data-glow);
+  white-space: nowrap;
+}
+
+.tl-ticks {
+  position: absolute;
+  left: 0; right: 0; top: 16px;
+  display: flex; justify-content: space-between;
+}
+.tl-tick {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+}
+.tick-line { width: 1px; height: 5px; background: var(--text-tertiary); }
+.tick-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; color: var(--text-tertiary);
+  letter-spacing: 0.5px;
+}
+.tick-label.on { color: var(--accent); font-weight: 600; text-shadow: var(--data-glow); }
+
+/* ================================================================
+   FOOTER
+   ================================================================ */
+.footer-line {
+  position: absolute;
+  bottom: 2px; left: 0; right: 0;
+  text-align: center; padding: 3px;
+  z-index: 40;
+}
+.footer-text {
+  font-size: 10px;
+  color: var(--text-tertiary);
+  opacity: 0.4;
+}
+
+/* ================================================================
+   RESPONSIVE
+   ================================================================ */
+@media (max-width: 1024px) {
+  .panel-left  { width: 220px; }
+  .panel-right { width: 240px; }
+  .timeline { left: 236px; right: 256px; }
+  .legend-bar { right: 256px; }
+}
+@media (max-width: 768px) {
+  .panel-left, .panel-right { display: none; }
+  .timeline { left: 12px; right: 12px; }
+  .legend-bar { right: 12px; bottom: 72px; }
+  .nav-tabs { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ============================================================
+       TOP BAR
+       ============================================================ -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <a class="logo" href="#">
+        <div class="logo-mark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--accent)">
+            <path d="M2 15L8 9l4 3 6-6"/>
+            <path d="M16 6h4v4"/>
+          </svg>
+        </div>
+        <span class="logo-name">Jetstream</span>
+        <span class="logo-sub">Aggregator</span>
+      </a>
+      <nav class="nav-tabs">
+        <button class="nav-tab" onclick="activateTab(this)">Airport</button>
+        <button class="nav-tab" onclick="activateTab(this)">Trip</button>
+        <button class="nav-tab active" onclick="activateTab(this)">Map</button>
+      </nav>
+    </div>
+    <div class="topbar-right">
+      <div class="status-dot" title="Live data"></div>
+      <span class="zulu-time" id="zuluClock">14:32Z</span>
+      <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
+        <svg class="theme-icon-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+        <svg class="theme-icon-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+      </button>
+      <div class="user-avatar">AG</div>
+    </div>
+  </header>
+
+  <!-- ============================================================
+       MAP
+       ============================================================ -->
+  <div class="map-container">
+
+    <!-- Atmospheric glow blobs -->
+    <div class="atmosphere">
+      <div class="atmo-blob" style="width:600px;height:600px;background:var(--accent);top:8%;left:18%;"></div>
+      <div class="atmo-blob" style="width:500px;height:500px;background:var(--accent-secondary);top:45%;right:8%;"></div>
+      <div class="atmo-blob" style="width:400px;height:400px;background:var(--accent-tertiary);bottom:8%;left:38%;"></div>
+    </div>
+
+    <!-- Grid -->
+    <div class="map-grid"></div>
+
+    <!-- Landmass shapes -->
+    <div class="map-land">
+      <div class="land-shape" style="width:500px;height:380px;top:14%;left:52%;border-radius:30% 60% 40% 50%;transform:rotate(-10deg);"></div>
+      <div class="land-shape" style="width:400px;height:300px;top:16%;left:28%;border-radius:50% 40% 60% 30%;transform:rotate(5deg);"></div>
+      <div class="land-shape" style="width:200px;height:440px;top:8%;left:8%;border-radius:60% 30% 40% 50%;transform:rotate(-5deg);"></div>
+      <div class="land-shape" style="width:340px;height:200px;top:52%;left:38%;border-radius:40% 50% 60% 30%;transform:rotate(3deg);"></div>
+      <div class="land-shape" style="width:90px;height:170px;top:54%;left:67%;border-radius:40% 40% 60% 60%;transform:rotate(10deg);"></div>
+    </div>
+
+    <!-- Coastline outlines -->
+    <div class="coastline">
+      <div class="coast-shape" style="width:55%;height:42%;top:22%;left:14%;transform:rotate(-4deg);border-radius:35% 55% 45% 50%;"></div>
+      <div class="coast-shape" style="width:18%;height:26%;top:18%;left:62%;border-radius:50% 35% 55% 40%;transform:rotate(6deg);"></div>
+    </div>
+
+    <!-- Coordinate labels -->
+    <div class="coord-label" style="top:18%;left:4%;">45&deg;N</div>
+    <div class="coord-label" style="top:38%;left:4%;">40&deg;N</div>
+    <div class="coord-label" style="top:58%;left:4%;">35&deg;N</div>
+    <div class="coord-label" style="top:78%;left:4%;">30&deg;N</div>
+    <div class="coord-label" style="bottom:4%;left:18%;">120&deg;W</div>
+    <div class="coord-label" style="bottom:4%;left:38%;">105&deg;W</div>
+    <div class="coord-label" style="bottom:4%;left:58%;">90&deg;W</div>
+    <div class="coord-label" style="bottom:4%;left:78%;">75&deg;W</div>
+
+    <!-- City dots -->
+    <div class="city-dot" style="top:34%;left:58%;"></div>
+    <div class="city-label" style="top:35%;left:59%;">Pittsburgh</div>
+    <div class="city-dot" style="top:48%;left:43%;"></div>
+    <div class="city-label" style="top:49%;left:44%;">Nashville</div>
+    <div class="city-dot" style="top:26%;left:36%;"></div>
+    <div class="city-label" style="top:27%;left:37%;">Minneapolis</div>
+    <div class="city-dot" style="top:44%;left:23%;"></div>
+    <div class="city-label" style="top:45%;left:24%;">Phoenix</div>
+    <div class="city-dot" style="top:56%;left:55%;"></div>
+    <div class="city-label" style="top:57%;left:56%;">Charlotte</div>
+    <div class="city-dot" style="top:22%;left:52%;"></div>
+    <div class="city-label" style="top:23%;left:53%;">Detroit</div>
+    <div class="city-dot" style="top:28%;left:69%;"></div>
+    <div class="city-label" style="top:29%;left:70%;">Hartford</div>
+    <div class="city-dot" style="top:62%;left:48%;"></div>
+    <div class="city-label" style="top:63%;left:49%;">Dallas</div>
+
+    <!-- Wind particles (CSS-animated) -->
+    <div class="wind-particles">
+      <div class="wind-line wl-1"></div>
+      <div class="wind-line wl-2"></div>
+      <div class="wind-line wl-3"></div>
+      <div class="wind-line wl-4"></div>
+      <div class="wind-line wl-5"></div>
+      <div class="wind-line wl-6"></div>
+      <div class="wind-line wl-7"></div>
+      <div class="wind-line wl-8"></div>
+      <div class="wind-line wl-9"></div>
+      <div class="wind-line wl-10"></div>
+      <div class="wind-line wl-11"></div>
+      <div class="wind-line wl-12"></div>
+      <div class="wind-line wl-13"></div>
+      <div class="wind-line wl-14"></div>
+      <div class="wind-dot wd-1"></div>
+      <div class="wind-dot wd-2"></div>
+      <div class="wind-dot wd-3"></div>
+      <div class="wind-dot wd-4"></div>
+      <div class="wind-dot wd-5"></div>
+      <div class="wind-dot wd-6"></div>
+      <div class="wind-dot wd-7"></div>
+      <div class="wind-dot wd-8"></div>
+      <div class="wind-dot wd-9"></div>
+      <div class="wind-dot wd-10"></div>
+    </div>
+
+    <!-- ====== AIRPORT PINS ====== -->
+    <div class="airport-pins">
+
+      <!-- KJFK — VFR -->
+      <div class="airport-pin pos-kjfk pin-vfr">
+        <div class="pin-tooltip">
+          <div class="tt-header">
+            <span class="tt-icao">KJFK</span>
+            <span class="tt-name">John F. Kennedy Intl</span>
+          </div>
+          <div class="tt-grid">
+            <div class="tt-cell"><span class="tt-label">Cat</span><span class="tt-value" style="color:var(--vfr)">VFR</span></div>
+            <div class="tt-cell"><span class="tt-label">Temp</span><span class="tt-value">72&deg;F</span></div>
+            <div class="tt-cell"><span class="tt-label">Wind</span><span class="tt-value">210/08</span></div>
+            <div class="tt-cell"><span class="tt-label">Vis</span><span class="tt-value">10+</span></div>
+            <div class="tt-cell"><span class="tt-label">Ceil</span><span class="tt-value">CLR</span></div>
+          </div>
+        </div>
+        <div class="pin-dot-wrap">
+          <div class="pin-glow"></div>
+          <div class="pin-dot"></div>
+        </div>
+        <span class="pin-label-bg">KJFK</span>
+      </div>
+
+      <!-- KBOS — VFR -->
+      <div class="airport-pin pos-kbos pin-vfr">
+        <div class="pin-tooltip">
+          <div class="tt-header">
+            <span class="tt-icao">KBOS</span>
+            <span class="tt-name">Boston Logan Intl</span>
+          </div>
+          <div class="tt-grid">
+            <div class="tt-cell"><span class="tt-label">Cat</span><span class="tt-value" style="color:var(--vfr)">VFR</span></div>
+            <div class="tt-cell"><span class="tt-label">Temp</span><span class="tt-value">65&deg;F</span></div>
+            <div class="tt-cell"><span class="tt-label">Wind</span><span class="tt-value">180/10</span></div>
+            <div class="tt-cell"><span class="tt-label">Vis</span><span class="tt-value">10+</span></div>
+            <div class="tt-cell"><span class="tt-label">Ceil</span><span class="tt-value">FEW250</span></div>
+          </div>
+        </div>
+        <div class="pin-dot-wrap">
+          <div class="pin-glow"></div>
+          <div class="pin-dot"></div>
+        </div>
+        <span class="pin-label-bg">KBOS</span>
+      </div>
+
+      <!-- KORD — MVFR -->
+      <div class="airport-pin pos-kord pin-mvfr">
+        <div class="pin-tooltip">
+          <div class="tt-header">
+            <span class="tt-icao">KORD</span>
+            <span class="tt-name">Chicago O'Hare Intl</span>
+          </div>
+          <div class="tt-grid">
+            <div class="tt-cell"><span class="tt-label">Cat</span><span class="tt-value" style="color:var(--mvfr)">MVFR</span></div>
+            <div class="tt-cell"><span class="tt-label">Temp</span><span class="tt-value">45&deg;F</span></div>
+            <div class="tt-cell"><span class="tt-label">Wind</span><span class="tt-value">290/18</span></div>
+            <div class="tt-cell"><span class="tt-label">Vis</span><span class="tt-value">4SM</span></div>
+            <div class="tt-cell"><span class="tt-label">Ceil</span><span class="tt-value">BKN022</span></div>
+          </div>
+        </div>
+        <div class="pin-dot-wrap">
+          <div class="pin-glow"></div>
+          <div class="pin-dot"></div>
+        </div>
+        <span class="pin-label-bg">KORD</span>
+      </div>
+
+      <!-- KATL — IFR -->
+      <div class="airport-pin pos-katl pin-ifr">
+        <div class="pin-tooltip">
+          <div class="tt-header">
+            <span class="tt-icao">KATL</span>
+            <span class="tt-name">Hartsfield-Jackson Atlanta</span>
+          </div>
+          <div class="tt-grid">
+            <div class="tt-cell"><span class="tt-label">Cat</span><span class="tt-value" style="color:var(--ifr)">IFR</span></div>
+            <div class="tt-cell"><span class="tt-label">Temp</span><span class="tt-value">52&deg;F</span></div>
+            <div class="tt-cell"><span class="tt-label">Wind</span><span class="tt-value">160/06</span></div>
+            <div class="tt-cell"><span class="tt-label">Vis</span><span class="tt-value">1.5SM</span></div>
+            <div class="tt-cell"><span class="tt-label">Ceil</span><span class="tt-value">OVC005</span></div>
+          </div>
+        </div>
+        <div class="pin-dot-wrap">
+          <div class="pin-glow"></div>
+          <div class="pin-dot"></div>
+        </div>
+        <span class="pin-label-bg">KATL</span>
+      </div>
+
+      <!-- KLAX — VFR -->
+      <div class="airport-pin pos-klax pin-vfr">
+        <div class="pin-tooltip">
+          <div class="tt-header">
+            <span class="tt-icao">KLAX</span>
+            <span class="tt-name">Los Angeles Intl</span>
+          </div>
+          <div class="tt-grid">
+            <div class="tt-cell"><span class="tt-label">Cat</span><span class="tt-value" style="color:var(--vfr)">VFR</span></div>
+            <div class="tt-cell"><span class="tt-label">Temp</span><span class="tt-value">68&deg;F</span></div>
+            <div class="tt-cell"><span class="tt-label">Wind</span><span class="tt-value">250/12</span></div>
+            <div class="tt-cell"><span class="tt-label">Vis</span><span class="tt-value">10+</span></div>
+            <div class="tt-cell"><span class="tt-label">Ceil</span><span class="tt-value">SCT080</span></div>
+          </div>
+        </div>
+        <div class="pin-dot-wrap">
+          <div class="pin-glow"></div>
+          <div class="pin-dot"></div>
+        </div>
+        <span class="pin-label-bg">KLAX</span>
+      </div>
+
+      <!-- KDEN — VFR -->
+      <div class="airport-pin pos-kden pin-vfr">
+        <div class="pin-tooltip">
+          <div class="tt-header">
+            <span class="tt-icao">KDEN</span>
+            <span class="tt-name">Denver Intl</span>
+          </div>
+          <div class="tt-grid">
+            <div class="tt-cell"><span class="tt-label">Cat</span><span class="tt-value" style="color:var(--vfr)">VFR</span></div>
+            <div class="tt-cell"><span class="tt-label">Temp</span><span class="tt-value">58&deg;F</span></div>
+            <div class="tt-cell"><span class="tt-label">Wind</span><span class="tt-value">310/14</span></div>
+            <div class="tt-cell"><span class="tt-label">Vis</span><span class="tt-value">10+</span></div>
+            <div class="tt-cell"><span class="tt-label">Ceil</span><span class="tt-value">CLR</span></div>
+          </div>
+        </div>
+        <div class="pin-dot-wrap">
+          <div class="pin-glow"></div>
+          <div class="pin-dot"></div>
+        </div>
+        <span class="pin-label-bg">KDEN</span>
+      </div>
+
+      <!-- KLAS — VFR -->
+      <div class="airport-pin pos-klas pin-vfr">
+        <div class="pin-tooltip">
+          <div class="tt-header">
+            <span class="tt-icao">KLAS</span>
+            <span class="tt-name">Harry Reid Intl</span>
+          </div>
+          <div class="tt-grid">
+            <div class="tt-cell"><span class="tt-label">Cat</span><span class="tt-value" style="color:var(--vfr)">VFR</span></div>
+            <div class="tt-cell"><span class="tt-label">Temp</span><span class="tt-value">75&deg;F</span></div>
+            <div class="tt-cell"><span class="tt-label">Wind</span><span class="tt-value">200/08</span></div>
+            <div class="tt-cell"><span class="tt-label">Vis</span><span class="tt-value">10+</span></div>
+            <div class="tt-cell"><span class="tt-label">Ceil</span><span class="tt-value">CLR</span></div>
+          </div>
+        </div>
+        <div class="pin-dot-wrap">
+          <div class="pin-glow"></div>
+          <div class="pin-dot"></div>
+        </div>
+        <span class="pin-label-bg">KLAS</span>
+      </div>
+
+      <!-- KMIA — VFR -->
+      <div class="airport-pin pos-kmia pin-vfr">
+        <div class="pin-tooltip">
+          <div class="tt-header">
+            <span class="tt-icao">KMIA</span>
+            <span class="tt-name">Miami Intl</span>
+          </div>
+          <div class="tt-grid">
+            <div class="tt-cell"><span class="tt-label">Cat</span><span class="tt-value" style="color:var(--vfr)">VFR</span></div>
+            <div class="tt-cell"><span class="tt-label">Temp</span><span class="tt-value">82&deg;F</span></div>
+            <div class="tt-cell"><span class="tt-label">Wind</span><span class="tt-value">140/10</span></div>
+            <div class="tt-cell"><span class="tt-label">Vis</span><span class="tt-value">10+</span></div>
+            <div class="tt-cell"><span class="tt-label">Ceil</span><span class="tt-value">FEW040</span></div>
+          </div>
+        </div>
+        <div class="pin-dot-wrap">
+          <div class="pin-glow"></div>
+          <div class="pin-dot"></div>
+        </div>
+        <span class="pin-label-bg">KMIA</span>
+      </div>
+
+    </div><!-- /airport-pins -->
+
+    <!-- ====== LEFT PANEL ====== -->
+    <div class="panel-left">
+      <div class="search-box glass">
+        <div class="search-input-wrap">
+          <span class="search-caret">&gt;</span>
+          <input class="search-input" type="text" placeholder="Enter ICAO code..." spellcheck="false" autocomplete="off">
+        </div>
+      </div>
+      <div class="layers-box glass">
+        <span class="section-label">Layers</span>
+        <div class="layer-row on" onclick="toggleLayer(this)">
+          <div class="layer-box">
+            <svg class="layer-check" viewBox="0 0 10 10"><path d="M2 5.2L4.2 7.4L8 3"/></svg>
+          </div>
+          <span>Flight Categories</span>
+        </div>
+        <div class="layer-row" onclick="toggleLayer(this)">
+          <div class="layer-box">
+            <svg class="layer-check" viewBox="0 0 10 10"><path d="M2 5.2L4.2 7.4L8 3"/></svg>
+          </div>
+          <span>Wind Speed</span>
+        </div>
+        <div class="layer-row" onclick="toggleLayer(this)">
+          <div class="layer-box">
+            <svg class="layer-check" viewBox="0 0 10 10"><path d="M2 5.2L4.2 7.4L8 3"/></svg>
+          </div>
+          <span>Temperature</span>
+        </div>
+        <div class="layer-row" onclick="toggleLayer(this)">
+          <div class="layer-box">
+            <svg class="layer-check" viewBox="0 0 10 10"><path d="M2 5.2L4.2 7.4L8 3"/></svg>
+          </div>
+          <span>Precipitation</span>
+        </div>
+        <div class="layer-row" onclick="toggleLayer(this)">
+          <div class="layer-box">
+            <svg class="layer-check" viewBox="0 0 10 10"><path d="M2 5.2L4.2 7.4L8 3"/></svg>
+          </div>
+          <span>Radar</span>
+        </div>
+        <div class="layer-row" onclick="toggleLayer(this)">
+          <div class="layer-box">
+            <svg class="layer-check" viewBox="0 0 10 10"><path d="M2 5.2L4.2 7.4L8 3"/></svg>
+          </div>
+          <span>AIRMETs / SIGMETs</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== RIGHT PANEL ====== -->
+    <div class="panel-right">
+      <div class="favorites-box glass">
+        <span class="section-label">Favorites</span>
+        <div class="fav-row">
+          <span class="fav-icao">KJFK</span>
+          <span class="fav-cat cat-vfr">VFR</span>
+          <span class="fav-temp">72&deg;F</span>
+          <span class="fav-wind">8kt</span>
+        </div>
+        <div class="fav-row">
+          <span class="fav-icao">KLAX</span>
+          <span class="fav-cat cat-vfr">VFR</span>
+          <span class="fav-temp">68&deg;F</span>
+          <span class="fav-wind">12kt</span>
+        </div>
+        <div class="fav-row">
+          <span class="fav-icao">KORD</span>
+          <span class="fav-cat cat-mvfr">MVFR</span>
+          <span class="fav-temp">45&deg;F</span>
+          <span class="fav-wind">18kt</span>
+        </div>
+        <div class="fav-row">
+          <span class="fav-icao">KATL</span>
+          <span class="fav-cat cat-ifr">IFR</span>
+          <span class="fav-temp">52&deg;F</span>
+          <span class="fav-wind">6kt</span>
+        </div>
+      </div>
+      <div class="recent-box glass">
+        <span class="section-label">Recent</span>
+        <div class="recent-pills">
+          <span class="recent-pill">KBOS</span>
+          <span class="recent-pill">KSFO</span>
+          <span class="recent-pill">KMIA</span>
+          <span class="recent-pill">KDEN</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== LEGEND ====== -->
+    <div class="legend-bar glass">
+      <div class="legend-item"><div class="legend-dot ld-vfr"></div><span class="legend-label">VFR</span></div>
+      <div class="legend-item"><div class="legend-dot ld-mvfr"></div><span class="legend-label">MVFR</span></div>
+      <div class="legend-item"><div class="legend-dot ld-ifr"></div><span class="legend-label">IFR</span></div>
+      <div class="legend-item"><div class="legend-dot ld-lifr"></div><span class="legend-label">LIFR</span></div>
+    </div>
+
+    <!-- ====== TIMELINE SCRUBBER ====== -->
+    <div class="timeline glass">
+      <div class="tl-header">
+        <span class="tl-date">23 Feb 2026</span>
+        <span class="tl-now-badge">NOW 14:32Z</span>
+      </div>
+      <div class="tl-track" id="tlTrack">
+        <div class="tl-rail"></div>
+        <div class="tl-progress" id="tlProgress"></div>
+        <div class="tl-thumb" id="tlThumb"></div>
+        <div class="tl-ticks">
+          <div class="tl-tick"><div class="tick-line"></div><span class="tick-label">13Z</span></div>
+          <div class="tl-tick"><div class="tick-line"></div><span class="tick-label on">14Z</span></div>
+          <div class="tl-tick"><div class="tick-line"></div><span class="tick-label">15Z</span></div>
+          <div class="tl-tick"><div class="tick-line"></div><span class="tick-label">16Z</span></div>
+          <div class="tl-tick"><div class="tick-line"></div><span class="tick-label">17Z</span></div>
+          <div class="tl-tick"><div class="tick-line"></div><span class="tick-label">18Z</span></div>
+          <div class="tl-tick"><div class="tick-line"></div><span class="tick-label">19Z</span></div>
+          <div class="tl-tick"><div class="tick-line"></div><span class="tick-label">20Z</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer-line">
+      <span class="footer-text">Data from AWC, Open-Meteo, NWS</span>
+    </div>
+
+  </div><!-- /map-container -->
+</div><!-- /app -->
+
+<!-- ================================================================
+     JAVASCRIPT
+     ================================================================ -->
+<script>
+(function() {
+  'use strict';
+
+  // ---- Theme toggle ----
+  window.toggleTheme = function() {
+    var html = document.documentElement;
+    var next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+  };
+
+  // ---- Nav tabs ----
+  window.activateTab = function(el) {
+    document.querySelectorAll('.nav-tab').forEach(function(t) { t.classList.remove('active'); });
+    el.classList.add('active');
+  };
+
+  // ---- Layer toggles ----
+  window.toggleLayer = function(el) {
+    el.classList.toggle('on');
+  };
+
+  // ---- Zulu clock ----
+  function updateClock() {
+    var now = new Date();
+    var h = String(now.getUTCHours()).padStart(2, '0');
+    var m = String(now.getUTCMinutes()).padStart(2, '0');
+    document.getElementById('zuluClock').textContent = h + ':' + m + 'Z';
+  }
+  updateClock();
+  setInterval(updateClock, 10000);
+
+  // ---- Timeline scrubber drag ----
+  var thumb = document.getElementById('tlThumb');
+  var progress = document.getElementById('tlProgress');
+  var track = document.getElementById('tlTrack');
+  var dragging = false;
+
+  function setThumbPos(clientX) {
+    var rect = track.getBoundingClientRect();
+    var pct = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+    thumb.style.left = (pct * 100) + '%';
+    progress.style.width = (pct * 100) + '%';
+
+    // Update active tick label
+    var ticks = track.querySelectorAll('.tick-label');
+    var activeIdx = Math.round(pct * (ticks.length - 1));
+    ticks.forEach(function(t, i) {
+      if (i === activeIdx) { t.classList.add('on'); }
+      else { t.classList.remove('on'); }
+    });
+
+    // Update NOW badge text
+    var hours = ['13', '14', '15', '16', '17', '18', '19', '20'];
+    var badge = document.querySelector('.tl-now-badge');
+    var mins = String(Math.floor(Math.random() * 60)).padStart(2, '0');
+    if (badge) badge.textContent = 'NOW ' + hours[activeIdx] + ':' + mins + 'Z';
+
+    // Update thumb label
+    thumb.style.setProperty('--tl-label', '"' + hours[activeIdx] + 'Z"');
+  }
+
+  thumb.addEventListener('mousedown', function(e) { dragging = true; e.preventDefault(); });
+  document.addEventListener('mousemove', function(e) { if (dragging) setThumbPos(e.clientX); });
+  document.addEventListener('mouseup', function() { dragging = false; });
+
+  // Touch
+  thumb.addEventListener('touchstart', function(e) { dragging = true; e.preventDefault(); }, { passive: false });
+  document.addEventListener('touchmove', function(e) { if (dragging && e.touches[0]) setThumbPos(e.touches[0].clientX); });
+  document.addEventListener('touchend', function() { dragging = false; });
+
+  // Click on track to jump
+  track.addEventListener('click', function(e) {
+    if (e.target === thumb) return;
+    setThumbPos(e.clientX);
+  });
+
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1861 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jetstream — Trip Planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ================================================================
+   RESET & BASE
+   ================================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #111318;
+  --surface: #1A1D25;
+  --glass: rgba(26,29,37,0.88);
+  --glass-border: rgba(255,255,255,0.06);
+  --glass-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.04);
+  --text-primary: #E4E7ED;
+  --text-secondary: #8B91A0;
+  --text-tertiary: #4A5066;
+  --border: #2A2E3A;
+  --accent: #22D3EE;
+  --accent-secondary: #818CF8;
+  --accent-tertiary: #F472B6;
+  --success: #4ADE80;
+  --warning: #FBBF24;
+  --danger: #F87171;
+  --vfr: #22C55E;
+  --mvfr: #3B82F6;
+  --ifr: #EF4444;
+  --lifr: #A855F7;
+  --map-bg: #0A0C12;
+  --map-grid: rgba(42,46,58,0.25);
+  --glow-cyan: 0 0 12px rgba(34,211,238,0.3);
+  --glow-green: 0 0 12px rgba(74,222,128,0.4);
+  --glow-blue: 0 0 12px rgba(59,130,246,0.4);
+  --data-glow: 0 0 12px rgba(34,211,238,0.3);
+}
+
+html.light {
+  --bg: #F0F2F5;
+  --surface: #FFFFFF;
+  --glass: rgba(255,255,255,0.92);
+  --glass-border: rgba(0,0,0,0.06);
+  --glass-shadow: 0 8px 32px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04);
+  --text-primary: #111318;
+  --text-secondary: #5A6070;
+  --text-tertiary: #9098A8;
+  --border: #D1D5DE;
+  --accent: #0891B2;
+  --map-bg: #E2E6EC;
+  --map-grid: rgba(0,0,0,0.06);
+  --glow-cyan: 0 0 10px rgba(8,145,178,0.15);
+  --glow-green: 0 0 8px rgba(74,222,128,0.2);
+  --glow-blue: 0 0 8px rgba(59,130,246,0.2);
+  --data-glow: 0 0 8px rgba(8,145,178,0.2);
+}
+
+html {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text-primary);
+  line-height: 1.5;
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.mono { font-family: 'JetBrains Mono', 'SF Mono', monospace; }
+.text-secondary { color: var(--text-secondary); }
+.text-tertiary { color: var(--text-tertiary); }
+
+/* ================================================================
+   GLASS PANEL
+   ================================================================ */
+.glass {
+  background: var(--glass);
+  backdrop-filter: blur(16px) saturate(1.5);
+  -webkit-backdrop-filter: blur(16px) saturate(1.5);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  border-radius: 8px;
+}
+
+/* ================================================================
+   ANIMATIONS
+   ================================================================ */
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.25; transform: scale(1); }
+  50% { opacity: 0.55; transform: scale(1.4); }
+}
+
+@keyframes dash-march {
+  to { stroke-dashoffset: -28; }
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { text-shadow: 0 0 8px rgba(34,211,238,0.2); }
+  50% { text-shadow: 0 0 16px rgba(34,211,238,0.5); }
+}
+
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+
+@keyframes now-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes scrubber-glow {
+  0%, 100% { box-shadow: 0 0 6px rgba(34,211,238,0.4); }
+  50% { box-shadow: 0 0 14px rgba(34,211,238,0.7); }
+}
+
+/* ================================================================
+   NAVBAR — Compact Top Bar
+   ================================================================ */
+.navbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  background: rgba(17,19,24,0.94);
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  border-bottom: 1px solid var(--border);
+}
+html.light .navbar { background: rgba(255,255,255,0.94); }
+
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: -0.3px;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+.navbar-brand svg { width: 22px; height: 22px; color: var(--accent); }
+.navbar-brand .brand-sub {
+  font-weight: 400;
+  font-size: 12px;
+  color: var(--text-tertiary);
+  margin-left: 4px;
+}
+
+.nav-tabs {
+  display: flex;
+  gap: 0;
+  list-style: none;
+}
+.nav-tabs a {
+  display: flex;
+  align-items: center;
+  height: 48px;
+  padding: 0 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+}
+.nav-tabs a:hover { color: var(--text-primary); }
+.nav-tabs a.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nav-clock {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  text-shadow: var(--data-glow);
+  letter-spacing: 0.5px;
+}
+
+.theme-toggle {
+  width: 32px; height: 32px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  font-size: 14px;
+}
+.theme-toggle:hover { color: var(--accent); border-color: var(--accent); }
+
+.nav-user {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #111;
+  cursor: pointer;
+}
+
+/* ================================================================
+   SPLIT CONTAINER
+   ================================================================ */
+.split-container {
+  display: flex;
+  margin-top: 48px;
+  height: calc(100vh - 48px);
+  min-height: 500px;
+}
+
+/* ================================================================
+   MAP PANEL (LEFT ~55%)
+   ================================================================ */
+.map-panel {
+  flex: 1.2;
+  position: relative;
+  background: var(--map-bg);
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* Dark basemap simulation */
+.map-base {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 45% 50%, rgba(20,25,40,1) 0%, rgba(10,12,18,1) 100%);
+}
+
+/* Subtle terrain/coast hint */
+.map-terrain {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 35% 45% at 30% 60%, rgba(34,211,238,0.03) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 30% at 65% 35%, rgba(129,140,248,0.02) 0%, transparent 70%),
+    radial-gradient(ellipse 25% 35% at 55% 55%, rgba(34,211,238,0.02) 0%, transparent 60%);
+}
+
+/* Grid lines */
+.map-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--map-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--map-grid) 1px, transparent 1px);
+  background-size: 80px 80px;
+}
+
+/* Coastline suggestion */
+.map-coast {
+  position: absolute;
+  inset: 0;
+  opacity: 0.12;
+  background:
+    radial-gradient(ellipse 55% 80% at 25% 50%, transparent 48%, var(--accent) 49%, transparent 51%);
+}
+
+/* Scanline effect */
+.map-scanline {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.map-scanline::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0;
+  height: 120px;
+  background: linear-gradient(180deg, transparent, rgba(34,211,238,0.02), transparent);
+  animation: scanline 8s linear infinite;
+}
+
+/* Airport dots */
+.airport-pin {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  cursor: pointer;
+}
+.airport-pin .pin-dot {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  position: relative;
+}
+.airport-pin .pin-glow {
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  opacity: 0.3;
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+.airport-pin .pin-ring {
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 1.5px solid;
+  opacity: 0.4;
+}
+.airport-pin.vfr .pin-dot { background: var(--vfr); box-shadow: var(--glow-green); }
+.airport-pin.vfr .pin-glow { background: var(--vfr); }
+.airport-pin.vfr .pin-ring { border-color: var(--vfr); }
+.airport-pin.mvfr .pin-dot { background: var(--mvfr); box-shadow: var(--glow-blue); }
+.airport-pin.mvfr .pin-glow { background: var(--mvfr); }
+.airport-pin.mvfr .pin-ring { border-color: var(--mvfr); }
+
+.airport-pin .pin-label {
+  position: absolute;
+  top: -28px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  letter-spacing: 1px;
+  text-shadow: 0 1px 6px rgba(0,0,0,0.9), 0 0 20px rgba(0,0,0,0.5);
+  color: var(--text-primary);
+}
+.airport-pin .pin-cat {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+.airport-pin.vfr .pin-cat { background: rgba(34,197,94,0.2); color: var(--vfr); }
+.airport-pin.mvfr .pin-cat { background: rgba(59,130,246,0.2); color: var(--mvfr); }
+
+/* Route SVG */
+.route-svg {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+.route-svg .route-line {
+  stroke-dasharray: 10 8;
+  stroke-linecap: round;
+  animation: dash-march 1.2s linear infinite;
+}
+.route-svg .route-line-glow {
+  stroke-linecap: round;
+  filter: blur(4px);
+  opacity: 0.3;
+}
+
+/* Leg labels on map */
+.leg-map-label {
+  position: absolute;
+  z-index: 8;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: rgba(17,19,24,0.8);
+  backdrop-filter: blur(8px);
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(255,255,255,0.05);
+  pointer-events: none;
+  letter-spacing: 0.5px;
+}
+
+/* Layers control */
+.map-layers {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  padding: 12px 14px;
+  z-index: 20;
+  min-width: 130px;
+}
+.map-layers .layers-title {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-tertiary);
+  margin-bottom: 8px;
+}
+.map-layers label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  margin-bottom: 3px;
+  transition: color 0.15s;
+}
+.map-layers label:hover { color: var(--text-primary); }
+.map-layers input[type="checkbox"] {
+  accent-color: var(--accent);
+  width: 12px; height: 12px;
+}
+
+/* Compass */
+.map-compass {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.map-compass .compass-ring {
+  width: 36px; height: 36px;
+  border: 1.5px solid var(--border);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(17,19,24,0.7);
+  backdrop-filter: blur(8px);
+}
+.map-compass .compass-n {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+/* ================================================================
+   DATA PANEL (RIGHT ~45%)
+   ================================================================ */
+.data-panel {
+  width: 460px;
+  min-width: 400px;
+  max-width: 520px;
+  overflow-y: auto;
+  padding: 20px;
+  border-left: 1px solid var(--border);
+  background: var(--bg);
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+.data-panel::-webkit-scrollbar { width: 5px; }
+.data-panel::-webkit-scrollbar-track { background: transparent; }
+.data-panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+.section { margin-bottom: 16px; animation: fade-in-up 0.4s ease both; }
+.section:nth-child(2) { animation-delay: 0.05s; }
+.section:nth-child(3) { animation-delay: 0.1s; }
+.section:nth-child(4) { animation-delay: 0.15s; }
+.section:nth-child(5) { animation-delay: 0.2s; }
+
+.section-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--text-tertiary);
+  margin-bottom: 8px;
+}
+
+/* Trip Header */
+.trip-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+.trip-title {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+.trip-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 4px;
+  background: rgba(34,211,238,0.08);
+  color: var(--accent);
+  border: 1px solid rgba(34,211,238,0.15);
+  letter-spacing: 0.5px;
+}
+
+/* Overall Status Card */
+.status-card {
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.status-go-big {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--success);
+  text-shadow: 0 0 20px rgba(74,222,128,0.4), 0 0 40px rgba(74,222,128,0.15);
+  line-height: 1;
+}
+.status-details { flex: 1; }
+.status-line {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 2px;
+}
+.status-line .hl { font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+.status-line .hl-green { color: var(--success); }
+.status-line .hl-cyan { color: var(--accent); }
+
+.confidence-track {
+  width: 100%;
+  height: 3px;
+  background: var(--border);
+  border-radius: 2px;
+  margin-top: 8px;
+  overflow: hidden;
+}
+.confidence-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--success));
+  transition: width 0.6s ease;
+}
+
+/* Metrics Grid */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.metric-cell {
+  padding: 12px 14px;
+  border-radius: 6px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  transition: border-color 0.15s;
+}
+.metric-cell:hover { border-color: rgba(34,211,238,0.2); }
+.metric-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-tertiary);
+  margin-bottom: 2px;
+}
+.metric-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-shadow: var(--data-glow);
+}
+.metric-value .unit {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-tertiary);
+}
+.metric-sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-tertiary);
+  margin-top: 1px;
+}
+
+/* Time Shift */
+.time-shift {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.time-shift-label {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  margin-right: 4px;
+  font-weight: 500;
+}
+.time-btn {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.time-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(34,211,238,0.04);
+}
+
+/* Leg Selector */
+.leg-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 6px;
+}
+.leg-row:hover {
+  border-color: rgba(34,211,238,0.25);
+  background: rgba(34,211,238,0.02);
+}
+.leg-row.selected {
+  border-color: var(--accent);
+  background: rgba(34,211,238,0.05);
+  box-shadow: 0 0 0 1px var(--accent), inset 0 0 20px rgba(34,211,238,0.03);
+}
+.leg-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  width: 24px; height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  background: rgba(34,211,238,0.1);
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.leg-route { flex: 1; min-width: 0; }
+.leg-route-codes {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: 0.3px;
+}
+.leg-route-meta {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 2px;
+}
+.cat-dot {
+  display: inline-block;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.cat-dot.vfr { background: var(--vfr); box-shadow: 0 0 4px rgba(34,197,94,0.4); }
+.cat-dot.mvfr { background: var(--mvfr); box-shadow: 0 0 4px rgba(59,130,246,0.4); }
+.cat-label-sm {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-tertiary);
+  letter-spacing: 0.3px;
+}
+.leg-time {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+}
+.leg-go {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--success);
+  flex-shrink: 0;
+}
+
+/* ================================================================
+   TIMELINE (full width, below split)
+   ================================================================ */
+.timeline-section {
+  border-top: 1px solid var(--border);
+  padding: 16px 24px 20px;
+  background: var(--bg);
+}
+.timeline-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.timeline-title {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--text-tertiary);
+}
+.timeline-date {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-tertiary);
+}
+.timeline-hours {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.timeline-hour {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-tertiary);
+  width: 40px;
+  text-align: center;
+}
+.timeline-track {
+  position: relative;
+  height: 52px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: visible;
+}
+.tl-leg {
+  position: absolute;
+  top: 8px;
+  height: 36px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.9);
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: filter 0.15s;
+  overflow: hidden;
+}
+.tl-leg:hover { filter: brightness(1.15); }
+.tl-leg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+/* NOW marker */
+.tl-now {
+  position: absolute;
+  top: -6px;
+  bottom: -6px;
+  width: 2px;
+  background: var(--accent);
+  z-index: 10;
+  border-radius: 1px;
+  box-shadow: 0 0 8px rgba(34,211,238,0.5);
+  animation: now-pulse 2s ease-in-out infinite;
+}
+.tl-now::before {
+  content: 'NOW';
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 1px;
+  text-shadow: var(--data-glow);
+}
+
+/* Scrubber */
+.tl-scrubber {
+  position: relative;
+  height: 14px;
+  margin-top: 10px;
+}
+.tl-scrubber-track {
+  position: absolute;
+  top: 5px;
+  left: 0; right: 0;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+}
+.tl-scrubber-fill {
+  position: absolute;
+  top: 0; left: 0;
+  height: 100%;
+  width: 38%;
+  background: linear-gradient(90deg, var(--accent), rgba(34,211,238,0.3));
+  border-radius: 2px;
+}
+.tl-scrubber-handle {
+  position: absolute;
+  top: 0;
+  left: 38%;
+  width: 14px; height: 14px;
+  background: var(--accent);
+  border: 2px solid var(--bg);
+  border-radius: 50%;
+  transform: translateX(-50%);
+  cursor: grab;
+  animation: scrubber-glow 2s ease-in-out infinite;
+}
+.tl-scrubber-hint {
+  position: absolute;
+  right: 0;
+  top: -2px;
+  font-size: 10px;
+  color: var(--text-tertiary);
+  font-style: italic;
+}
+
+/* ================================================================
+   LEG DETAIL (full width, below timeline)
+   ================================================================ */
+.leg-detail {
+  padding: 24px;
+  background: var(--bg);
+}
+.leg-detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+.leg-detail-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 700;
+}
+.leg-detail-title .leg-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  text-shadow: var(--data-glow);
+}
+.leg-detail-title .arrow { color: var(--text-tertiary); font-size: 14px; }
+.leg-detail-meta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* Two-column dep/arr */
+.leg-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.airport-card { padding: 18px; }
+.airport-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.airport-role {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-tertiary);
+  margin-bottom: 3px;
+}
+.airport-code-big {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-shadow: var(--data-glow);
+}
+.airport-badges {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.cat-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+}
+.cat-badge.vfr { background: rgba(34,197,94,0.12); color: var(--vfr); border: 1px solid rgba(34,197,94,0.2); }
+.cat-badge.mvfr { background: rgba(59,130,246,0.12); color: var(--mvfr); border: 1px solid rgba(59,130,246,0.2); }
+.status-badge-sm {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+}
+.status-badge-sm.go { background: rgba(74,222,128,0.12); color: var(--success); border: 1px solid rgba(74,222,128,0.2); }
+
+/* Data table */
+.data-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  margin-bottom: 16px;
+}
+.data-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(42,46,58,0.35);
+}
+.data-row:nth-child(odd) { padding-right: 12px; }
+.data-row:nth-child(even) { padding-left: 12px; }
+
+/* Alternative: simple table approach */
+.wx-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 16px;
+}
+.wx-table tr { border-bottom: 1px solid rgba(42,46,58,0.35); }
+.wx-table tr:last-child { border-bottom: none; }
+.wx-table td { padding: 6px 0; font-size: 12px; }
+.wx-table .wt-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-tertiary);
+  width: 48px;
+}
+.wx-table .wt-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-align: right;
+  text-shadow: var(--data-glow);
+}
+.wx-table .wt-value .trend {
+  font-size: 10px;
+  margin-left: 3px;
+}
+.wx-table .wt-value .trend-down { color: var(--accent); }
+.wx-table .wt-value .trend-up { color: var(--warning); }
+.wx-table .wt-value .dim { color: var(--text-tertiary); text-shadow: none; }
+.wx-table .wt-value .warn { color: var(--warning); }
+
+/* Sources table */
+.sub-header {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-tertiary);
+  margin-bottom: 8px;
+  margin-top: 2px;
+}
+.src-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 16px;
+}
+.src-table td {
+  padding: 4px 0;
+  font-size: 11px;
+  vertical-align: middle;
+}
+.src-table .src-name {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  width: 56px;
+}
+.src-table .src-data {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+.src-agree {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+}
+.src-agree.strong { color: var(--success); }
+.src-agree.moderate { color: var(--warning); }
+
+/* Part 135 bars */
+.p135-header {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-tertiary);
+  margin-bottom: 8px;
+}
+.p135-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.p135-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  width: 32px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.p135-bar-wrap {
+  flex: 1;
+  height: 8px;
+  background: var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+.p135-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.6s ease;
+}
+.p135-bar-fill.safe { background: linear-gradient(90deg, var(--accent), var(--accent-secondary)); }
+.p135-bar-min {
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 2px;
+  background: var(--danger);
+  opacity: 0.6;
+}
+.p135-vals {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-secondary);
+  width: 100px;
+  text-align: right;
+  white-space: nowrap;
+}
+.p135-margin {
+  text-align: right;
+  margin-bottom: 8px;
+}
+.p135-margin span {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--success);
+  text-shadow: 0 0 8px rgba(74,222,128,0.2);
+}
+
+/* ================================================================
+   RAW DATA ACCORDION
+   ================================================================ */
+.raw-section {
+  padding: 0 24px 24px;
+  background: var(--bg);
+}
+.raw-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 6px;
+}
+.accordion {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--surface);
+  transition: border-color 0.15s;
+}
+.accordion:hover { border-color: rgba(34,211,238,0.15); }
+.accordion-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 12px;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: 'Inter', sans-serif;
+}
+.accordion-btn:hover { color: var(--text-primary); background: rgba(34,211,238,0.02); }
+.accordion-btn .chevron {
+  font-size: 10px;
+  transition: transform 0.2s;
+  color: var(--text-tertiary);
+}
+.accordion.open .accordion-btn { color: var(--accent); }
+.accordion.open .accordion-btn .chevron { transform: rotate(90deg); }
+.accordion-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.25s ease;
+}
+.accordion.open .accordion-body { max-height: 300px; }
+.accordion-inner {
+  padding: 0 12px 10px;
+}
+.raw-text {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  white-space: pre-wrap;
+  word-break: break-all;
+  background: rgba(17,19,24,0.5);
+  padding: 8px 10px;
+  border-radius: 4px;
+  border: 1px solid rgba(42,46,58,0.3);
+}
+html.light .raw-text { background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.06); }
+
+/* ================================================================
+   FOOTER
+   ================================================================ */
+.footer {
+  padding: 18px 24px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-tertiary);
+  background: var(--bg);
+}
+.footer a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
+}
+.footer a:hover { text-decoration: underline; }
+
+/* ================================================================
+   RESPONSIVE
+   ================================================================ */
+@media (max-width: 1024px) {
+  .split-container { flex-direction: column; height: auto; }
+  .map-panel { height: 350px; min-height: 300px; }
+  .data-panel {
+    width: 100%; min-width: 0; max-width: none;
+    border-left: none; border-top: 1px solid var(--border);
+    overflow-y: visible;
+  }
+  .leg-columns { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .map-panel { height: 260px; }
+  .data-panel { padding: 14px; }
+  .leg-detail { padding: 16px; }
+  .timeline-section { padding: 14px 16px; }
+  .raw-section { padding: 0 16px 20px; }
+  .raw-grid { grid-template-columns: 1fr; }
+  .metrics-grid { grid-template-columns: 1fr; }
+  .nav-tabs { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ================================================================
+     NAVBAR
+     ================================================================ -->
+<nav class="navbar">
+  <div class="nav-left">
+    <a href="#" class="navbar-brand">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M17.8 19.2L16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/>
+      </svg>
+      Aggregator
+    </a>
+    <ul class="nav-tabs">
+      <li><a href="#">Weather</a></li>
+      <li><a href="#" class="active">Trip</a></li>
+      <li><a href="#">Dispatch</a></li>
+      <li><a href="#">Alerts</a></li>
+    </ul>
+  </div>
+  <div class="nav-right">
+    <span class="nav-clock mono" id="utcClock">14:32Z</span>
+    <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+      <span class="theme-icon">&#9790;</span>
+    </button>
+    <div class="nav-user">AG</div>
+  </div>
+</nav>
+
+<!-- ================================================================
+     SPLIT SCREEN
+     ================================================================ -->
+<div class="split-container">
+  <!-- LEFT: MAP VIEW -->
+  <div class="map-panel">
+    <div class="map-base"></div>
+    <div class="map-terrain"></div>
+    <div class="map-grid"></div>
+    <div class="map-coast"></div>
+    <div class="map-scanline"></div>
+
+    <!-- SVG Route Lines -->
+    <svg class="route-svg" viewBox="0 0 1000 800" preserveAspectRatio="none">
+      <!-- Glow layer -->
+      <line class="route-line-glow" x1="280" y1="400" x2="730" y2="260" stroke="#4ADE80" stroke-width="6"/>
+      <line class="route-line-glow" x1="730" y1="260" x2="400" y2="520" stroke="#4ADE80" stroke-width="6"/>
+      <line class="route-line-glow" x1="400" y1="520" x2="280" y2="400" stroke="#4ADE80" stroke-width="6"/>
+      <!-- Dashed route lines -->
+      <line class="route-line" x1="280" y1="400" x2="730" y2="260" stroke="#4ADE80" stroke-width="2.5" opacity="0.8"/>
+      <line class="route-line" x1="730" y1="260" x2="400" y2="520" stroke="#4ADE80" stroke-width="2.5" opacity="0.8"/>
+      <line class="route-line" x1="400" y1="520" x2="280" y2="400" stroke="#4ADE80" stroke-width="2.5" opacity="0.8"/>
+    </svg>
+
+    <!-- Airport Pins -->
+    <div class="airport-pin vfr" style="left:28%;top:50%">
+      <div class="pin-glow"></div>
+      <div class="pin-ring"></div>
+      <div class="pin-dot"></div>
+      <span class="pin-label">KTEB</span>
+      <span class="pin-cat">VFR</span>
+    </div>
+    <div class="airport-pin vfr" style="left:73%;top:32.5%">
+      <div class="pin-glow"></div>
+      <div class="pin-ring"></div>
+      <div class="pin-dot"></div>
+      <span class="pin-label">KBOS</span>
+      <span class="pin-cat">VFR</span>
+    </div>
+    <div class="airport-pin mvfr" style="left:40%;top:65%">
+      <div class="pin-glow"></div>
+      <div class="pin-ring"></div>
+      <div class="pin-dot"></div>
+      <span class="pin-label">KJFK</span>
+      <span class="pin-cat">MVFR</span>
+    </div>
+
+    <!-- Leg labels on map -->
+    <div class="leg-map-label" style="left:49%;top:34%">LEG 1</div>
+    <div class="leg-map-label" style="left:60%;top:48%">LEG 2</div>
+    <div class="leg-map-label" style="left:30%;top:58%">LEG 3</div>
+
+    <!-- Compass -->
+    <div class="map-compass">
+      <div class="compass-ring"><span class="compass-n">N</span></div>
+    </div>
+
+    <!-- Layer Controls -->
+    <div class="map-layers glass">
+      <div class="layers-title">Layers</div>
+      <label><input type="checkbox" checked> Route</label>
+      <label><input type="checkbox" checked> Categories</label>
+      <label><input type="checkbox"> Wind</label>
+      <label><input type="checkbox"> Precip</label>
+    </div>
+  </div>
+
+  <!-- RIGHT: DATA PANEL -->
+  <div class="data-panel">
+
+    <!-- Trip Header -->
+    <div class="trip-header section">
+      <div class="trip-title">Northeast Shuttle</div>
+      <span class="trip-tag">3 LEGS</span>
+    </div>
+
+    <!-- Overall Status -->
+    <div class="section">
+      <div class="section-label">Overall Status</div>
+      <div class="status-card glass">
+        <div class="status-go-big">GO</div>
+        <div class="status-details">
+          <div class="status-line"><span class="hl hl-green">3/3</span> legs clear</div>
+          <div class="status-line">Confidence: <span class="hl hl-cyan">HIGH</span></div>
+          <div class="confidence-track"><div class="confidence-fill" style="width:92%"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Trip Summary Metrics -->
+    <div class="section">
+      <div class="section-label">Trip Summary</div>
+      <div class="metrics-grid">
+        <div class="metric-cell">
+          <div class="metric-label">ETD</div>
+          <div class="metric-value">14:00<span class="unit">Z</span></div>
+          <div class="metric-sub">KTEB</div>
+        </div>
+        <div class="metric-cell">
+          <div class="metric-label">ETA</div>
+          <div class="metric-value">19:25<span class="unit">Z</span></div>
+          <div class="metric-sub">KTEB</div>
+        </div>
+        <div class="metric-cell">
+          <div class="metric-label">Duration</div>
+          <div class="metric-value">5h 25m</div>
+          <div class="metric-sub">incl. ground</div>
+        </div>
+        <div class="metric-cell">
+          <div class="metric-label">Flight Time</div>
+          <div class="metric-value">2h 35m</div>
+          <div class="metric-sub">3 legs</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Time Shift -->
+    <div class="section">
+      <div class="time-shift">
+        <span class="time-shift-label">Shift:</span>
+        <button class="time-btn">-2h</button>
+        <button class="time-btn">-1h</button>
+        <button class="time-btn">+1h</button>
+        <button class="time-btn">+2h</button>
+      </div>
+    </div>
+
+    <!-- Leg Selector -->
+    <div class="section">
+      <div class="section-label">Legs</div>
+      <div id="legSelector">
+        <!-- Leg 1 -->
+        <div class="leg-row" data-leg="1">
+          <div class="leg-num">1</div>
+          <div class="leg-route">
+            <div class="leg-route-codes">KTEB <span style="color:var(--text-tertiary);font-size:11px">&rarr;</span> KBOS</div>
+            <div class="leg-route-meta">
+              <span class="cat-dot vfr"></span><span class="cat-label-sm">VFR</span>
+              <span style="color:var(--text-tertiary);font-size:9px">&rarr;</span>
+              <span class="cat-dot vfr"></span><span class="cat-label-sm">VFR</span>
+            </div>
+          </div>
+          <div class="leg-time">14:00-15:15Z</div>
+          <div class="leg-go">GO</div>
+        </div>
+        <!-- Leg 2 (selected) -->
+        <div class="leg-row selected" data-leg="2">
+          <div class="leg-num">2</div>
+          <div class="leg-route">
+            <div class="leg-route-codes">KBOS <span style="color:var(--text-tertiary);font-size:11px">&rarr;</span> KJFK</div>
+            <div class="leg-route-meta">
+              <span class="cat-dot vfr"></span><span class="cat-label-sm">VFR</span>
+              <span style="color:var(--text-tertiary);font-size:9px">&rarr;</span>
+              <span class="cat-dot mvfr"></span><span class="cat-label-sm">MVFR</span>
+            </div>
+          </div>
+          <div class="leg-time">16:30-17:25Z</div>
+          <div class="leg-go">GO</div>
+        </div>
+        <!-- Leg 3 -->
+        <div class="leg-row" data-leg="3">
+          <div class="leg-num">3</div>
+          <div class="leg-route">
+            <div class="leg-route-codes">KJFK <span style="color:var(--text-tertiary);font-size:11px">&rarr;</span> KTEB</div>
+            <div class="leg-route-meta">
+              <span class="cat-dot mvfr"></span><span class="cat-label-sm">MVFR</span>
+              <span style="color:var(--text-tertiary);font-size:9px">&rarr;</span>
+              <span class="cat-dot vfr"></span><span class="cat-label-sm">VFR</span>
+            </div>
+          </div>
+          <div class="leg-time">19:00-19:25Z</div>
+          <div class="leg-go">GO</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ================================================================
+     TIMELINE (full width)
+     ================================================================ -->
+<div class="timeline-section">
+  <div class="timeline-header">
+    <div class="timeline-title">Flight Timeline</div>
+    <div class="timeline-date">UTC / 23 FEB 2026</div>
+  </div>
+  <div class="timeline-hours">
+    <span class="timeline-hour">13Z</span>
+    <span class="timeline-hour">14Z</span>
+    <span class="timeline-hour">15Z</span>
+    <span class="timeline-hour">16Z</span>
+    <span class="timeline-hour">17Z</span>
+    <span class="timeline-hour">18Z</span>
+    <span class="timeline-hour">19Z</span>
+    <span class="timeline-hour">20Z</span>
+  </div>
+  <div class="timeline-track">
+    <!-- Leg 1: 14:00-15:15 => (1/7)=14.3% to (2.25/7)=32.1% width=17.8% -->
+    <div class="tl-leg" style="left:14.3%;width:17.8%;background:linear-gradient(90deg,rgba(34,197,94,0.55),rgba(34,197,94,0.35));">
+      <span>LEG 1 &middot; KTEB-KBOS</span>
+    </div>
+    <!-- Leg 2: 16:30-17:25 => (3.5/7)=50% to (4.42/7)=63.1% width=13.1% -->
+    <div class="tl-leg" style="left:50%;width:13.1%;background:linear-gradient(90deg,rgba(34,197,94,0.45),rgba(59,130,246,0.45));">
+      <span>LEG 2 &middot; KBOS-KJFK</span>
+    </div>
+    <!-- Leg 3: 19:00-19:25 => (6/7)=85.7% width=5.9% -->
+    <div class="tl-leg" style="left:85.7%;width:5.9%;background:linear-gradient(90deg,rgba(59,130,246,0.45),rgba(34,197,94,0.35));">
+      <span style="font-size:9px;">L3</span>
+    </div>
+    <!-- NOW marker at ~14:32Z => (1.53/7)=21.9% -->
+    <div class="tl-now" style="left:21.9%"></div>
+  </div>
+  <div class="tl-scrubber">
+    <div class="tl-scrubber-track">
+      <div class="tl-scrubber-fill"></div>
+    </div>
+    <div class="tl-scrubber-handle"></div>
+    <span class="tl-scrubber-hint">Drag to scrub through time</span>
+  </div>
+</div>
+
+<!-- ================================================================
+     LEG 2 DETAIL (full width)
+     ================================================================ -->
+<div class="leg-detail">
+  <div class="leg-detail-header">
+    <div class="leg-detail-title">
+      <span class="leg-tag">LEG 2</span>
+      <span>KBOS</span>
+      <span class="arrow">&rarr;</span>
+      <span>KJFK</span>
+    </div>
+    <div class="leg-detail-meta">16:30Z &ndash; 17:25Z &middot; 0h 55m</div>
+  </div>
+
+  <div class="leg-columns">
+    <!-- ==================== DEPARTURE: KBOS ==================== -->
+    <div class="airport-card glass">
+      <div class="airport-card-header">
+        <div>
+          <div class="airport-role">Departure</div>
+          <div class="airport-code-big">KBOS</div>
+        </div>
+        <div class="airport-badges">
+          <span class="cat-badge vfr">VFR</span>
+          <span class="status-badge-sm go">GO</span>
+        </div>
+      </div>
+
+      <!-- Weather Data Grid -->
+      <table class="wx-table">
+        <tr>
+          <td class="wt-label">Temp</td>
+          <td class="wt-value">58&deg;F <span class="trend trend-down">&#9660;</span></td>
+        </tr>
+        <tr>
+          <td class="wt-label">Wind</td>
+          <td class="wt-value">10 <span style="font-size:10px;color:var(--text-secondary)">kt</span> W</td>
+        </tr>
+        <tr>
+          <td class="wt-label">Gust</td>
+          <td class="wt-value"><span class="dim">&mdash;</span></td>
+        </tr>
+        <tr>
+          <td class="wt-label">Vis</td>
+          <td class="wt-value">10 <span style="font-size:10px;color:var(--text-secondary)">SM</span></td>
+        </tr>
+        <tr>
+          <td class="wt-label">Ceil</td>
+          <td class="wt-value">4500 <span style="font-size:10px;color:var(--text-secondary)">ft</span></td>
+        </tr>
+        <tr>
+          <td class="wt-label">Press</td>
+          <td class="wt-value">30.12 <span style="font-size:10px;color:var(--text-secondary)">"Hg</span></td>
+        </tr>
+      </table>
+
+      <!-- Sources -->
+      <div class="sub-header">Sources</div>
+      <table class="src-table">
+        <tr>
+          <td class="src-name">AWC</td>
+          <td class="src-data"><span class="cat-dot vfr" style="vertical-align:middle;margin-right:4px"></span>VFR &nbsp;58&deg;F &nbsp;10kt</td>
+        </tr>
+        <tr>
+          <td class="src-name">O-Meteo</td>
+          <td class="src-data"><span class="cat-dot vfr" style="vertical-align:middle;margin-right:4px"></span>VFR &nbsp;57&deg;F &nbsp;11kt</td>
+        </tr>
+        <tr>
+          <td class="src-name">NWS</td>
+          <td class="src-data"><span class="cat-dot vfr" style="vertical-align:middle;margin-right:4px"></span>VFR &nbsp;59&deg;F &nbsp;9kt</td>
+        </tr>
+        <tr>
+          <td class="src-name" style="font-weight:700;color:var(--text-secondary)">Agree</td>
+          <td class="src-data"><span class="src-agree strong">STRONG 3/3</span></td>
+        </tr>
+      </table>
+
+      <!-- Part 135 Margins -->
+      <div class="p135-header">Part 135 Margins</div>
+      <div class="p135-row">
+        <div class="p135-label">Ceil</div>
+        <div class="p135-bar-wrap">
+          <div class="p135-bar-fill safe" style="width:90%"></div>
+          <div class="p135-bar-min" style="left:10%"></div>
+        </div>
+        <div class="p135-vals">4500 / 500 min</div>
+      </div>
+      <div class="p135-margin"><span>+4000 ft</span></div>
+      <div class="p135-row">
+        <div class="p135-label">Vis</div>
+        <div class="p135-bar-wrap">
+          <div class="p135-bar-fill safe" style="width:95%"></div>
+          <div class="p135-bar-min" style="left:10%"></div>
+        </div>
+        <div class="p135-vals">10.0 / 1.0 min</div>
+      </div>
+      <div class="p135-margin"><span>+9.0 SM</span></div>
+    </div>
+
+    <!-- ==================== ARRIVAL: KJFK ==================== -->
+    <div class="airport-card glass">
+      <div class="airport-card-header">
+        <div>
+          <div class="airport-role">Arrival</div>
+          <div class="airport-code-big">KJFK</div>
+        </div>
+        <div class="airport-badges">
+          <span class="cat-badge mvfr">MVFR</span>
+          <span class="status-badge-sm go">GO</span>
+        </div>
+      </div>
+
+      <!-- Weather Data Grid -->
+      <table class="wx-table">
+        <tr>
+          <td class="wt-label">Temp</td>
+          <td class="wt-value">55&deg;F <span class="trend trend-down">&#9660;</span></td>
+        </tr>
+        <tr>
+          <td class="wt-label">Wind</td>
+          <td class="wt-value">14 <span style="font-size:10px;color:var(--text-secondary)">kt</span> SW</td>
+        </tr>
+        <tr>
+          <td class="wt-label">Gust</td>
+          <td class="wt-value"><span class="warn">22</span> <span style="font-size:10px;color:var(--text-secondary)">kt</span></td>
+        </tr>
+        <tr>
+          <td class="wt-label">Vis</td>
+          <td class="wt-value">4 <span style="font-size:10px;color:var(--text-secondary)">SM</span></td>
+        </tr>
+        <tr>
+          <td class="wt-label">Ceil</td>
+          <td class="wt-value">2800 <span style="font-size:10px;color:var(--text-secondary)">ft</span></td>
+        </tr>
+        <tr>
+          <td class="wt-label">Press</td>
+          <td class="wt-value">29.98 <span style="font-size:10px;color:var(--text-secondary)">"Hg</span></td>
+        </tr>
+      </table>
+
+      <!-- Sources -->
+      <div class="sub-header">Sources</div>
+      <table class="src-table">
+        <tr>
+          <td class="src-name">AWC</td>
+          <td class="src-data"><span class="cat-dot mvfr" style="vertical-align:middle;margin-right:4px"></span>MVFR &nbsp;55&deg;F &nbsp;14kt</td>
+        </tr>
+        <tr>
+          <td class="src-name">O-Meteo</td>
+          <td class="src-data"><span class="cat-dot vfr" style="vertical-align:middle;margin-right:4px"></span>VFR &nbsp;56&deg;F &nbsp;12kt</td>
+        </tr>
+        <tr>
+          <td class="src-name">NWS</td>
+          <td class="src-data"><span class="cat-dot mvfr" style="vertical-align:middle;margin-right:4px"></span>MVFR &nbsp;54&deg;F &nbsp;15kt</td>
+        </tr>
+        <tr>
+          <td class="src-name" style="font-weight:700;color:var(--text-secondary)">Agree</td>
+          <td class="src-data"><span class="src-agree moderate">MODERATE 2/3</span></td>
+        </tr>
+      </table>
+
+      <!-- Part 135 Margins -->
+      <div class="p135-header">Part 135 Margins</div>
+      <div class="p135-row">
+        <div class="p135-label">Ceil</div>
+        <div class="p135-bar-wrap">
+          <div class="p135-bar-fill safe" style="width:56%"></div>
+          <div class="p135-bar-min" style="left:10%"></div>
+        </div>
+        <div class="p135-vals">2800 / 500 min</div>
+      </div>
+      <div class="p135-margin"><span>+2300 ft</span></div>
+      <div class="p135-row">
+        <div class="p135-label">Vis</div>
+        <div class="p135-bar-wrap">
+          <div class="p135-bar-fill safe" style="width:40%"></div>
+          <div class="p135-bar-min" style="left:10%"></div>
+        </div>
+        <div class="p135-vals">4.0 / 1.0 min</div>
+      </div>
+      <div class="p135-margin"><span>+3.0 SM</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================
+     RAW DATA ACCORDION
+     ================================================================ -->
+<div class="raw-section">
+  <div class="section-label" style="margin-bottom:10px;">Raw Data</div>
+  <div class="raw-grid">
+    <div class="accordion" data-acc>
+      <button class="accordion-btn">
+        <span>METAR KBOS</span>
+        <span class="chevron">&#9654;</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-inner">
+          <div class="raw-text">METAR KBOS 231456Z 27010KT 10SM FEW045 SCT250 14/06 A3012 RMK AO2 SLP203 T01440061</div>
+        </div>
+      </div>
+    </div>
+    <div class="accordion" data-acc>
+      <button class="accordion-btn">
+        <span>TAF KBOS</span>
+        <span class="chevron">&#9654;</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-inner">
+          <div class="raw-text">TAF KBOS 231130Z 2312/2418 27012KT P6SM FEW050 SCT250
+  FM231800 24015KT P6SM SCT040 BKN080
+  FM240000 21010KT P6SM SCT050</div>
+        </div>
+      </div>
+    </div>
+    <div class="accordion" data-acc>
+      <button class="accordion-btn">
+        <span>METAR KJFK</span>
+        <span class="chevron">&#9654;</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-inner">
+          <div class="raw-text">METAR KJFK 231456Z 22014G22KT 4SM BR SCT028 OVC045 13/09 A2998 RMK AO2 SLP153 T01280089</div>
+        </div>
+      </div>
+    </div>
+    <div class="accordion" data-acc>
+      <button class="accordion-btn">
+        <span>TAF KJFK</span>
+        <span class="chevron">&#9654;</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-inner">
+          <div class="raw-text">TAF KJFK 231130Z 2312/2418 22014G22KT 4SM BR SCT028 BKN045
+  FM231700 23012KT 5SM HZ BKN040
+  FM240000 20008KT P6SM SCT050</div>
+        </div>
+      </div>
+    </div>
+    <div class="accordion" data-acc>
+      <button class="accordion-btn">
+        <span>NOTAMs</span>
+        <span class="chevron">&#9654;</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-inner">
+          <div class="raw-text">!BOS 02/158 BOS RWY 04R/22L CLSD 2602231400-2602231800
+!BOS 02/147 BOS TWY K BTN TWY K1 AND TWY K3 CLSD 2602230800-2602240200
+!JFK 02/201 JFK NAV ILS RWY 04L LOC/DME U/S 2602221500-2602251500
+!JFK 02/195 JFK OBST CRANE (ASN UNKNOWN) 404000N0734700W 250FT AGL</div>
+        </div>
+      </div>
+    </div>
+    <div class="accordion" data-acc>
+      <button class="accordion-btn">
+        <span>Winds Aloft</span>
+        <span class="chevron">&#9654;</span>
+      </button>
+      <div class="accordion-body">
+        <div class="accordion-inner">
+          <div class="raw-text">FD1 WINDS ALOFT FORECAST
+DATA BASED ON 231200Z
+VALID 231800Z FOR USE 1700-2100Z
+
+STN   3000  6000  9000  12000 18000
+BOS   2715  2725+07  2740+01  2855-06  2870-18
+JFK   2312  2420+08  2535+02  2650-05  2765-17</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================
+     FOOTER
+     ================================================================ -->
+<div class="footer">
+  Jetstream Weather Platform &middot; Data from <a href="#">AWC</a>, <a href="#">Open-Meteo</a>, <a href="#">NWS</a> &middot; Not for operational use
+</div>
+
+<!-- ================================================================
+     JAVASCRIPT
+     ================================================================ -->
+<script>
+// ===== Theme Toggle =====
+(function() {
+  const html = document.documentElement;
+  const toggle = document.getElementById('themeToggle');
+  const icon = toggle.querySelector('.theme-icon');
+
+  function setTheme(mode) {
+    html.classList.remove('dark', 'light');
+    html.classList.add(mode);
+    icon.innerHTML = mode === 'light' ? '&#9728;' : '&#9790;';
+  }
+
+  toggle.addEventListener('click', function() {
+    setTheme(html.classList.contains('light') ? 'dark' : 'light');
+  });
+})();
+
+// ===== Live UTC Clock =====
+(function() {
+  const clockEl = document.getElementById('utcClock');
+  function tick() {
+    const now = new Date();
+    const h = String(now.getUTCHours()).padStart(2, '0');
+    const m = String(now.getUTCMinutes()).padStart(2, '0');
+    clockEl.textContent = h + ':' + m + 'Z';
+  }
+  tick();
+  setInterval(tick, 10000);
+})();
+
+// ===== Leg Selector =====
+(function() {
+  const rows = document.querySelectorAll('#legSelector .leg-row');
+  rows.forEach(function(row) {
+    row.addEventListener('click', function() {
+      rows.forEach(function(r) { r.classList.remove('selected'); });
+      row.classList.add('selected');
+    });
+  });
+})();
+
+// ===== Accordion =====
+(function() {
+  document.querySelectorAll('[data-acc]').forEach(function(item) {
+    var btn = item.querySelector('.accordion-btn');
+    btn.addEventListener('click', function() {
+      item.classList.toggle('open');
+    });
+  });
+})();
+
+// ===== Timeline Scrubber Drag =====
+(function() {
+  var handle = document.querySelector('.tl-scrubber-handle');
+  var fill = document.querySelector('.tl-scrubber-fill');
+  var track = document.querySelector('.tl-scrubber-track');
+  var dragging = false;
+
+  function moveTo(clientX) {
+    var rect = track.getBoundingClientRect();
+    var pct = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+    handle.style.left = (pct * 100) + '%';
+    fill.style.width = (pct * 100) + '%';
+  }
+
+  handle.addEventListener('mousedown', function(e) {
+    dragging = true;
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove', function(e) {
+    if (dragging) moveTo(e.clientX);
+  });
+  document.addEventListener('mouseup', function() {
+    dragging = false;
+  });
+
+  // Touch support
+  handle.addEventListener('touchstart', function(e) {
+    dragging = true;
+    e.preventDefault();
+  });
+  document.addEventListener('touchmove', function(e) {
+    if (dragging) moveTo(e.touches[0].clientX);
+  });
+  document.addEventListener('touchend', function() {
+    dragging = false;
+  });
+})();
+
+// ===== Entrance animations for sections =====
+(function() {
+  var sections = document.querySelectorAll('.section');
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.1 });
+
+  sections.forEach(function(s) {
+    observer.observe(s);
+  });
+})();
+</script>
+
+</body>
+</html>

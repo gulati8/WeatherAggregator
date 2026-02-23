@@ -1,0 +1,1368 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Clearway — Weather Aggregator Homepage</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    /* =================================================================
+       CSS CUSTOM PROPERTIES — LIGHT MODE (default)
+       ================================================================= */
+    :root {
+      --bg: #FBF8F3;
+      --surface: #FFFFFF;
+      --surface-tinted: #F5F0E8;
+      --text-primary: #1C1917;
+      --text-secondary: #57534E;
+      --text-tertiary: #A8A29E;
+      --border: #E7E5E4;
+      --accent: #0D9488;
+      --accent-hover: #0F766E;
+      --accent-light: #CCFBF1;
+      --accent-secondary: #D97706;
+      --accent-secondary-light: #FEF3C7;
+      --success: #16A34A;
+      --warning: #EA580C;
+      --danger: #DC2626;
+      --celebration: #8B5CF6;
+
+      --card-shadow: 0 2px 8px rgba(28,25,23,0.06), 0 0 0 1px rgba(231,229,228,0.8);
+      --card-shadow-hover: 0 8px 24px rgba(28,25,23,0.10), 0 0 0 1px rgba(231,229,228,0.9);
+      --hero-gradient: linear-gradient(135deg, #FBF8F3 0%, #F0EDE6 100%);
+
+      --mascot-cloud: #FFFFFF;
+      --mascot-cloud-shadow: #E7E5E4;
+      --mascot-cheek: #FECDD3;
+      --mascot-eyes: #1C1917;
+      --speech-bg: #FFFFFF;
+
+      --vfr: #22C55E;
+      --mvfr: #3B82F6;
+      --ifr: #EF4444;
+      --lifr: #A855F7;
+      --vfr-bg: #F0FDF4;
+      --mvfr-bg: #EFF6FF;
+      --ifr-bg: #FEF2F2;
+      --lifr-bg: #FAF5FF;
+
+      --pastel-teal: #F0FDFA;
+      --pastel-amber: #FFFBEB;
+      --pastel-sky: #F0F9FF;
+      --pastel-rose: #FFF1F2;
+
+      --toggle-bg: #F5F0E8;
+      --toggle-knob: #FFFFFF;
+      --input-bg: #F5F0E8;
+    }
+
+    /* =================================================================
+       DARK MODE
+       ================================================================= */
+    [data-theme="dark"] {
+      --bg: #1C1917;
+      --surface: #292524;
+      --surface-tinted: #44403C;
+      --text-primary: #FAFAF9;
+      --text-secondary: #A8A29E;
+      --text-tertiary: #78716C;
+      --border: #44403C;
+      --accent: #2DD4BF;
+      --accent-hover: #14B8A6;
+      --accent-light: #1a3a35;
+      --accent-secondary: #FBBF24;
+      --accent-secondary-light: #3d3520;
+      --success: #4ADE80;
+      --warning: #FB923C;
+      --danger: #F87171;
+      --celebration: #A78BFA;
+
+      --card-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      --card-shadow-hover: 0 8px 24px rgba(0,0,0,0.45);
+      --hero-gradient: linear-gradient(135deg, #1C1917 0%, #292524 100%);
+
+      --mascot-cloud: #44403C;
+      --mascot-cloud-shadow: #292524;
+      --mascot-cheek: #7f1d1d;
+      --mascot-eyes: #FAFAF9;
+      --speech-bg: #292524;
+
+      --vfr: #4ADE80;
+      --mvfr: #60A5FA;
+      --ifr: #F87171;
+      --lifr: #C084FC;
+      --vfr-bg: rgba(20,83,45,0.3);
+      --mvfr-bg: rgba(30,58,95,0.4);
+      --ifr-bg: rgba(127,29,29,0.3);
+      --lifr-bg: rgba(88,28,135,0.3);
+
+      --pastel-teal: #1a3a35;
+      --pastel-amber: #3d3520;
+      --pastel-sky: #1e3a5f;
+      --pastel-rose: #3b1520;
+
+      --toggle-bg: #44403C;
+      --toggle-knob: #FAFAF9;
+      --input-bg: #292524;
+    }
+
+    /* =================================================================
+       RESET & BASE
+       ================================================================= */
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--text-primary);
+      background: var(--bg);
+      overflow-x: hidden;
+      transition: background 0.35s ease, color 0.35s ease;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+    a:hover { color: var(--accent-hover); }
+
+    :focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+
+    .mono {
+      font-family: 'IBM Plex Mono', 'Menlo', monospace;
+      font-size: 13px;
+    }
+
+    /* =================================================================
+       LAYOUT
+       ================================================================= */
+    .container {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* =================================================================
+       STAGGER LOAD ANIMATION
+       ================================================================= */
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .stagger {
+      opacity: 0;
+      animation: fadeSlideUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+    .stagger-1 { animation-delay: 0.05s; }
+    .stagger-2 { animation-delay: 0.15s; }
+    .stagger-3 { animation-delay: 0.28s; }
+    .stagger-4 { animation-delay: 0.38s; }
+    .stagger-5 { animation-delay: 0.48s; }
+    .stagger-6 { animation-delay: 0.58s; }
+    .stagger-7 { animation-delay: 0.68s; }
+    .stagger-8 { animation-delay: 0.78s; }
+
+    /* =================================================================
+       HEADER / NAV
+       ================================================================= */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+      transition: background 0.35s ease, border-color 0.35s ease;
+    }
+
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 18px;
+      color: var(--text-primary);
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .logo:hover { color: var(--text-primary); }
+
+    .logo-cloud .cloud-body { fill: var(--accent); }
+
+    .nav-tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--surface-tinted);
+      padding: 4px;
+      border-radius: 9999px;
+    }
+
+    .nav-tab {
+      padding: 8px 20px;
+      border-radius: 9999px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      border: none;
+      background: none;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+    .nav-tab:hover {
+      color: var(--text-primary);
+      background: var(--surface);
+    }
+    .nav-tab.active {
+      color: var(--text-primary);
+      background: var(--surface);
+      box-shadow: 0 1px 4px rgba(28,25,23,0.08);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .zulu-time {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-tertiary);
+      letter-spacing: 0.02em;
+      background: var(--surface-tinted);
+      padding: 5px 10px;
+      border-radius: 8px;
+    }
+
+    /* Dark mode toggle — pill slider */
+    .theme-toggle {
+      position: relative;
+      width: 52px;
+      height: 28px;
+      background: var(--toggle-bg);
+      border: 1px solid var(--border);
+      border-radius: 9999px;
+      cursor: pointer;
+      transition: background 0.3s ease, border-color 0.3s ease;
+      display: flex;
+      align-items: center;
+      padding: 0 4px;
+    }
+
+    .theme-toggle-knob {
+      width: 20px;
+      height: 20px;
+      background: var(--toggle-knob);
+      border-radius: 50%;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+    }
+
+    [data-theme="dark"] .theme-toggle-knob {
+      transform: translateX(24px);
+    }
+
+    .theme-toggle-icon {
+      font-size: 11px;
+      line-height: 1;
+    }
+
+    .login-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: 9999px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--accent);
+      border: 1.5px solid var(--accent);
+      background: none;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s ease;
+    }
+    .login-btn:hover {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    /* =================================================================
+       HERO SECTION
+       ================================================================= */
+    .hero {
+      background: var(--hero-gradient);
+      padding: 52px 0 48px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      transition: background 0.35s ease;
+    }
+
+    /* Subtle radial glow behind mascot */
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -30%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 400px;
+      background: radial-gradient(ellipse at center, rgba(13,148,136,0.05) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-inner {
+      position: relative;
+      z-index: 1;
+      max-width: 640px;
+      margin: 0 auto;
+    }
+
+    /* Cloud Mascot Animations */
+    @keyframes mascotBob {
+      0%, 100% { transform: translateY(0); }
+      50%      { transform: translateY(-6px); }
+    }
+
+    @keyframes mascotBreathe {
+      0%, 100% { transform: scale(1); }
+      50%      { transform: scale(1.02); }
+    }
+
+    @keyframes blink {
+      0%, 42%, 58%, 100% { transform: scaleY(1); }
+      50% { transform: scaleY(0.08); }
+    }
+
+    @keyframes speechPop {
+      0%   { opacity: 0; transform: scale(0.85) translateY(8px); }
+      60%  { transform: scale(1.02) translateY(-2px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .mascot-wrapper {
+      display: inline-block;
+      animation: mascotBob 4s ease-in-out infinite;
+      margin-bottom: 8px;
+    }
+
+    .mascot {
+      position: relative;
+      width: 130px;
+      height: 95px;
+      margin: 0 auto;
+      animation: mascotBreathe 5s ease-in-out infinite;
+    }
+
+    /* Blink animation for eyes */
+    .mascot-eye-group {
+      animation: blink 4.5s ease-in-out infinite;
+      transform-origin: center center;
+    }
+    .mascot-eye-group-r {
+      animation: blink 4.5s ease-in-out infinite 0.1s;
+      transform-origin: center center;
+    }
+
+    /* Speech bubble */
+    .speech-bubble {
+      display: inline-block;
+      background: var(--speech-bg);
+      color: var(--text-primary);
+      font-size: 28px;
+      font-weight: 700;
+      padding: 16px 32px;
+      border-radius: 20px;
+      box-shadow: var(--card-shadow);
+      position: relative;
+      margin-bottom: 32px;
+      animation: speechPop 0.65s cubic-bezier(0.22, 1, 0.36, 1) 0.25s both;
+      transition: background 0.35s ease, box-shadow 0.35s ease;
+    }
+
+    .speech-bubble::after {
+      content: '';
+      position: absolute;
+      bottom: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 14px solid transparent;
+      border-right: 14px solid transparent;
+      border-top: 14px solid var(--speech-bg);
+      transition: border-top-color 0.35s ease;
+    }
+
+    /* =================================================================
+       SEARCH INPUT
+       ================================================================= */
+    @keyframes searchFocusGlow {
+      0%, 100% { box-shadow: 0 0 0 4px rgba(13,148,136,0.10); }
+      50%      { box-shadow: 0 0 0 6px rgba(13,148,136,0.06); }
+    }
+
+    .search-wrapper {
+      position: relative;
+      max-width: 520px;
+      margin: 0 auto 20px;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-tertiary);
+      pointer-events: none;
+      transition: color 0.25s ease;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 18px 24px 18px 54px;
+      font-size: 17px;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500;
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      background: var(--input-bg);
+      color: var(--text-primary);
+      outline: none;
+      transition: all 0.25s ease;
+      box-shadow: 0 2px 8px rgba(28,25,23,0.04);
+    }
+    .search-input::placeholder {
+      color: var(--text-tertiary);
+      font-weight: 400;
+    }
+    .search-input:focus {
+      border-color: var(--accent);
+      background: var(--surface);
+      box-shadow: 0 0 0 4px rgba(13,148,136,0.12);
+      animation: searchFocusGlow 2.5s ease-in-out infinite;
+    }
+    .search-input:focus + .search-icon {
+      color: var(--accent);
+    }
+    [data-theme="dark"] .search-input:focus {
+      box-shadow: 0 0 0 4px rgba(45,212,191,0.15);
+    }
+
+    .quick-suggestions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .quick-label {
+      font-size: 13px;
+      color: var(--text-tertiary);
+      font-weight: 500;
+    }
+
+    .quick-pill {
+      display: inline-block;
+      padding: 6px 16px;
+      border-radius: 9999px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 13px;
+      font-weight: 500;
+      background: var(--surface);
+      color: var(--accent);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+    .quick-pill:hover {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(13,148,136,0.2);
+    }
+    .quick-pill:active {
+      transform: scale(0.96);
+      box-shadow: none;
+    }
+
+    /* =================================================================
+       SECTION TITLES
+       ================================================================= */
+    .section {
+      padding: 40px 0;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .section-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-tertiary);
+    }
+
+    .section-link {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent);
+      cursor: pointer;
+    }
+    .section-link:hover { text-decoration: underline; }
+
+    /* =================================================================
+       FAVORITES GRID
+       ================================================================= */
+    .favorites-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+
+    .fav-card {
+      background: var(--surface);
+      border-radius: 12px;
+      box-shadow: var(--card-shadow);
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+                  box-shadow 0.25s ease;
+    }
+    .fav-card:hover {
+      transform: translateY(-4px) scale(1.01);
+      box-shadow: var(--card-shadow-hover);
+    }
+    .fav-card:active {
+      transform: scale(0.98);
+      box-shadow: var(--card-shadow);
+    }
+
+    .fav-card-header {
+      height: 100px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Pastel weather scene backgrounds */
+    .scene-sunny {
+      background: linear-gradient(135deg, #ECFDF5 0%, #FEF9C3 60%, #FEF3C7 100%);
+    }
+    .scene-cloudy {
+      background: linear-gradient(135deg, #EFF6FF 0%, #E0E7FF 60%, #DBEAFE 100%);
+    }
+    .scene-clear {
+      background: linear-gradient(135deg, #F0FDFA 0%, #CCFBF1 60%, #A7F3D0 100%);
+    }
+    .scene-foggy {
+      background: linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 40%, #E7E5E4 100%);
+    }
+
+    [data-theme="dark"] .scene-sunny {
+      background: linear-gradient(135deg, #1a3a2e 0%, #3d3520 60%, #3d3520 100%);
+    }
+    [data-theme="dark"] .scene-cloudy {
+      background: linear-gradient(135deg, #1e3a5f 0%, #2e2659 60%, #1e3a5f 100%);
+    }
+    [data-theme="dark"] .scene-clear {
+      background: linear-gradient(135deg, #1a3a35 0%, #1a3a35 60%, #0f2e1a 100%);
+    }
+    [data-theme="dark"] .scene-foggy {
+      background: linear-gradient(135deg, #3b1520 0%, #3b1520 40%, #44403C 100%);
+    }
+
+    .scene-icon { opacity: 0.65; }
+
+    .fav-star {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      color: var(--accent-secondary);
+      font-size: 18px;
+      filter: drop-shadow(0 1px 2px rgba(0,0,0,0.15));
+      z-index: 2;
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .fav-card:hover .fav-star {
+      transform: scale(1.15) rotate(10deg);
+    }
+
+    .fav-card-body { padding: 16px; }
+
+    .fav-icao {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: 0.03em;
+    }
+
+    .fav-name {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .fav-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .badge-vfr  { background: var(--vfr-bg);  color: var(--vfr);  }
+    .badge-mvfr { background: var(--mvfr-bg); color: var(--mvfr); }
+    .badge-ifr  { background: var(--ifr-bg);  color: var(--ifr);  }
+    .badge-lifr { background: var(--lifr-bg); color: var(--lifr); }
+
+    .badge-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+      flex-shrink: 0;
+    }
+
+    .fav-weather-summary {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+
+    .fav-footer {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    .view-link {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: gap 0.2s ease;
+    }
+    .view-link:hover {
+      gap: 8px;
+    }
+
+    /* =================================================================
+       RECENTLY VISITED
+       ================================================================= */
+    .recent-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .recent-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 9999px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 13px;
+      font-weight: 500;
+      background: var(--surface);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+    .recent-chip:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(13,148,136,0.12);
+    }
+    .recent-chip:active {
+      transform: scale(0.97);
+    }
+
+    .chip-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* =================================================================
+       DID YOU KNOW CARD
+       ================================================================= */
+    .dyk-card {
+      background: var(--surface);
+      border-radius: 16px;
+      box-shadow: var(--card-shadow);
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      padding: 32px 36px;
+      transition: background 0.35s ease, box-shadow 0.35s ease, transform 0.25s ease;
+    }
+    .dyk-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--card-shadow-hover);
+    }
+
+    .dyk-illustration {
+      flex-shrink: 0;
+      width: 76px;
+      height: 76px;
+      border-radius: 16px;
+      background: var(--pastel-amber);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.35s ease;
+    }
+
+    .dyk-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent-secondary);
+      margin-bottom: 6px;
+    }
+    .dyk-text {
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--text-secondary);
+    }
+    .dyk-text strong {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    /* =================================================================
+       FOOTER
+       ================================================================= */
+    .footer {
+      border-top: 1px solid var(--border);
+      padding: 36px 0;
+      text-align: center;
+      transition: border-color 0.35s ease;
+    }
+
+    .footer-tagline {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      font-style: italic;
+      margin-bottom: 6px;
+    }
+
+    .footer-text {
+      font-size: 13px;
+      color: var(--text-tertiary);
+    }
+
+    .footer-sources {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      margin-top: 4px;
+    }
+    .footer-sources a {
+      color: var(--text-tertiary);
+      text-decoration: underline;
+      text-decoration-color: var(--border);
+      text-underline-offset: 2px;
+    }
+    .footer-sources a:hover {
+      color: var(--accent);
+      text-decoration-color: var(--accent);
+    }
+
+    /* =================================================================
+       MOBILE RESPONSIVE
+       ================================================================= */
+    @media (max-width: 960px) {
+      .favorites-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .nav-tabs { display: none; }
+      .zulu-time { display: none; }
+
+      .speech-bubble {
+        font-size: 22px;
+        padding: 12px 22px;
+      }
+
+      .mascot {
+        width: 100px;
+        height: 76px;
+      }
+
+      .dyk-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 16px;
+        padding: 24px;
+      }
+
+      .fav-card-header { height: 80px; }
+    }
+
+    @media (max-width: 540px) {
+      .favorites-grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+      }
+      .header-inner { height: 56px; }
+      .logo { font-size: 16px; }
+      .search-input { font-size: 16px; padding: 16px 20px 16px 48px; }
+      .hero { padding: 40px 0 36px; }
+    }
+
+    /* =================================================================
+       ACCESSIBILITY / UTILITY
+       ================================================================= */
+    .sr-only {
+      position: absolute;
+      width: 1px; height: 1px;
+      padding: 0; margin: -1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      border: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ================================================================
+       HEADER / NAV
+       ================================================================ -->
+  <header class="header stagger stagger-1">
+    <div class="container header-inner">
+      <!-- Logo -->
+      <a href="#" class="logo">
+        <svg width="34" height="24" viewBox="0 0 40 26" fill="none" xmlns="http://www.w3.org/2000/svg" class="logo-cloud">
+          <path class="cloud-body" d="M32.5 24H9.5C4.8 24 1 20.4 1 16C1 12 4.1 8.7 8.2 8.1C8.1 7.6 8 7 8 6.5C8 3.5 10.5 1 13.5 1C15.4 1 17 2 18 3.5C19.3 2 21.3 1 23.5 1C27.6 1 31 4.4 31 8.5C31 8.7 31 8.9 31 9.1C35 9.8 38 13.2 38 17.2C38 21 35.6 24 32.5 24Z"/>
+        </svg>
+        Weather Aggregator
+      </a>
+
+      <!-- Nav Tabs (pill switcher) -->
+      <nav class="nav-tabs" role="tablist">
+        <button class="nav-tab active" role="tab" aria-selected="true">Single Airport</button>
+        <button class="nav-tab" role="tab" aria-selected="false">Trip Planner</button>
+        <button class="nav-tab" role="tab" aria-selected="false">Map</button>
+      </nav>
+
+      <!-- Right side -->
+      <div class="header-right">
+        <span class="zulu-time" id="zuluTime">23:45Z</span>
+
+        <!-- Theme Toggle -->
+        <div class="theme-toggle" id="themeToggle" role="switch" aria-checked="false" aria-label="Toggle dark mode" tabindex="0">
+          <div class="theme-toggle-knob">
+            <span class="theme-toggle-icon" id="themeIcon">&#9728;</span>
+          </div>
+        </div>
+
+        <!-- Login Button -->
+        <button class="login-btn">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="8" cy="5" r="3"/>
+            <path d="M2 15c0-3.3 2.7-6 6-6s6 2.7 6 6"/>
+          </svg>
+          Log in
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================================================================
+       HERO SECTION
+       ================================================================ -->
+  <section class="hero stagger stagger-2">
+    <div class="container hero-inner">
+
+      <!-- Cloud Mascot (SVG) -->
+      <div class="mascot-wrapper" aria-hidden="true">
+        <svg class="mascot" viewBox="0 0 130 95" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Shadow -->
+          <ellipse cx="65" cy="82" rx="44" ry="8" fill="var(--mascot-cloud-shadow)" opacity="0.25"/>
+
+          <!-- Cloud lumps -->
+          <ellipse cx="40" cy="52" rx="24" ry="22" fill="var(--mascot-cloud)"/>
+          <ellipse cx="78" cy="54" rx="22" ry="20" fill="var(--mascot-cloud)"/>
+          <ellipse cx="58" cy="40" rx="28" ry="24" fill="var(--mascot-cloud)"/>
+
+          <!-- Cloud base -->
+          <rect x="20" y="52" width="88" height="24" rx="12" fill="var(--mascot-cloud)"/>
+
+          <!-- Stroke outline for definition -->
+          <ellipse cx="40" cy="52" rx="24" ry="22" stroke="var(--mascot-cloud-shadow)" stroke-width="1" fill="none" opacity="0.3"/>
+          <ellipse cx="78" cy="54" rx="22" ry="20" stroke="var(--mascot-cloud-shadow)" stroke-width="1" fill="none" opacity="0.3"/>
+          <ellipse cx="58" cy="40" rx="28" ry="24" stroke="var(--mascot-cloud-shadow)" stroke-width="1" fill="none" opacity="0.3"/>
+
+          <!-- Fill-over to hide internal strokes -->
+          <rect x="22" y="53" width="84" height="22" rx="11" fill="var(--mascot-cloud)"/>
+          <ellipse cx="40" cy="53" rx="22" ry="16" fill="var(--mascot-cloud)"/>
+          <ellipse cx="78" cy="55" rx="20" ry="14" fill="var(--mascot-cloud)"/>
+          <ellipse cx="58" cy="42" rx="26" ry="20" fill="var(--mascot-cloud)"/>
+
+          <!-- Left eye -->
+          <g class="mascot-eye-group">
+            <ellipse cx="48" cy="52" rx="4.5" ry="5" fill="var(--mascot-eyes)"/>
+            <ellipse cx="49.8" cy="50.2" rx="1.6" ry="1.6" fill="var(--surface)"/>
+          </g>
+
+          <!-- Right eye -->
+          <g class="mascot-eye-group-r">
+            <ellipse cx="72" cy="52" rx="4.5" ry="5" fill="var(--mascot-eyes)"/>
+            <ellipse cx="73.8" cy="50.2" rx="1.6" ry="1.6" fill="var(--surface)"/>
+          </g>
+
+          <!-- Smile -->
+          <path d="M52 60 Q60 68 72 60" stroke="var(--mascot-eyes)" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+
+          <!-- Cheeks -->
+          <ellipse cx="40" cy="59" rx="5.5" ry="3.2" fill="var(--mascot-cheek)" opacity="0.4"/>
+          <ellipse cx="80" cy="59" rx="5.5" ry="3.2" fill="var(--mascot-cheek)" opacity="0.4"/>
+        </svg>
+      </div>
+
+      <!-- Speech bubble -->
+      <div class="speech-bubble">Where are we flying today?</div>
+
+      <!-- Search -->
+      <div class="search-wrapper">
+        <input
+          class="search-input"
+          type="text"
+          id="searchInput"
+          placeholder="Enter ICAO code (e.g., KJFK)"
+          aria-label="Search by ICAO airport code"
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <svg class="search-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="9" cy="9" r="6.5"/>
+          <line x1="14" y1="14" x2="18" y2="18"/>
+        </svg>
+      </div>
+
+      <!-- Quick suggestions -->
+      <div class="quick-suggestions">
+        <span class="quick-label">Try:</span>
+        <span class="quick-pill" data-code="KJFK">KJFK</span>
+        <span class="quick-pill" data-code="KLAX">KLAX</span>
+        <span class="quick-pill" data-code="EGLL">EGLL</span>
+        <span class="quick-pill" data-code="RJTT">RJTT</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       YOUR AIRPORTS (Favorites)
+       ================================================================ -->
+  <section class="section stagger stagger-3">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-label">Your Airports</span>
+        <a href="#" class="section-link">Manage favorites</a>
+      </div>
+
+      <div class="favorites-grid">
+
+        <!-- KJFK — VFR, Sunny -->
+        <div class="fav-card stagger stagger-4">
+          <div class="fav-card-header scene-sunny">
+            <span class="fav-star">&#9733;</span>
+            <!-- Sun illustration -->
+            <svg class="scene-icon" width="52" height="52" viewBox="0 0 52 52" fill="none">
+              <circle cx="26" cy="26" r="11" fill="#FBBF24" opacity="0.85"/>
+              <g stroke="#FBBF24" stroke-width="2.5" stroke-linecap="round" opacity="0.55">
+                <line x1="26" y1="5" x2="26" y2="10"/>
+                <line x1="26" y1="42" x2="26" y2="47"/>
+                <line x1="5" y1="26" x2="10" y2="26"/>
+                <line x1="42" y1="26" x2="47" y2="26"/>
+                <line x1="11.1" y1="11.1" x2="14.6" y2="14.6"/>
+                <line x1="37.4" y1="37.4" x2="40.9" y2="40.9"/>
+                <line x1="11.1" y1="40.9" x2="14.6" y2="37.4"/>
+                <line x1="37.4" y1="14.6" x2="40.9" y2="11.1"/>
+              </g>
+            </svg>
+          </div>
+          <div class="fav-card-body">
+            <div class="fav-icao">KJFK</div>
+            <div class="fav-name">John F. Kennedy Intl</div>
+            <div class="fav-badge badge-vfr">
+              <span class="badge-dot"></span>
+              VFR &mdash; Clear for takeoff!
+            </div>
+            <div class="fav-weather-summary">72&deg;F &nbsp;&middot;&nbsp; 8 kt SW &nbsp;&middot;&nbsp; 10+ SM</div>
+            <div class="fav-footer">
+              <a href="#" class="view-link">View Weather <span>&rarr;</span></a>
+            </div>
+          </div>
+        </div>
+
+        <!-- KORD — MVFR, Cloudy -->
+        <div class="fav-card stagger stagger-5">
+          <div class="fav-card-header scene-cloudy">
+            <span class="fav-star">&#9733;</span>
+            <!-- Clouds illustration -->
+            <svg class="scene-icon" width="64" height="42" viewBox="0 0 64 42" fill="none">
+              <ellipse cx="24" cy="27" rx="15" ry="12" fill="#93C5FD" opacity="0.45"/>
+              <ellipse cx="40" cy="24" rx="18" ry="14" fill="#93C5FD" opacity="0.6"/>
+              <ellipse cx="32" cy="19" rx="19" ry="15" fill="#BFDBFE" opacity="0.45"/>
+              <rect x="10" y="26" width="44" height="12" rx="6" fill="#93C5FD" opacity="0.45"/>
+            </svg>
+          </div>
+          <div class="fav-card-body">
+            <div class="fav-icao">KORD</div>
+            <div class="fav-name">Chicago O'Hare Intl</div>
+            <div class="fav-badge badge-mvfr">
+              <span class="badge-dot"></span>
+              MVFR &mdash; Fly with care
+            </div>
+            <div class="fav-weather-summary">58&deg;F &nbsp;&middot;&nbsp; 14 kt NW &nbsp;&middot;&nbsp; 4 SM</div>
+            <div class="fav-footer">
+              <a href="#" class="view-link">View Weather <span>&rarr;</span></a>
+            </div>
+          </div>
+        </div>
+
+        <!-- KLAX — VFR, Clear -->
+        <div class="fav-card stagger stagger-6">
+          <div class="fav-card-header scene-clear">
+            <span class="fav-star">&#9733;</span>
+            <!-- Green sun / clear day -->
+            <svg class="scene-icon" width="52" height="52" viewBox="0 0 52 52" fill="none">
+              <circle cx="26" cy="26" r="11" fill="#34D399" opacity="0.5"/>
+              <g stroke="#34D399" stroke-width="2" stroke-linecap="round" opacity="0.35">
+                <line x1="26" y1="7" x2="26" y2="12"/>
+                <line x1="26" y1="40" x2="26" y2="45"/>
+                <line x1="7" y1="26" x2="12" y2="26"/>
+                <line x1="40" y1="26" x2="45" y2="26"/>
+                <line x1="12.6" y1="12.6" x2="16.1" y2="16.1"/>
+                <line x1="35.9" y1="35.9" x2="39.4" y2="39.4"/>
+                <line x1="12.6" y1="39.4" x2="16.1" y2="35.9"/>
+                <line x1="35.9" y1="16.1" x2="39.4" y2="12.6"/>
+              </g>
+            </svg>
+          </div>
+          <div class="fav-card-body">
+            <div class="fav-icao">KLAX</div>
+            <div class="fav-name">Los Angeles Intl</div>
+            <div class="fav-badge badge-vfr">
+              <span class="badge-dot"></span>
+              VFR &mdash; Clear for takeoff!
+            </div>
+            <div class="fav-weather-summary">78&deg;F &nbsp;&middot;&nbsp; 5 kt W &nbsp;&middot;&nbsp; 10+ SM</div>
+            <div class="fav-footer">
+              <a href="#" class="view-link">View Weather <span>&rarr;</span></a>
+            </div>
+          </div>
+        </div>
+
+        <!-- KATL — IFR, Foggy -->
+        <div class="fav-card stagger stagger-7">
+          <div class="fav-card-header scene-foggy">
+            <span class="fav-star">&#9733;</span>
+            <!-- Fog lines -->
+            <svg class="scene-icon" width="64" height="42" viewBox="0 0 64 42" fill="none">
+              <line x1="10" y1="12" x2="54" y2="12" stroke="#D6D3D1" stroke-width="3" stroke-linecap="round" opacity="0.6"/>
+              <line x1="14" y1="20" x2="50" y2="20" stroke="#D6D3D1" stroke-width="3" stroke-linecap="round" opacity="0.45"/>
+              <line x1="8" y1="28" x2="56" y2="28" stroke="#D6D3D1" stroke-width="3" stroke-linecap="round" opacity="0.3"/>
+              <line x1="16" y1="36" x2="48" y2="36" stroke="#D6D3D1" stroke-width="2" stroke-linecap="round" opacity="0.2"/>
+              <ellipse cx="32" cy="16" rx="14" ry="7" fill="#FCA5A5" opacity="0.2"/>
+            </svg>
+          </div>
+          <div class="fav-card-body">
+            <div class="fav-icao">KATL</div>
+            <div class="fav-name">Hartsfield-Jackson Atlanta Intl</div>
+            <div class="fav-badge badge-ifr">
+              <span class="badge-dot"></span>
+              IFR &mdash; Instruments required
+            </div>
+            <div class="fav-weather-summary">62&deg;F &nbsp;&middot;&nbsp; 3 kt Calm &nbsp;&middot;&nbsp; 1.5 SM</div>
+            <div class="fav-footer">
+              <a href="#" class="view-link">View Weather <span>&rarr;</span></a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       RECENTLY VISITED
+       ================================================================ -->
+  <section class="section stagger stagger-6" style="padding-top: 0;">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-label">Recently Visited</span>
+        <a href="#" class="section-link">Clear all</a>
+      </div>
+
+      <div class="recent-row">
+        <span class="recent-chip" data-code="KBOS">
+          <span class="chip-dot" style="background: var(--vfr);"></span>
+          KBOS
+        </span>
+        <span class="recent-chip" data-code="KSFO">
+          <span class="chip-dot" style="background: var(--mvfr);"></span>
+          KSFO
+        </span>
+        <span class="recent-chip" data-code="KMIA">
+          <span class="chip-dot" style="background: var(--vfr);"></span>
+          KMIA
+        </span>
+        <span class="recent-chip" data-code="KDEN">
+          <span class="chip-dot" style="background: var(--vfr);"></span>
+          KDEN
+        </span>
+        <span class="recent-chip" data-code="KLAS">
+          <span class="chip-dot" style="background: var(--mvfr);"></span>
+          KLAS
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       DID YOU KNOW
+       ================================================================ -->
+  <section class="section stagger stagger-7" style="padding-top: 8px;">
+    <div class="container">
+      <div class="dyk-card">
+        <div class="dyk-illustration" aria-hidden="true">
+          <!-- Lightbulb icon -->
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Bulb glow -->
+            <circle cx="18" cy="14" r="12" fill="var(--accent-secondary)" opacity="0.08"/>
+            <!-- Bulb glass -->
+            <path d="M13 17c-1.5-2-2.5-4.3-2.5-7 0-4.1 3.4-7.5 7.5-7.5s7.5 3.4 7.5 7.5c0 2.7-1 5-2.5 7" stroke="var(--accent-secondary)" stroke-width="2" stroke-linecap="round" fill="none"/>
+            <!-- Filament -->
+            <path d="M15 17v3c0 1.7 1.3 3 3 3s3-1.3 3-3v-3" stroke="var(--accent-secondary)" stroke-width="2" stroke-linecap="round" fill="none"/>
+            <!-- Base lines -->
+            <line x1="14.5" y1="25" x2="21.5" y2="25" stroke="var(--accent-secondary)" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="15.5" y1="27.5" x2="20.5" y2="27.5" stroke="var(--accent-secondary)" stroke-width="1.5" stroke-linecap="round"/>
+            <!-- Rays -->
+            <line x1="18" y1="0" x2="18" y2="3" stroke="var(--accent-secondary)" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+            <line x1="6" y1="5.5" x2="8.2" y2="7.7" stroke="var(--accent-secondary)" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+            <line x1="30" y1="5.5" x2="27.8" y2="7.7" stroke="var(--accent-secondary)" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+            <line x1="3" y1="14" x2="6" y2="14" stroke="var(--accent-secondary)" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+            <line x1="30" y1="14" x2="33" y2="14" stroke="var(--accent-secondary)" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+          </svg>
+        </div>
+        <div class="dyk-content">
+          <div class="dyk-label">Did You Know?</div>
+          <div class="dyk-text">
+            We compare <strong>3 independent weather sources</strong> so you don't have to.
+            When sources disagree, we flag it &mdash; because the weather you plan on
+            should be the weather you get.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================================
+       FOOTER
+       ================================================================ -->
+  <footer class="footer stagger stagger-8">
+    <div class="container">
+      <div class="footer-tagline">"Clear skies, clear answers."</div>
+      <div class="footer-text">Weather Aggregator &mdash; Flight Planning Weather for Part 135 Dispatch</div>
+      <div class="footer-sources">
+        Data from
+        <a href="https://aviationweather.gov" target="_blank" rel="noopener">Aviation Weather Center</a>,
+        <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a>, and
+        <a href="https://weather.gov" target="_blank" rel="noopener">National Weather Service</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ================================================================
+       JAVASCRIPT
+       ================================================================ -->
+  <script>
+    /* ----------------------------------------------------------
+       Zulu time clock
+       ---------------------------------------------------------- */
+    function updateZuluTime() {
+      const now = new Date();
+      const hh = String(now.getUTCHours()).padStart(2, '0');
+      const mm = String(now.getUTCMinutes()).padStart(2, '0');
+      const el = document.getElementById('zuluTime');
+      if (el) el.textContent = hh + ':' + mm + 'Z';
+    }
+    updateZuluTime();
+    setInterval(updateZuluTime, 10000);
+
+    /* ----------------------------------------------------------
+       Dark / Light mode toggle
+       ---------------------------------------------------------- */
+    const html = document.documentElement;
+    const toggle = document.getElementById('themeToggle');
+    const icon = document.getElementById('themeIcon');
+
+    function updateToggleState(theme) {
+      if (theme === 'dark') {
+        icon.innerHTML = '&#9790;'; // moon
+        toggle.setAttribute('aria-checked', 'true');
+      } else {
+        icon.innerHTML = '&#9728;'; // sun
+        toggle.setAttribute('aria-checked', 'false');
+      }
+    }
+
+    // Restore saved preference
+    const savedTheme = localStorage.getItem('clearway-theme');
+    if (savedTheme) {
+      html.setAttribute('data-theme', savedTheme);
+      updateToggleState(savedTheme);
+    }
+
+    toggle.addEventListener('click', function() {
+      const current = html.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('clearway-theme', next);
+      updateToggleState(next);
+    });
+
+    toggle.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggle.click();
+      }
+    });
+
+    /* ----------------------------------------------------------
+       Nav tab switching (visual only)
+       ---------------------------------------------------------- */
+    document.querySelectorAll('.nav-tab').forEach(function(tab) {
+      tab.addEventListener('click', function() {
+        document.querySelectorAll('.nav-tab').forEach(function(t) {
+          t.classList.remove('active');
+          t.setAttribute('aria-selected', 'false');
+        });
+        tab.classList.add('active');
+        tab.setAttribute('aria-selected', 'true');
+      });
+    });
+
+    /* ----------------------------------------------------------
+       Search input — auto uppercase
+       ---------------------------------------------------------- */
+    var searchInput = document.getElementById('searchInput');
+
+    searchInput.addEventListener('input', function() {
+      var pos = searchInput.selectionStart;
+      searchInput.value = searchInput.value.toUpperCase();
+      searchInput.setSelectionRange(pos, pos);
+    });
+
+    /* ----------------------------------------------------------
+       Quick suggestion pills -> populate search
+       ---------------------------------------------------------- */
+    document.querySelectorAll('.quick-pill').forEach(function(pill) {
+      pill.addEventListener('click', function() {
+        var code = pill.getAttribute('data-code') || pill.textContent.trim();
+        searchInput.value = code;
+        searchInput.focus();
+        // Brief press feedback
+        pill.style.transform = 'scale(0.93)';
+        setTimeout(function() { pill.style.transform = ''; }, 150);
+      });
+    });
+
+    /* ----------------------------------------------------------
+       Recent chip click -> populate search & scroll up
+       ---------------------------------------------------------- */
+    document.querySelectorAll('.recent-chip').forEach(function(chip) {
+      chip.addEventListener('click', function() {
+        var code = chip.getAttribute('data-code') || chip.textContent.trim();
+        searchInput.value = code;
+        searchInput.focus();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    });
+
+    /* ----------------------------------------------------------
+       Enter on search — highlight first card briefly
+       ---------------------------------------------------------- */
+    searchInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && searchInput.value.trim()) {
+        var firstCard = document.querySelector('.fav-card');
+        if (firstCard) {
+          firstCard.style.outline = '2px solid var(--accent)';
+          firstCard.style.outlineOffset = '3px';
+          setTimeout(function() {
+            firstCard.style.outline = '';
+            firstCard.style.outlineOffset = '';
+          }, 1500);
+        }
+      }
+    });
+  </script>
+</body>
+</html>

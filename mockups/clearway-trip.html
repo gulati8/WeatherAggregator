@@ -1,0 +1,2591 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clearway — Trip Planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============================================
+   CSS CUSTOM PROPERTIES — Clearway "Friendly Expert"
+   ============================================ */
+:root {
+  --bg: #FBF8F3;
+  --surface: #FFFFFF;
+  --surface-tinted: #F5F0E8;
+  --text-primary: #1C1917;
+  --text-secondary: #57534E;
+  --text-tertiary: #A8A29E;
+  --border: #E7E5E4;
+  --accent: #0D9488;
+  --accent-hover: #0F766E;
+  --accent-light: rgba(13,148,136,0.08);
+  --accent-secondary: #D97706;
+  --accent-secondary-light: rgba(217,119,6,0.08);
+  --success: #16A34A;
+  --success-light: rgba(22,163,74,0.08);
+  --warning: #EA580C;
+  --warning-light: rgba(234,88,12,0.08);
+  --danger: #DC2626;
+  --danger-light: rgba(220,38,38,0.08);
+  --celebration: #8B5CF6;
+  --vfr: #22C55E;
+  --mvfr: #3B82F6;
+  --ifr: #EF4444;
+  --lifr: #A855F7;
+  --shadow-sm: 0 1px 3px rgba(28,25,23,0.04), 0 1px 2px rgba(28,25,23,0.03);
+  --shadow-md: 0 4px 12px rgba(28,25,23,0.06), 0 2px 4px rgba(28,25,23,0.04);
+  --shadow-lg: 0 12px 32px rgba(28,25,23,0.08), 0 4px 8px rgba(28,25,23,0.04);
+  --shadow-xl: 0 16px 48px rgba(28,25,23,0.1), 0 6px 12px rgba(28,25,23,0.06);
+  --radius-card: 12px;
+  --radius-input: 8px;
+  --radius-pill: 9999px;
+  --navbar-bg: rgba(255,255,255,0.88);
+  --cloud-body: #FFFFFF;
+  --cloud-shadow: #E7E5E4;
+  --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+[data-theme="dark"] {
+  --bg: #1C1917;
+  --surface: #292524;
+  --surface-tinted: #33302E;
+  --text-primary: #FAFAF9;
+  --text-secondary: #A8A29E;
+  --text-tertiary: #78716C;
+  --border: #44403C;
+  --accent: #2DD4BF;
+  --accent-hover: #14B8A6;
+  --accent-light: rgba(45,212,191,0.1);
+  --accent-secondary: #FBBF24;
+  --accent-secondary-light: rgba(251,191,36,0.1);
+  --success: #4ADE80;
+  --success-light: rgba(74,222,128,0.1);
+  --warning: #FB923C;
+  --warning-light: rgba(251,146,60,0.1);
+  --danger: #F87171;
+  --danger-light: rgba(248,113,113,0.1);
+  --vfr: #4ADE80;
+  --mvfr: #60A5FA;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.25);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.3);
+  --shadow-lg: 0 12px 32px rgba(0,0,0,0.35);
+  --shadow-xl: 0 16px 48px rgba(0,0,0,0.4);
+  --navbar-bg: rgba(41,37,36,0.92);
+  --cloud-body: #44403C;
+  --cloud-shadow: #292524;
+}
+
+/* ============================================
+   RESET & BASE
+   ============================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 15px;
+  background: var(--bg);
+  color: var(--text-primary);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background 0.4s var(--ease), color 0.4s var(--ease);
+}
+
+code, .mono {
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+/* ============================================
+   KEYFRAME ANIMATIONS
+   ============================================ */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes breathe {
+  0%, 100% { transform: scale(1) translateY(0); }
+  50% { transform: scale(1.03) translateY(-3px); }
+}
+
+@keyframes blink {
+  0%, 42%, 58%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(0.08); }
+}
+
+@keyframes wave {
+  0%, 100% { transform: rotate(0deg); }
+  15% { transform: rotate(14deg); }
+  30% { transform: rotate(-8deg); }
+  45% { transform: rotate(10deg); }
+  60% { transform: rotate(-4deg); }
+  75% { transform: rotate(6deg); }
+}
+
+@keyframes nowPulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(220,38,38,0.3); }
+  50% { opacity: 0.85; box-shadow: 0 0 0 6px rgba(220,38,38,0); }
+}
+
+@keyframes barGrow {
+  from { width: 0%; }
+}
+
+@keyframes speechPop {
+  0% { opacity: 0; transform: scale(0.85) translateY(6px); }
+  60% { transform: scale(1.02) translateY(-1px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200px 0; }
+  100% { background-position: 200px 0; }
+}
+
+.fade-in { animation: fadeInUp 0.6s var(--ease) both; }
+.fade-in-d1 { animation: fadeInUp 0.6s var(--ease) 0.1s both; }
+.fade-in-d2 { animation: fadeInUp 0.6s var(--ease) 0.2s both; }
+.fade-in-d3 { animation: fadeInUp 0.6s var(--ease) 0.35s both; }
+.fade-in-d4 { animation: fadeInUp 0.6s var(--ease) 0.5s both; }
+
+/* ============================================
+   NAVBAR
+   ============================================ */
+.navbar {
+  background: var(--navbar-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  transition: background 0.4s var(--ease), border-color 0.4s var(--ease);
+}
+
+.navbar-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--text-primary);
+  font-weight: 700;
+  font-size: 1.15rem;
+}
+
+.brand-icon {
+  width: 34px;
+  height: 34px;
+  background: var(--accent);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.brand-icon::after {
+  content: '';
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  width: 12px;
+  height: 12px;
+  background: rgba(255,255,255,0.25);
+  border-radius: 50%;
+}
+
+.navbar-nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  list-style: none;
+}
+
+.navbar-nav a {
+  text-decoration: none;
+  color: var(--text-secondary);
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  font-size: 0.88rem;
+  font-weight: 500;
+  transition: all 0.25s var(--ease);
+}
+
+.navbar-nav a:hover {
+  color: var(--text-primary);
+  background: var(--surface-tinted);
+}
+
+.navbar-nav a.active {
+  color: var(--accent);
+  background: var(--accent-light);
+  font-weight: 600;
+}
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav-clock {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.8rem;
+  color: var(--text-tertiary);
+  padding: 5px 10px;
+  background: var(--surface-tinted);
+  border-radius: var(--radius-input);
+  letter-spacing: 0.02em;
+}
+
+.theme-toggle {
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  transition: all 0.25s var(--spring);
+}
+
+.theme-toggle:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-light);
+  transform: scale(1.05);
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--accent), var(--celebration));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s var(--spring);
+}
+
+.user-avatar:hover { transform: scale(1.08); }
+
+/* ============================================
+   MAIN CONTAINER
+   ============================================ */
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 36px 24px 80px;
+}
+
+/* ============================================
+   PAGE HEADER & TRIP NAME
+   ============================================ */
+.page-header {
+  margin-bottom: 32px;
+}
+
+.page-header h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 14px;
+  letter-spacing: -0.02em;
+}
+
+.trip-name-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 16px 20px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 440px;
+  transition: all 0.3s var(--ease);
+}
+
+.trip-name-card:focus-within {
+  border-color: var(--accent);
+  box-shadow: var(--shadow-sm), 0 0 0 3px var(--accent-light);
+}
+
+.trip-name-icon {
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+}
+
+.trip-name-input {
+  background: transparent;
+  border: none;
+  font-size: 1rem;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+  color: var(--text-primary);
+  width: 100%;
+  outline: none;
+}
+
+.trip-name-input::placeholder { color: var(--text-tertiary); }
+
+/* ============================================
+   SECTION LABEL
+   ============================================ */
+.section-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-tertiary);
+  margin-bottom: 14px;
+}
+
+/* ============================================
+   ROUTE BUILDER
+   ============================================ */
+.route-builder {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 28px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s var(--ease);
+}
+
+.route-builder:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.leg-list { position: relative; }
+
+.leg-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 0;
+  position: relative;
+}
+
+.leg-number {
+  width: 36px;
+  height: 36px;
+  background: var(--accent);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+  z-index: 2;
+  box-shadow: 0 2px 8px rgba(13,148,136,0.25);
+}
+
+.leg-fields {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  flex-wrap: wrap;
+}
+
+.leg-airport {
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 600;
+  font-size: 1.05rem;
+  background: var(--surface-tinted);
+  border: 1px solid var(--border);
+  padding: 8px 14px;
+  border-radius: var(--radius-input);
+  width: 88px;
+  text-align: center;
+  color: var(--text-primary);
+  transition: all 0.2s var(--ease);
+  outline: none;
+  letter-spacing: 0.04em;
+}
+
+.leg-airport:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-light);
+}
+
+.leg-arrow {
+  color: var(--accent);
+  font-size: 1.3rem;
+  font-weight: 300;
+}
+
+.leg-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-secondary);
+  font-size: 0.86rem;
+}
+
+.leg-meta input {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.84rem;
+  background: var(--surface-tinted);
+  border: 1px solid var(--border);
+  padding: 6px 10px;
+  border-radius: var(--radius-input);
+  color: var(--text-primary);
+  width: 82px;
+  outline: none;
+  transition: all 0.2s var(--ease);
+}
+
+.leg-meta input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-light);
+}
+
+.leg-duration {
+  color: var(--text-tertiary);
+  font-size: 0.82rem;
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+.leg-remove {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  transition: all 0.2s var(--spring);
+  flex-shrink: 0;
+}
+
+.leg-remove:hover {
+  background: var(--danger-light);
+  color: var(--danger);
+  transform: scale(1.12);
+}
+
+/* Dotted connector between legs */
+.leg-connector {
+  display: flex;
+  align-items: center;
+  padding: 2px 0 2px 17px;
+  position: relative;
+}
+
+.leg-connector::before {
+  content: '';
+  position: absolute;
+  left: 17px;
+  top: -6px;
+  bottom: -6px;
+  width: 2px;
+  border-left: 2px dashed var(--border);
+}
+
+.ground-time {
+  margin-left: 36px;
+  font-size: 0.76rem;
+  color: var(--text-tertiary);
+  background: var(--surface-tinted);
+  padding: 3px 12px;
+  border-radius: var(--radius-pill);
+  font-family: 'IBM Plex Mono', monospace;
+  position: relative;
+  z-index: 1;
+}
+
+.add-leg-btn {
+  margin-top: 18px;
+  width: 100%;
+  padding: 14px;
+  border: 2px dashed var(--border);
+  border-radius: var(--radius-input);
+  background: transparent;
+  color: var(--accent);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s var(--spring);
+}
+
+.add-leg-btn:hover {
+  border-color: var(--accent);
+  background: var(--accent-light);
+  transform: translateY(-1px);
+}
+
+/* ============================================
+   SUMMARY BAR
+   ============================================ */
+.summary-bar {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 18px 24px;
+  margin-bottom: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  box-shadow: var(--shadow-sm);
+  flex-wrap: wrap;
+  transition: all 0.3s var(--ease);
+}
+
+.summary-route {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.92rem;
+}
+
+.summary-airport {
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 700;
+  color: var(--accent);
+  font-size: 1rem;
+}
+
+.summary-time {
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+.summary-local {
+  color: var(--text-tertiary);
+  font-size: 0.74rem;
+}
+
+.summary-arrow {
+  color: var(--text-tertiary);
+  font-size: 1.3rem;
+}
+
+.summary-totals {
+  text-align: right;
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+}
+
+.summary-total-main {
+  font-weight: 700;
+  color: var(--text-primary);
+  font-size: 1.05rem;
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+/* ============================================
+   CTA BUTTON + MASCOT
+   ============================================ */
+.cta-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  margin-bottom: 20px;
+}
+
+.cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 16px 40px;
+  border-radius: var(--radius-pill);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(13,148,136,0.3);
+  transition: all 0.3s var(--spring);
+  position: relative;
+  overflow: hidden;
+}
+
+.cta-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 200%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+.cta-btn:hover {
+  background: var(--accent-hover);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 28px rgba(13,148,136,0.35);
+}
+
+.cta-btn:active { transform: translateY(-1px); }
+
+/* Mini cloud mascot next to CTA */
+.cta-mascot {
+  position: relative;
+  width: 56px;
+  height: 44px;
+  animation: breathe 3.5s ease-in-out infinite;
+}
+
+.cta-mascot .cm-body {
+  position: absolute;
+  bottom: 0;
+  left: 6px;
+  width: 44px;
+  height: 22px;
+  background: var(--cloud-body);
+  border-radius: 16px;
+  border: 2px solid var(--cloud-shadow);
+}
+
+.cta-mascot .cm-bump1 {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  width: 22px;
+  height: 22px;
+  background: var(--cloud-body);
+  border-radius: 50%;
+  border: 2px solid var(--cloud-shadow);
+  border-bottom-color: transparent;
+}
+
+.cta-mascot .cm-bump2 {
+  position: absolute;
+  bottom: 10px;
+  left: 26px;
+  width: 18px;
+  height: 18px;
+  background: var(--cloud-body);
+  border-radius: 50%;
+  border: 2px solid var(--cloud-shadow);
+  border-bottom-color: transparent;
+}
+
+.cta-mascot .cm-fill {
+  position: absolute;
+  bottom: 2px;
+  left: 8px;
+  width: 40px;
+  height: 18px;
+  background: var(--cloud-body);
+  border-radius: 12px;
+  z-index: 2;
+}
+
+.cta-mascot .cm-eye {
+  position: absolute;
+  bottom: 7px;
+  width: 4px;
+  height: 5px;
+  background: var(--text-primary);
+  border-radius: 50%;
+  z-index: 3;
+  animation: blink 4s ease-in-out infinite;
+}
+
+.cta-mascot .cm-eye.l { left: 18px; }
+.cta-mascot .cm-eye.r { left: 28px; }
+
+.cta-mascot .cm-mouth {
+  position: absolute;
+  bottom: 4px;
+  left: 21px;
+  width: 8px;
+  height: 4px;
+  border: 2px solid var(--text-primary);
+  border-top: none;
+  border-radius: 0 0 6px 6px;
+  z-index: 3;
+}
+
+.cta-mascot .cm-wave {
+  position: absolute;
+  bottom: 14px;
+  right: -2px;
+  font-size: 14px;
+  z-index: 4;
+  animation: wave 2s ease-in-out infinite;
+  transform-origin: 70% 70%;
+}
+
+/* ============================================
+   ACTION BUTTONS ROW
+   ============================================ */
+.action-btns {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 44px;
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  padding: 9px 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  color: var(--text-secondary);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s var(--spring);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.action-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-light);
+  transform: translateY(-1px);
+}
+
+.action-btn.primary {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+.action-btn.primary:hover {
+  background: var(--accent-hover);
+  color: white;
+  box-shadow: var(--shadow-md);
+}
+
+.action-btn.danger {
+  border-color: var(--border);
+  color: var(--text-tertiary);
+}
+
+.action-btn.danger:hover {
+  border-color: var(--danger);
+  color: var(--danger);
+  background: var(--danger-light);
+}
+
+/* ============================================
+   RESULTS DIVIDER
+   ============================================ */
+.results-divider {
+  border: none;
+  border-top: 2px solid var(--border);
+  margin: 0 0 40px;
+  position: relative;
+}
+
+.divider-label {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg);
+  padding: 0 16px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-tertiary);
+}
+
+/* ============================================
+   CLOUD MASCOT — LARGE (Status Section)
+   ============================================ */
+.mascot-status {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 36px;
+}
+
+.cloud-mascot-lg {
+  position: relative;
+  width: 80px;
+  height: 62px;
+  flex-shrink: 0;
+  animation: breathe 4s ease-in-out infinite;
+}
+
+.cloud-mascot-lg .cl-body {
+  position: absolute;
+  bottom: 0;
+  left: 8px;
+  width: 64px;
+  height: 36px;
+  background: var(--accent);
+  border-radius: 24px;
+}
+
+.cloud-mascot-lg .cl-bump1 {
+  position: absolute;
+  bottom: 20px;
+  left: 14px;
+  width: 34px;
+  height: 34px;
+  background: var(--accent);
+  border-radius: 50%;
+}
+
+.cloud-mascot-lg .cl-bump2 {
+  position: absolute;
+  bottom: 17px;
+  left: 38px;
+  width: 28px;
+  height: 28px;
+  background: var(--accent);
+  border-radius: 50%;
+}
+
+.cloud-mascot-lg .cl-eye {
+  position: absolute;
+  bottom: 10px;
+  width: 5px;
+  height: 6px;
+  background: white;
+  border-radius: 50%;
+  z-index: 2;
+  animation: blink 3.5s ease-in-out infinite;
+}
+
+.cloud-mascot-lg .cl-eye.l { left: 26px; animation-delay: 0.1s; }
+.cloud-mascot-lg .cl-eye.r { left: 40px; }
+
+.cloud-mascot-lg .cl-mouth {
+  position: absolute;
+  bottom: 5px;
+  left: 30px;
+  width: 12px;
+  height: 6px;
+  border: 2px solid white;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  z-index: 2;
+}
+
+.cloud-mascot-lg .cl-cheek {
+  position: absolute;
+  bottom: 6px;
+  width: 8px;
+  height: 5px;
+  background: rgba(255,255,255,0.35);
+  border-radius: 50%;
+  z-index: 2;
+}
+
+.cloud-mascot-lg .cl-cheek.l { left: 20px; }
+.cloud-mascot-lg .cl-cheek.r { left: 45px; }
+
+.speech-bubble {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 14px 20px;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  position: relative;
+  box-shadow: var(--shadow-sm);
+  animation: speechPop 0.5s var(--ease) both;
+  transition: background 0.3s var(--ease), border-color 0.3s var(--ease);
+}
+
+.speech-bubble::before {
+  content: '';
+  position: absolute;
+  left: -8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-right: 8px solid var(--border);
+}
+
+.speech-bubble::after {
+  content: '';
+  position: absolute;
+  left: -6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-top: 7px solid transparent;
+  border-bottom: 7px solid transparent;
+  border-right: 7px solid var(--surface);
+}
+
+.speech-bubble .highlight {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* ============================================
+   TRIP HEALTH CARDS
+   ============================================ */
+.health-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 40px;
+}
+
+.health-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 24px 20px;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.35s var(--spring);
+  cursor: default;
+  overflow: hidden;
+  position: relative;
+}
+
+.health-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+}
+
+.health-card.green::before { background: linear-gradient(90deg, var(--vfr), #4ADE80); }
+.health-card.amber::before { background: linear-gradient(90deg, var(--accent-secondary), #FBBF24); }
+.health-card.blue::before { background: linear-gradient(90deg, var(--mvfr), #93C5FD); }
+
+.health-card:hover {
+  transform: translateY(-5px) scale(1.01);
+  box-shadow: var(--shadow-lg);
+}
+
+.health-icon {
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 24px;
+}
+
+.health-card.green .health-icon {
+  background: var(--success-light);
+  color: var(--success);
+}
+
+.health-card.amber .health-icon {
+  background: var(--accent-secondary-light);
+  color: var(--accent-secondary);
+}
+
+.health-card.blue .health-icon {
+  background: rgba(59,130,246,0.08);
+  color: var(--mvfr);
+}
+
+.health-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 3px;
+  color: var(--text-primary);
+}
+
+.health-subtitle {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  margin-bottom: 14px;
+}
+
+.health-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-tertiary);
+  margin-bottom: 6px;
+}
+
+.go-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--success-light);
+  color: var(--success);
+  padding: 5px 16px;
+  border-radius: var(--radius-pill);
+  font-weight: 700;
+  font-size: 0.82rem;
+  letter-spacing: 0.05em;
+}
+
+.go-badge::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  background: var(--success);
+  border-radius: 50%;
+}
+
+/* ============================================
+   TIMELINE
+   ============================================ */
+.timeline-section {
+  margin-bottom: 40px;
+}
+
+.timeline-bar-container {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 22px 24px 18px;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s var(--ease);
+}
+
+.timeline-hours {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem;
+  color: var(--text-tertiary);
+}
+
+.timeline-track {
+  height: 40px;
+  background: var(--surface-tinted);
+  border-radius: 10px;
+  position: relative;
+  overflow: visible;
+}
+
+.timeline-leg {
+  position: absolute;
+  top: 5px;
+  height: 30px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: white;
+  font-family: 'IBM Plex Mono', monospace;
+  cursor: pointer;
+  transition: all 0.3s var(--spring);
+  letter-spacing: 0.02em;
+}
+
+.timeline-leg:hover {
+  transform: scaleY(1.18);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  z-index: 3;
+}
+
+.timeline-leg.vfr { background: linear-gradient(135deg, #22C55E, #16A34A); }
+.timeline-leg.mvfr { background: linear-gradient(135deg, #3B82F6, #2563EB); }
+.timeline-leg.vfr-mvfr { background: linear-gradient(135deg, #22C55E 40%, #3B82F6 100%); }
+
+/* NOW marker */
+.timeline-now {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  width: 2px;
+  background: var(--danger);
+  z-index: 5;
+  animation: nowPulse 2s ease-in-out infinite;
+}
+
+.timeline-now::before {
+  content: 'NOW';
+  position: absolute;
+  top: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: var(--danger);
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+.timeline-now::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  background: var(--danger);
+  border-radius: 50%;
+}
+
+/* ============================================
+   LEG DETAILS SECTION
+   ============================================ */
+.leg-details-section {
+  margin-bottom: 24px;
+}
+
+.leg-instruction {
+  font-size: 0.88rem;
+  color: var(--text-tertiary);
+  margin-bottom: 16px;
+  font-style: italic;
+}
+
+.leg-detail-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  margin-bottom: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.35s var(--spring);
+}
+
+.leg-detail-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.leg-detail-card.expanded {
+  box-shadow: var(--shadow-lg);
+  border-color: var(--accent);
+  transform: translateY(0);
+}
+
+.leg-detail-header {
+  padding: 16px 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  user-select: none;
+  transition: background 0.2s var(--ease);
+}
+
+.leg-detail-header:hover {
+  background: var(--surface-tinted);
+}
+
+.leg-detail-card.expanded .leg-detail-header {
+  border-bottom: 1px solid var(--border);
+  background: var(--accent-light);
+}
+
+.leg-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.leg-badge {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--accent-light);
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+  letter-spacing: 0.04em;
+}
+
+.leg-header-route {
+  font-weight: 700;
+  font-size: 1.05rem;
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+.leg-header-summary {
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+  flex: 1;
+}
+
+.leg-header-arrow {
+  color: var(--text-tertiary);
+  font-size: 0.9rem;
+  transition: transform 0.35s var(--spring);
+  flex-shrink: 0;
+}
+
+.leg-detail-card.expanded .leg-header-arrow {
+  transform: rotate(180deg);
+  color: var(--accent);
+}
+
+/* Expanded body */
+.leg-detail-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.45s var(--ease);
+}
+
+.leg-detail-card.expanded .leg-detail-body {
+  max-height: 2400px;
+}
+
+.leg-body-inner {
+  padding: 24px;
+}
+
+.leg-summary-text {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+  padding: 14px 18px;
+  background: var(--success-light);
+  border-radius: var(--radius-input);
+  border-left: 4px solid var(--success);
+  line-height: 1.6;
+}
+
+.leg-summary-text.caution {
+  background: var(--warning-light);
+  border-left-color: var(--warning);
+}
+
+/* Two-column airport weather */
+.airport-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.airport-col {
+  background: var(--surface-tinted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 20px;
+  transition: all 0.3s var(--ease);
+}
+
+.airport-col:hover {
+  border-color: var(--accent);
+  box-shadow: var(--shadow-sm);
+}
+
+.airport-col-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-tertiary);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.airport-col-icao {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+
+.flight-cat-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  border-radius: var(--radius-pill);
+  font-weight: 700;
+  font-size: 0.82rem;
+  margin-bottom: 6px;
+}
+
+.flight-cat-badge.vfr {
+  background: rgba(34,197,94,0.12);
+  color: #16A34A;
+}
+
+.flight-cat-badge.mvfr {
+  background: rgba(59,130,246,0.12);
+  color: #2563EB;
+}
+
+[data-theme="dark"] .flight-cat-badge.vfr {
+  background: rgba(74,222,128,0.15);
+  color: #4ADE80;
+}
+
+[data-theme="dark"] .flight-cat-badge.mvfr {
+  background: rgba(96,165,250,0.15);
+  color: #60A5FA;
+}
+
+.flight-cat-badge::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.cat-friendly-text {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+  font-style: italic;
+}
+
+.wx-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 16px;
+}
+
+.wx-detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.wx-detail-label {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-tertiary);
+  font-weight: 600;
+}
+
+.wx-detail-value {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.wx-detail-value .gust {
+  color: var(--warning);
+  font-weight: 600;
+}
+
+/* ============================================
+   PART 135 COMPLIANCE SECTION
+   ============================================ */
+.part135-section {
+  margin-bottom: 24px;
+}
+
+.part135-title {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.part135-title .shield {
+  color: var(--success);
+}
+
+.margin-bars {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.margin-bar-item {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.margin-bar-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.78rem;
+}
+
+.margin-bar-name {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.margin-bar-value {
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 600;
+  color: var(--success);
+  font-size: 0.82rem;
+}
+
+.margin-bar-value.amber {
+  color: var(--accent-secondary);
+}
+
+.margin-bar-track {
+  height: 8px;
+  background: var(--surface-tinted);
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.margin-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 1s var(--spring);
+}
+
+.margin-bar-fill.green { background: linear-gradient(90deg, var(--vfr), #4ADE80); }
+.margin-bar-fill.amber { background: linear-gradient(90deg, var(--accent-secondary), #FBBF24); }
+
+.margin-bar-range {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.64rem;
+  color: var(--text-tertiary);
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+/* ============================================
+   ACCORDION / COLLAPSIBLE SECTIONS
+   ============================================ */
+.accordion-trigger {
+  width: 100%;
+  padding: 11px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-input);
+  background: var(--surface);
+  color: var(--text-secondary);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.84rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.25s var(--ease);
+  margin-bottom: 8px;
+}
+
+.accordion-trigger:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-light);
+}
+
+.accordion-trigger .arr {
+  transition: transform 0.3s var(--spring);
+  font-size: 0.72rem;
+}
+
+.accordion-trigger.open .arr {
+  transform: rotate(180deg);
+}
+
+.accordion-trigger.open {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-light);
+  border-radius: var(--radius-input) var(--radius-input) 0 0;
+  margin-bottom: 0;
+}
+
+.accordion-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s var(--ease);
+}
+
+.accordion-content.open {
+  max-height: 500px;
+}
+
+.accordion-inner {
+  padding: 14px 16px;
+  background: var(--surface-tinted);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 var(--radius-input) var(--radius-input);
+  margin-bottom: 8px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.76rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+
+/* ============================================
+   FOOTER
+   ============================================ */
+.footer {
+  text-align: center;
+  padding: 40px 24px 32px;
+  color: var(--text-tertiary);
+  font-size: 0.78rem;
+  border-top: 1px solid var(--border);
+  transition: border-color 0.3s var(--ease);
+}
+
+.footer a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+  .container { padding: 20px 16px 60px; }
+  .page-header h1 { font-size: 1.4rem; }
+  .health-cards { grid-template-columns: 1fr; gap: 12px; }
+  .airport-columns { grid-template-columns: 1fr; }
+  .margin-bars { grid-template-columns: 1fr; }
+  .summary-bar { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .summary-totals { text-align: left; }
+  .leg-fields { flex-wrap: wrap; }
+  .leg-meta { flex-wrap: wrap; gap: 8px; }
+  .cta-row { flex-direction: column; }
+  .action-btns { flex-wrap: wrap; justify-content: center; }
+  .navbar-nav { display: none; }
+  .nav-clock { display: none; }
+  .timeline-hours { font-size: 0.64rem; }
+  .mascot-status { flex-direction: column; text-align: center; }
+  .speech-bubble::before, .speech-bubble::after { display: none; }
+}
+
+@media (max-width: 480px) {
+  .page-header h1 { font-size: 1.25rem; }
+  .route-builder { padding: 18px; }
+  .leg-item { gap: 10px; }
+  .leg-airport { width: 72px; font-size: 0.92rem; }
+  .cta-btn { padding: 14px 28px; font-size: 1rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================
+     NAVBAR
+     ============================================ -->
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="#" class="navbar-brand">
+      <div class="brand-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 8c0-3.3-2.7-6-6-6S6 4.7 6 8c-3.3 0-6 2.7-6 6s2.7 6 6 6h12c3.3 0 6-2.7 6-6s-2.7-6-6-6z"/>
+        </svg>
+      </div>
+      Weather Aggregator
+    </a>
+
+    <ul class="navbar-nav">
+      <li><a href="#">Weather</a></li>
+      <li><a href="#" class="active">Trip Planner</a></li>
+      <li><a href="#">Map</a></li>
+      <li><a href="#">Alerts</a></li>
+    </ul>
+
+    <div class="navbar-right">
+      <div class="nav-clock" id="navClock">14:32 UTC</div>
+      <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode" id="themeBtn">
+        <span id="themeIcon">&#9789;</span>
+      </button>
+      <div class="user-avatar" title="User menu">AG</div>
+    </div>
+  </div>
+</nav>
+
+<!-- ============================================
+     MAIN CONTENT
+     ============================================ -->
+<main class="container">
+
+  <!-- Page Header -->
+  <div class="page-header fade-in">
+    <h1>Trip Planner</h1>
+    <div class="trip-name-card">
+      <span class="trip-name-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17.8 19.2L16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/>
+        </svg>
+      </span>
+      <input type="text" class="trip-name-input" value="Northeast Shuttle" placeholder="Trip name...">
+    </div>
+  </div>
+
+  <!-- Route Builder -->
+  <div class="section-label fade-in-d1">Build Your Route</div>
+  <div class="route-builder fade-in-d1">
+    <div class="leg-list">
+
+      <!-- Leg 1 -->
+      <div class="leg-item">
+        <div class="leg-number">1</div>
+        <div class="leg-fields">
+          <input type="text" class="leg-airport" value="KTEB" readonly>
+          <span class="leg-arrow">&longrightarrow;</span>
+          <input type="text" class="leg-airport" value="KBOS" readonly>
+          <div class="leg-meta">
+            <input type="text" value="14:00Z" readonly>
+            <span class="leg-duration">1h 15m</span>
+          </div>
+        </div>
+        <button class="leg-remove" title="Remove leg">&times;</button>
+      </div>
+
+      <!-- Connector 1-2 -->
+      <div class="leg-connector">
+        <span class="ground-time">1h 15m ground</span>
+      </div>
+
+      <!-- Leg 2 -->
+      <div class="leg-item">
+        <div class="leg-number">2</div>
+        <div class="leg-fields">
+          <input type="text" class="leg-airport" value="KBOS" readonly>
+          <span class="leg-arrow">&longrightarrow;</span>
+          <input type="text" class="leg-airport" value="KJFK" readonly>
+          <div class="leg-meta">
+            <input type="text" value="16:30Z" readonly>
+            <span class="leg-duration">0h 55m</span>
+          </div>
+        </div>
+        <button class="leg-remove" title="Remove leg">&times;</button>
+      </div>
+
+      <!-- Connector 2-3 -->
+      <div class="leg-connector">
+        <span class="ground-time">1h 35m ground</span>
+      </div>
+
+      <!-- Leg 3 -->
+      <div class="leg-item">
+        <div class="leg-number">3</div>
+        <div class="leg-fields">
+          <input type="text" class="leg-airport" value="KJFK" readonly>
+          <span class="leg-arrow">&longrightarrow;</span>
+          <input type="text" class="leg-airport" value="KTEB" readonly>
+          <div class="leg-meta">
+            <input type="text" value="19:00Z" readonly>
+            <span class="leg-duration">0h 25m</span>
+          </div>
+        </div>
+        <button class="leg-remove" title="Remove leg">&times;</button>
+      </div>
+    </div>
+
+    <button class="add-leg-btn">+ Add another leg</button>
+  </div>
+
+  <!-- Summary Bar -->
+  <div class="summary-bar fade-in-d2">
+    <div class="summary-route">
+      <div>
+        <span class="summary-airport">KTEB</span>
+        <span class="summary-time"> departs 14:00Z</span>
+        <span class="summary-local">(09:00L)</span>
+      </div>
+      <span class="summary-arrow">&longrightarrow;</span>
+      <div>
+        <span class="summary-airport">KTEB</span>
+        <span class="summary-time"> arrives 19:25Z</span>
+        <span class="summary-local">(14:25L)</span>
+      </div>
+    </div>
+    <div class="summary-totals">
+      <div class="summary-total-main">5h 25m total</div>
+      <div>2h 35m flight &middot; 2h 50m ground</div>
+    </div>
+  </div>
+
+  <!-- CTA Row -->
+  <div class="cta-row fade-in-d2">
+    <button class="cta-btn" id="ctaBtn">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0">
+        <circle cx="12" cy="12" r="4"/>
+        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+      </svg>
+      Check the Weather!
+    </button>
+    <!-- CTA cloud mascot waving -->
+    <div class="cta-mascot">
+      <div class="cm-body"></div>
+      <div class="cm-bump1"></div>
+      <div class="cm-bump2"></div>
+      <div class="cm-fill"></div>
+      <div class="cm-eye l"></div>
+      <div class="cm-eye r"></div>
+      <div class="cm-mouth"></div>
+      <div class="cm-wave">&#128075;</div>
+    </div>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="action-btns fade-in-d3">
+    <button class="action-btn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Export
+    </button>
+    <button class="action-btn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      Import
+    </button>
+    <button class="action-btn primary">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+      Save Trip
+    </button>
+    <button class="action-btn danger">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+      Delete
+    </button>
+  </div>
+
+  <!-- Results Divider -->
+  <div style="position:relative;">
+    <hr class="results-divider">
+    <span class="divider-label">Weather Results</span>
+  </div>
+
+  <!-- Cloud Mascot Status -->
+  <div class="mascot-status fade-in-d3">
+    <div class="cloud-mascot-lg">
+      <div class="cl-body"></div>
+      <div class="cl-bump1"></div>
+      <div class="cl-bump2"></div>
+      <div class="cl-eye l"></div>
+      <div class="cl-eye r"></div>
+      <div class="cl-mouth"></div>
+      <div class="cl-cheek l"></div>
+      <div class="cl-cheek r"></div>
+    </div>
+    <div class="speech-bubble">
+      Looking good! <span class="highlight">All legs are clear</span> for departure. Slight breeze at JFK but nothing to worry about.
+    </div>
+  </div>
+
+  <!-- Trip Health Cards -->
+  <div class="section-label fade-in-d3">Trip Health</div>
+  <div class="health-cards fade-in-d3">
+
+    <!-- Departure Card -->
+    <div class="health-card green">
+      <div class="health-icon">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="4"/>
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+        </svg>
+      </div>
+      <div class="health-title">All Clear</div>
+      <div class="health-subtitle">VFR at all departures</div>
+      <div class="health-label">Departure</div>
+      <div class="go-badge">GO</div>
+    </div>
+
+    <!-- Enroute Card -->
+    <div class="health-card amber">
+      <div class="health-icon">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/>
+        </svg>
+      </div>
+      <div class="health-title">Mostly Clear</div>
+      <div class="health-subtitle">VFR/MVFR mix expected</div>
+      <div class="health-label">En Route</div>
+      <div class="go-badge">GO</div>
+    </div>
+
+    <!-- Arrival Card -->
+    <div class="health-card blue">
+      <div class="health-icon">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9.59 4.59A2 2 0 1111 8H2m10.59 11.41A2 2 0 1014 16H2m15.73-8.27A2.5 2.5 0 1119.5 12H2"/>
+        </svg>
+      </div>
+      <div class="health-title">Breezy</div>
+      <div class="health-subtitle">MVFR at KJFK arrival</div>
+      <div class="health-label">Arrival</div>
+      <div class="go-badge">GO</div>
+    </div>
+  </div>
+
+  <!-- Timeline -->
+  <div class="section-label fade-in-d4">Flight Timeline</div>
+  <div class="timeline-section fade-in-d4">
+    <div class="timeline-bar-container">
+      <div class="timeline-hours">
+        <span>13Z</span><span>14Z</span><span>15Z</span><span>16Z</span><span>17Z</span><span>18Z</span><span>19Z</span><span>20Z</span>
+      </div>
+      <div class="timeline-track">
+        <!-- Leg 1: 14:00Z - 15:15Z  in 13Z-20Z window (7h span) -->
+        <!-- 14:00 = 1h into 7h = 14.3%,  15:15 = 2.25h = 32.1%,  width = 17.8% -->
+        <div class="timeline-leg vfr" style="left: 14.3%; width: 17.8%" title="Leg 1: KTEB → KBOS (VFR)" onclick="toggleLeg('leg1')">
+          KTEB&rarr;KBOS
+        </div>
+        <!-- Leg 2: 16:30Z - 17:25Z -->
+        <!-- 16:30 = 3.5h = 50%,  17:25 = 4.42h = 63.1%,  width = 13.1% -->
+        <div class="timeline-leg vfr-mvfr" style="left: 50%; width: 13.1%" title="Leg 2: KBOS → KJFK (VFR/MVFR)" onclick="toggleLeg('leg2')">
+          KBOS&rarr;KJFK
+        </div>
+        <!-- Leg 3: 19:00Z - 19:25Z -->
+        <!-- 19:00 = 6h = 85.7%,  19:25 = 6.42h = 91.7%,  width = 6% -->
+        <div class="timeline-leg vfr" style="left: 85.7%; width: 6%" title="Leg 3: KJFK → KTEB (VFR)" onclick="toggleLeg('leg3')">
+          L3
+        </div>
+        <!-- NOW marker at ~14:32Z = 1.53h = 21.9% -->
+        <div class="timeline-now" style="left: 21.9%"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Leg Details -->
+  <div class="section-label">Leg Details</div>
+  <p class="leg-instruction">Click a leg above or below to see full weather details</p>
+
+  <div class="leg-details-section">
+
+    <!-- ================================================
+         LEG 1 — KTEB → KBOS (Expanded by default)
+         ================================================ -->
+    <div class="leg-detail-card expanded" id="leg1">
+      <div class="leg-detail-header" onclick="toggleLeg('leg1')">
+        <div class="leg-header-left">
+          <span class="leg-badge">LEG 1</span>
+          <span class="leg-header-route">KTEB &rarr; KBOS</span>
+        </div>
+        <span class="leg-header-summary" style="display:none">Clear for takeoff! VFR conditions at both airports.</span>
+        <span class="leg-header-arrow">&#9660;</span>
+      </div>
+      <div class="leg-detail-body">
+        <div class="leg-body-inner">
+          <div class="leg-summary-text">
+            Clear for takeoff! VFR conditions at both airports. All 3 weather sources agree.
+          </div>
+
+          <!-- Airport Columns -->
+          <div class="airport-columns">
+            <!-- KTEB -->
+            <div class="airport-col">
+              <div class="airport-col-label">Departure</div>
+              <div class="airport-col-icao">KTEB</div>
+              <div class="flight-cat-badge vfr">VFR</div>
+              <div class="cat-friendly-text">"Clear for takeoff!"</div>
+              <div class="wx-detail-grid">
+                <div class="wx-detail-item">
+                  <span class="wx-detail-label">Temp</span>
+                  <span class="wx-detail-value">72&deg;F / 22&deg;C</span>
+                </div>
+                <div class="wx-detail-item">
+                  <span class="wx-detail-label">Wind</span>
+                  <span class="wx-detail-value">220&deg; 8kt SW</span>
+                </div>
+                <div class="wx-detail-item">
+                  <span class="wx-detail-label">Visibility</span>
+                  <span class="wx-detail-value">10+ SM</span>
+                </div>
+                <div class="wx-detail-item">
+                  <span class="wx-detail-label">Ceiling</span>
+                  <span class="wx-detail-value">SCT 5000</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- KBOS -->
+            <div class="airport-col">
+              <div class="airport-col-label">Arrival</div>
+              <div class="airport-col-icao">KBOS</div>
+              <div class="flight-cat-badge vfr">VFR</div>
+              <div class="cat-friendly-text">"Clear for takeoff!"</div>
+              <div class="wx-detail-grid">
+                <div class="wx-detail-item">
+                  <span class="wx-detail-label">Temp</span>
+                  <span class="wx-detail-value">58&deg;F / 14&deg;C</span>
+                </div>
+                <div class="wx-detail-item">
+                  <span class="wx-detail-label">Wind</span>
+                  <span class="wx-detail-value">270&deg; 10kt W</span>
+                </div>
+                <div class="wx-detail-item">
+                  <span class="wx-detail-label">Visibility</span>
+                  <span class="wx-detail-value">10 SM</span>
+                </div>
+                <div class="wx-detail-item">
+                  <span class="wx-detail-label">Ceiling</span>
+                  <span class="wx-detail-value">FEW 4500</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Part 135 -->
+          <div class="part135-section">
+            <div class="part135-title">
+              <span class="shield">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5zm-1 15l-4-4 1.41-1.41L11 14.17l6.59-6.59L19 9l-8 8z"/></svg>
+              </span>
+              Part 135 Compliance &mdash; All Clear
+            </div>
+            <div class="margin-bars">
+              <div class="margin-bar-item">
+                <div class="margin-bar-label">
+                  <span class="margin-bar-name">Ceiling Margin (KTEB)</span>
+                  <span class="margin-bar-value">+3,000 ft</span>
+                </div>
+                <div class="margin-bar-track">
+                  <div class="margin-bar-fill green" data-width="80%"></div>
+                </div>
+                <div class="margin-bar-range">
+                  <span>Min: 2,000 ft</span>
+                  <span>Actual: 5,000 ft</span>
+                </div>
+              </div>
+              <div class="margin-bar-item">
+                <div class="margin-bar-label">
+                  <span class="margin-bar-name">Visibility Margin (KTEB)</span>
+                  <span class="margin-bar-value">+7.0 SM</span>
+                </div>
+                <div class="margin-bar-track">
+                  <div class="margin-bar-fill green" data-width="93%"></div>
+                </div>
+                <div class="margin-bar-range">
+                  <span>Min: 3.0 SM</span>
+                  <span>Actual: 10+ SM</span>
+                </div>
+              </div>
+              <div class="margin-bar-item">
+                <div class="margin-bar-label">
+                  <span class="margin-bar-name">Ceiling Margin (KBOS)</span>
+                  <span class="margin-bar-value">+2,500 ft</span>
+                </div>
+                <div class="margin-bar-track">
+                  <div class="margin-bar-fill green" data-width="72%"></div>
+                </div>
+                <div class="margin-bar-range">
+                  <span>Min: 2,000 ft</span>
+                  <span>Actual: 4,500 ft</span>
+                </div>
+              </div>
+              <div class="margin-bar-item">
+                <div class="margin-bar-label">
+                  <span class="margin-bar-name">Visibility Margin (KBOS)</span>
+                  <span class="margin-bar-value">+7.0 SM</span>
+                </div>
+                <div class="margin-bar-track">
+                  <div class="margin-bar-fill green" data-width="93%"></div>
+                </div>
+                <div class="margin-bar-range">
+                  <span>Min: 3.0 SM</span>
+                  <span>Actual: 10 SM</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Accordion: Source Comparison -->
+          <button class="accordion-trigger" onclick="toggleAccordion(this)">
+            <span>Show detailed source comparison</span>
+            <span class="arr">&#9660;</span>
+          </button>
+          <div class="accordion-content">
+            <div class="accordion-inner"><strong>AWC (METAR)</strong>      VFR  &mdash; Ceiling 5,000 SCT  &mdash; Vis 10+ SM  &mdash; Wind 220/08
+<strong>Open-Meteo</strong>       VFR  &mdash; Cloud cover 28%     &mdash; Vis 18 km   &mdash; Wind 14 km/h
+<strong>NWS Forecast</strong>     VFR  &mdash; Mostly sunny        &mdash; Vis unlimited
+
+Consensus: <strong>3/3 sources agree on VFR conditions.</strong></div>
+          </div>
+
+          <!-- Accordion: Raw METAR/TAF -->
+          <button class="accordion-trigger" onclick="toggleAccordion(this)">
+            <span>Show raw METAR / TAF</span>
+            <span class="arr">&#9660;</span>
+          </button>
+          <div class="accordion-content">
+            <div class="accordion-inner">METAR KTEB 231356Z 22008KT 10SM SCT050 22/12 A3018 RMK AO2 SLP221
+
+TAF KTEB 231130Z 2312/2412 22010KT P6SM FEW050 SCT250
+     FM231800 24012KT P6SM SCT060
+     FM240200 28008KT P6SM FEW080
+
+METAR KBOS 231354Z 27010KT 10SM FEW045 14/06 A3024 RMK AO2 SLP242
+
+TAF KBOS 231130Z 2312/2412 27012G18KT P6SM FEW045 BKN250
+     FM231800 29015G22KT P6SM SCT050
+     FM240200 31010KT P6SM FEW070</div>
+          </div>
+
+          <!-- Accordion: NOTAMs -->
+          <button class="accordion-trigger" onclick="toggleAccordion(this)">
+            <span>Show NOTAMs</span>
+            <span class="arr">&#9660;</span>
+          </button>
+          <div class="accordion-content">
+            <div class="accordion-inner"><strong>KTEB</strong>
+!TEB 02/023 TEB RWY 06/24 CLSD FOR MAINT 2302231400-2302231600
+!TEB 02/021 TEB TWY A BTN RWY 06/24 AND TWY B CLSD
+
+<strong>KBOS</strong>
+!BOS 02/045 BOS NAV ILS RWY 04R GP OTS 2302231200-2302240600
+!BOS 02/042 BOS RWY 09/27 SNOW REMOVAL IN PROG</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================
+         LEG 2 — KBOS → KJFK (Collapsed)
+         ================================================ -->
+    <div class="leg-detail-card" id="leg2">
+      <div class="leg-detail-header" onclick="toggleLeg('leg2')">
+        <div class="leg-header-left">
+          <span class="leg-badge">LEG 2</span>
+          <span class="leg-header-route">KBOS &rarr; KJFK</span>
+        </div>
+        <span class="leg-header-summary">Fly with care &mdash; MVFR at arrival. 2/3 sources agree.</span>
+        <span class="leg-header-arrow">&#9660;</span>
+      </div>
+      <div class="leg-detail-body">
+        <div class="leg-body-inner">
+          <div class="leg-summary-text caution">
+            Fly with care &mdash; MVFR conditions expected at KJFK arrival. Reduced visibility to 4 SM with gusts to 22kt. 2 of 3 weather sources agree on marginal conditions.
+          </div>
+
+          <div class="airport-columns">
+            <div class="airport-col">
+              <div class="airport-col-label">Departure</div>
+              <div class="airport-col-icao">KBOS</div>
+              <div class="flight-cat-badge vfr">VFR</div>
+              <div class="cat-friendly-text">"Clear for takeoff!"</div>
+              <div class="wx-detail-grid">
+                <div class="wx-detail-item">
+                  <span class="wx-detail-label">Temp</span>
+                  <span class="wx-detail-value">58&deg;F / 14&deg;C</span>
+                </div>
+                <div class="wx-detail-item">
+                  <span class="wx-detail-label">Wind</span>
+                  <span class="wx-detail-value">290&deg; 15kt NW</span>
+                </div>
+                <div class="wx-detail-item">
+                  <span class="wx-detail-label">Visibility</span>
+                  <span class="wx-detail-value">10+ SM</span>
+                </div>
+                <div class="wx-detail-item">
+                  <span class="wx-detail-label">Ceiling</span>
+                  <span class="wx-detail-value">SCT 5000</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="airport-col">
+              <div class="airport-col-label">Arrival</div>
+              <div class="airport-col-icao">KJFK</div>
+              <div class="flight-cat-badge mvfr">MVFR</div>
+              <div class="cat-friendly-text">"Fly with care" &mdash; reduced visibility</div>
+              <div class="wx-detail-grid">
+                <div class="wx-detail-item">
+                  <span class="wx-detail-label">Temp</span>
+                  <span class="wx-detail-value">55&deg;F / 13&deg;C</span>
+                </div>
+                <div class="wx-detail-item">
+                  <span class="wx-detail-label">Wind</span>
+                  <span class="wx-detail-value">220&deg; 14kt <span class="gust">G22kt</span></span>
+                </div>
+                <div class="wx-detail-item">
+                  <span class="wx-detail-label">Visibility</span>
+                  <span class="wx-detail-value">4 SM</span>
+                </div>
+                <div class="wx-detail-item">
+                  <span class="wx-detail-label">Ceiling</span>
+                  <span class="wx-detail-value">BKN 2800</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Part 135 -->
+          <div class="part135-section">
+            <div class="part135-title">
+              <span class="shield">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5zm-1 15l-4-4 1.41-1.41L11 14.17l6.59-6.59L19 9l-8 8z"/></svg>
+              </span>
+              Part 135 Compliance &mdash; Marginal at KJFK
+            </div>
+            <div class="margin-bars">
+              <div class="margin-bar-item">
+                <div class="margin-bar-label">
+                  <span class="margin-bar-name">Ceiling Margin (KJFK)</span>
+                  <span class="margin-bar-value amber">+800 ft</span>
+                </div>
+                <div class="margin-bar-track">
+                  <div class="margin-bar-fill amber" data-width="42%"></div>
+                </div>
+                <div class="margin-bar-range">
+                  <span>Min: 2,000 ft</span>
+                  <span>Actual: 2,800 ft</span>
+                </div>
+              </div>
+              <div class="margin-bar-item">
+                <div class="margin-bar-label">
+                  <span class="margin-bar-name">Visibility Margin (KJFK)</span>
+                  <span class="margin-bar-value amber">+1.0 SM</span>
+                </div>
+                <div class="margin-bar-track">
+                  <div class="margin-bar-fill amber" data-width="38%"></div>
+                </div>
+                <div class="margin-bar-range">
+                  <span>Min: 3.0 SM</span>
+                  <span>Actual: 4.0 SM</span>
+                </div>
+              </div>
+              <div class="margin-bar-item">
+                <div class="margin-bar-label">
+                  <span class="margin-bar-name">Ceiling Margin (KBOS)</span>
+                  <span class="margin-bar-value">+3,000 ft</span>
+                </div>
+                <div class="margin-bar-track">
+                  <div class="margin-bar-fill green" data-width="80%"></div>
+                </div>
+                <div class="margin-bar-range">
+                  <span>Min: 2,000 ft</span>
+                  <span>Actual: 5,000 ft</span>
+                </div>
+              </div>
+              <div class="margin-bar-item">
+                <div class="margin-bar-label">
+                  <span class="margin-bar-name">Visibility Margin (KBOS)</span>
+                  <span class="margin-bar-value">+7.0 SM</span>
+                </div>
+                <div class="margin-bar-track">
+                  <div class="margin-bar-fill green" data-width="93%"></div>
+                </div>
+                <div class="margin-bar-range">
+                  <span>Min: 3.0 SM</span>
+                  <span>Actual: 10+ SM</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Accordion: Source Comparison -->
+          <button class="accordion-trigger" onclick="toggleAccordion(this)">
+            <span>Show detailed source comparison</span>
+            <span class="arr">&#9660;</span>
+          </button>
+          <div class="accordion-content">
+            <div class="accordion-inner"><strong>AWC (TAF)</strong>       MVFR &mdash; Ceiling 2,800 BKN  &mdash; Vis 4 SM    &mdash; Wind 220/14G22
+<strong>Open-Meteo</strong>       MVFR &mdash; Cloud cover 72%     &mdash; Vis 6.5 km  &mdash; Wind 28 km/h
+<strong>NWS Forecast</strong>     VFR  &mdash; Partly cloudy       &mdash; Vis 6+ SM
+
+Consensus: <strong>2/3 sources agree on MVFR.</strong> NWS slightly more optimistic.</div>
+          </div>
+
+          <!-- Accordion: Raw METAR/TAF -->
+          <button class="accordion-trigger" onclick="toggleAccordion(this)">
+            <span>Show raw METAR / TAF</span>
+            <span class="arr">&#9660;</span>
+          </button>
+          <div class="accordion-content">
+            <div class="accordion-inner">METAR KJFK 231556Z 22014G22KT 4SM BR BKN028 13/09 A3012 RMK AO2 SLP201
+
+TAF KJFK 231130Z 2312/2412 22015G22KT 5SM BR SCT020 BKN030
+     FM231600 22018G28KT 4SM BR BKN025
+     FM232000 26012KT P6SM SCT040
+     FM240200 28008KT P6SM FEW060</div>
+          </div>
+
+          <!-- Accordion: NOTAMs -->
+          <button class="accordion-trigger" onclick="toggleAccordion(this)">
+            <span>Show NOTAMs</span>
+            <span class="arr">&#9660;</span>
+          </button>
+          <div class="accordion-content">
+            <div class="accordion-inner"><strong>KJFK</strong>
+!JFK 02/089 JFK RWY 13R/31L CLSD 2302231500-2302232100
+!JFK 02/085 JFK TWY K BTN TWY J AND TWY L CLSD
+
+<strong>KBOS</strong>
+!BOS 02/042 BOS RWY 09/27 SNOW REMOVAL IN PROG</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================
+         LEG 3 — KJFK → KTEB (Collapsed)
+         ================================================ -->
+    <div class="leg-detail-card" id="leg3">
+      <div class="leg-detail-header" onclick="toggleLeg('leg3')">
+        <div class="leg-header-left">
+          <span class="leg-badge">LEG 3</span>
+          <span class="leg-header-route">KJFK &rarr; KTEB</span>
+        </div>
+        <span class="leg-header-summary">Clear for takeoff! VFR at both airports.</span>
+        <span class="leg-header-arrow">&#9660;</span>
+      </div>
+      <div class="leg-detail-body">
+        <div class="leg-body-inner">
+          <div class="leg-summary-text">
+            Clear for takeoff! VFR conditions at both airports. Winds calming through the evening. All 3 sources agree.
+          </div>
+
+          <div class="airport-columns">
+            <div class="airport-col">
+              <div class="airport-col-label">Departure</div>
+              <div class="airport-col-icao">KJFK</div>
+              <div class="flight-cat-badge mvfr">MVFR</div>
+              <div class="cat-friendly-text">"Fly with care" &mdash; still marginal at departure</div>
+              <div class="wx-detail-grid">
+                <div class="wx-detail-item">
+                  <span class="wx-detail-label">Temp</span>
+                  <span class="wx-detail-value">55&deg;F / 13&deg;C</span>
+                </div>
+                <div class="wx-detail-item">
+                  <span class="wx-detail-label">Wind</span>
+                  <span class="wx-detail-value">260&deg; 12kt W</span>
+                </div>
+                <div class="wx-detail-item">
+                  <span class="wx-detail-label">Visibility</span>
+                  <span class="wx-detail-value">6+ SM</span>
+                </div>
+                <div class="wx-detail-item">
+                  <span class="wx-detail-label">Ceiling</span>
+                  <span class="wx-detail-value">SCT 4000</span>
+                </div>
+              </div>
+            </div>
+            <div class="airport-col">
+              <div class="airport-col-label">Arrival</div>
+              <div class="airport-col-icao">KTEB</div>
+              <div class="flight-cat-badge vfr">VFR</div>
+              <div class="cat-friendly-text">"Clear for takeoff!" &mdash; clear evening</div>
+              <div class="wx-detail-grid">
+                <div class="wx-detail-item">
+                  <span class="wx-detail-label">Temp</span>
+                  <span class="wx-detail-value">70&deg;F / 21&deg;C</span>
+                </div>
+                <div class="wx-detail-item">
+                  <span class="wx-detail-label">Wind</span>
+                  <span class="wx-detail-value">320&deg; 6kt NW</span>
+                </div>
+                <div class="wx-detail-item">
+                  <span class="wx-detail-label">Visibility</span>
+                  <span class="wx-detail-value">10+ SM</span>
+                </div>
+                <div class="wx-detail-item">
+                  <span class="wx-detail-label">Ceiling</span>
+                  <span class="wx-detail-value">FEW 6000</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="part135-section">
+            <div class="part135-title">
+              <span class="shield">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5zm-1 15l-4-4 1.41-1.41L11 14.17l6.59-6.59L19 9l-8 8z"/></svg>
+              </span>
+              Part 135 Compliance &mdash; All Clear
+            </div>
+            <div class="margin-bars">
+              <div class="margin-bar-item">
+                <div class="margin-bar-label">
+                  <span class="margin-bar-name">Ceiling Margin (KJFK)</span>
+                  <span class="margin-bar-value">+2,000 ft</span>
+                </div>
+                <div class="margin-bar-track">
+                  <div class="margin-bar-fill green" data-width="65%"></div>
+                </div>
+                <div class="margin-bar-range">
+                  <span>Min: 2,000 ft</span>
+                  <span>Actual: 4,000 ft</span>
+                </div>
+              </div>
+              <div class="margin-bar-item">
+                <div class="margin-bar-label">
+                  <span class="margin-bar-name">Visibility Margin (KJFK)</span>
+                  <span class="margin-bar-value">+3.0 SM</span>
+                </div>
+                <div class="margin-bar-track">
+                  <div class="margin-bar-fill green" data-width="62%"></div>
+                </div>
+                <div class="margin-bar-range">
+                  <span>Min: 3.0 SM</span>
+                  <span>Actual: 6+ SM</span>
+                </div>
+              </div>
+              <div class="margin-bar-item">
+                <div class="margin-bar-label">
+                  <span class="margin-bar-name">Ceiling Margin (KTEB)</span>
+                  <span class="margin-bar-value">+4,000 ft</span>
+                </div>
+                <div class="margin-bar-track">
+                  <div class="margin-bar-fill green" data-width="85%"></div>
+                </div>
+                <div class="margin-bar-range">
+                  <span>Min: 2,000 ft</span>
+                  <span>Actual: 6,000 ft</span>
+                </div>
+              </div>
+              <div class="margin-bar-item">
+                <div class="margin-bar-label">
+                  <span class="margin-bar-name">Visibility Margin (KTEB)</span>
+                  <span class="margin-bar-value">+7.0 SM</span>
+                </div>
+                <div class="margin-bar-track">
+                  <div class="margin-bar-fill green" data-width="93%"></div>
+                </div>
+                <div class="margin-bar-range">
+                  <span>Min: 3.0 SM</span>
+                  <span>Actual: 10+ SM</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Accordion: Source Comparison -->
+          <button class="accordion-trigger" onclick="toggleAccordion(this)">
+            <span>Show detailed source comparison</span>
+            <span class="arr">&#9660;</span>
+          </button>
+          <div class="accordion-content">
+            <div class="accordion-inner"><strong>AWC (TAF)</strong>       VFR  &mdash; Ceiling 4,000 SCT  &mdash; Vis 6+ SM   &mdash; Wind 260/12
+<strong>Open-Meteo</strong>       VFR  &mdash; Cloud cover 22%     &mdash; Vis 16 km   &mdash; Wind 12 km/h
+<strong>NWS Forecast</strong>     VFR  &mdash; Clear evening       &mdash; Vis unlimited
+
+Consensus: <strong>3/3 sources agree on VFR conditions.</strong></div>
+          </div>
+
+          <!-- Accordion: Raw METAR/TAF -->
+          <button class="accordion-trigger" onclick="toggleAccordion(this)">
+            <span>Show raw METAR / TAF</span>
+            <span class="arr">&#9660;</span>
+          </button>
+          <div class="accordion-content">
+            <div class="accordion-inner">TAF KJFK 231130Z 2312/2412 22015G22KT 5SM BR SCT020 BKN030
+     FM231600 22018G28KT 4SM BR BKN025
+     FM232000 26012KT P6SM SCT040
+     FM240200 28008KT P6SM FEW060
+
+TAF KTEB 231130Z 2312/2412 22010KT P6SM FEW050 SCT250
+     FM231800 24012KT P6SM SCT060
+     FM240200 28008KT P6SM FEW080</div>
+          </div>
+
+          <!-- Accordion: NOTAMs -->
+          <button class="accordion-trigger" onclick="toggleAccordion(this)">
+            <span>Show NOTAMs</span>
+            <span class="arr">&#9660;</span>
+          </button>
+          <div class="accordion-content">
+            <div class="accordion-inner"><strong>KJFK</strong>
+!JFK 02/089 JFK RWY 13R/31L CLSD 2302231500-2302232100
+
+<strong>KTEB</strong>
+!TEB 02/023 TEB RWY 06/24 CLSD FOR MAINT 2302231400-2302231600 (completed by this time)</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div><!-- .leg-details-section -->
+
+</main>
+
+<!-- ============================================
+     FOOTER
+     ============================================ -->
+<footer class="footer">
+  Weather data from <a href="https://aviationweather.gov" target="_blank">Aviation Weather Center</a>,
+  <a href="https://open-meteo.com" target="_blank">Open-Meteo</a>, and
+  <a href="https://weather.gov" target="_blank">National Weather Service</a>.
+  &middot; Built for private jet dispatch &mdash; Part 135 compliant.
+  &middot; Clearway &copy; 2026
+</footer>
+
+<!-- ============================================
+     JAVASCRIPT
+     ============================================ -->
+<script>
+// ===== Theme Toggle =====
+function toggleTheme() {
+  const html = document.documentElement;
+  const current = html.getAttribute('data-theme');
+  const next = current === 'dark' ? 'light' : 'dark';
+  html.setAttribute('data-theme', next);
+  document.getElementById('themeIcon').innerHTML = next === 'dark' ? '&#9788;' : '&#9789;';
+  localStorage.setItem('clearway-theme', next);
+}
+
+// Restore saved theme
+(function() {
+  const saved = localStorage.getItem('clearway-theme');
+  if (saved === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    document.getElementById('themeIcon').innerHTML = '&#9788;';
+  }
+})();
+
+// ===== UTC Clock =====
+function updateClock() {
+  const now = new Date();
+  const h = String(now.getUTCHours()).padStart(2, '0');
+  const m = String(now.getUTCMinutes()).padStart(2, '0');
+  document.getElementById('navClock').textContent = h + ':' + m + ' UTC';
+}
+updateClock();
+setInterval(updateClock, 10000);
+
+// ===== Leg Expand/Collapse =====
+function toggleLeg(id) {
+  const card = document.getElementById(id);
+  const wasExpanded = card.classList.contains('expanded');
+
+  // Collapse all legs
+  document.querySelectorAll('.leg-detail-card').forEach(c => {
+    c.classList.remove('expanded');
+    const summary = c.querySelector('.leg-header-summary');
+    if (summary) summary.style.display = '';
+  });
+
+  // Toggle clicked leg
+  if (!wasExpanded) {
+    card.classList.add('expanded');
+    const summary = card.querySelector('.leg-header-summary');
+    if (summary) summary.style.display = 'none';
+
+    // Animate margin bars inside this leg
+    setTimeout(() => {
+      card.querySelectorAll('.margin-bar-fill').forEach(bar => {
+        const targetWidth = bar.getAttribute('data-width');
+        bar.style.width = '0%';
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            bar.style.width = targetWidth;
+          });
+        });
+      });
+    }, 100);
+
+    // Scroll into view smoothly
+    setTimeout(() => {
+      card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 200);
+  }
+}
+
+// ===== Accordion Toggle =====
+function toggleAccordion(btn) {
+  btn.classList.toggle('open');
+  const content = btn.nextElementSibling;
+  content.classList.toggle('open');
+}
+
+// ===== Animate Margin Bars on Scroll =====
+function initMarginBarAnimations() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const bar = entry.target;
+        const targetWidth = bar.getAttribute('data-width');
+        if (targetWidth) {
+          bar.style.width = '0%';
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              bar.style.width = targetWidth;
+            });
+          });
+        }
+        observer.unobserve(bar);
+      }
+    });
+  }, { threshold: 0.3 });
+
+  document.querySelectorAll('.margin-bar-fill').forEach(bar => {
+    observer.observe(bar);
+  });
+}
+
+// ===== CTA Button Click Effect =====
+document.getElementById('ctaBtn').addEventListener('click', function() {
+  this.style.transform = 'scale(0.96)';
+  setTimeout(() => {
+    this.style.transform = '';
+  }, 150);
+  // Scroll to results
+  setTimeout(() => {
+    document.querySelector('.results-divider').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 300);
+});
+
+// ===== Initialize =====
+document.addEventListener('DOMContentLoaded', () => {
+  initMarginBarAnimations();
+
+  // Make leg 1 expanded summary hidden on load
+  const leg1Summary = document.querySelector('#leg1 .leg-header-summary');
+  if (leg1Summary) leg1Summary.style.display = 'none';
+
+  // Set initial widths for visible bars (Leg 1 is expanded)
+  document.querySelectorAll('#leg1 .margin-bar-fill').forEach(bar => {
+    const targetWidth = bar.getAttribute('data-width');
+    bar.style.width = targetWidth;
+  });
+});
+</script>
+</body>
+</html>

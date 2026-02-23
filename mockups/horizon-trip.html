@@ -1,0 +1,2040 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trip Planner — Weather Aggregator — Horizon Design</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* ========================================
+       CSS Custom Properties — Dark / Light
+       ======================================== */
+    :root {
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+      --radius-sm: 6px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --radius-pill: 20px;
+      --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+      --vfr: #22C55E;
+      --mvfr: #3B82F6;
+      --ifr: #EF4444;
+      --lifr: #A855F7;
+      --success: #34D399;
+      --warning: #FBBF24;
+      --danger: #F87171;
+      --accent-primary: #38BDF8;
+      --accent-secondary: #818CF8;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0B1120;
+      --bg-gradient-start: #0B1120;
+      --bg-gradient-mid: #0E1629;
+      --bg-gradient-end: #0B1120;
+      --surface: #131D35;
+      --surface-elevated: #1A2744;
+      --surface-hover: #1E2D4A;
+      --text-primary: #E8ECF4;
+      --text-secondary: #8892A8;
+      --text-tertiary: #4F5B73;
+      --border: #1E2D4A;
+      --border-subtle: rgba(30, 45, 74, 0.6);
+      --accent: #38BDF8;
+      --accent-dim: rgba(56, 189, 248, 0.1);
+      --accent-secondary: #818CF8;
+      --input-bg: #0F1729;
+      --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+      --shadow-card-hover: 0 4px 16px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      --shadow-input: 0 1px 2px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+      --glass-bg: rgba(19, 29, 53, 0.7);
+      --glass-border: rgba(30, 45, 74, 0.5);
+      --overlay: rgba(11, 17, 32, 0.8);
+    }
+
+    [data-theme="light"] {
+      --bg: #F5F7FA;
+      --bg-gradient-start: #F5F7FA;
+      --bg-gradient-mid: #EDF0F7;
+      --bg-gradient-end: #F5F7FA;
+      --surface: #FFFFFF;
+      --surface-elevated: #F8FAFC;
+      --surface-hover: #F1F5F9;
+      --text-primary: #0F172A;
+      --text-secondary: #475569;
+      --text-tertiary: #94A3B8;
+      --border: #E2E8F0;
+      --border-subtle: rgba(226, 232, 240, 0.8);
+      --accent: #0284C7;
+      --accent-dim: rgba(2, 132, 199, 0.08);
+      --accent-secondary: #6366F1;
+      --input-bg: #FFFFFF;
+      --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.04);
+      --shadow-card-hover: 0 4px 16px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.06);
+      --shadow-input: 0 1px 2px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.04);
+      --glass-bg: rgba(255, 255, 255, 0.8);
+      --glass-border: rgba(226, 232, 240, 0.6);
+      --overlay: rgba(245, 247, 250, 0.8);
+    }
+
+    /* ========================================
+       Reset & Base
+       ======================================== */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; }
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+      transition: background var(--transition-base), color var(--transition-base);
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(56, 189, 248, 0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 50%, rgba(129, 140, 248, 0.04) 0%, transparent 50%),
+        linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-mid) 50%, var(--bg-gradient-end) 100%);
+      pointer-events: none;
+      z-index: 0;
+      transition: background var(--transition-base);
+    }
+
+    /* ========================================
+       Animations
+       ======================================== */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+    .animate-in { animation: fadeInUp 0.6s var(--transition-base) both; }
+    .animate-in-delay-1 { animation-delay: 0.1s; }
+    .animate-in-delay-2 { animation-delay: 0.2s; }
+    .animate-in-delay-3 { animation-delay: 0.3s; }
+    .animate-in-delay-4 { animation-delay: 0.4s; }
+    .animate-in-delay-5 { animation-delay: 0.5s; }
+
+    /* ========================================
+       Layout
+       ======================================== */
+    .container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ========================================
+       Navbar (identical to homepage)
+       ======================================== */
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(16px) saturate(180%);
+      -webkit-backdrop-filter: blur(16px) saturate(180%);
+      background: var(--glass-bg);
+      border-bottom: 1px solid var(--border-subtle);
+      transition: background var(--transition-base), border-color var(--transition-base);
+    }
+    .navbar-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+      gap: 16px;
+    }
+    .navbar-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text-primary);
+      font-weight: 700;
+      font-size: 15px;
+      letter-spacing: -0.02em;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .navbar-logo-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: var(--radius-sm);
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .navbar-logo-icon svg { width: 16px; height: 16px; fill: white; }
+    .navbar-nav { display: flex; align-items: center; gap: 4px; }
+    .navbar-nav a {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 500;
+      transition: color var(--transition-fast), background var(--transition-fast);
+      white-space: nowrap;
+    }
+    .navbar-nav a:hover { color: var(--text-primary); background: var(--surface-hover); }
+    .navbar-nav a.active { color: var(--text-primary); background: var(--surface); }
+    .navbar-nav a svg { width: 14px; height: 14px; opacity: 0.7; }
+    .navbar-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+    .clock {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      letter-spacing: 0.02em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+    .clock-zulu { color: var(--accent); }
+    .clock-separator { color: var(--text-tertiary); }
+    .theme-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-sm);
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: color var(--transition-fast), background var(--transition-fast);
+    }
+    .theme-toggle:hover { color: var(--text-primary); background: var(--surface-hover); }
+    .theme-toggle svg { width: 16px; height: 16px; }
+    .avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: white;
+      cursor: pointer;
+      transition: box-shadow var(--transition-fast);
+      flex-shrink: 0;
+    }
+    .avatar:hover { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent); }
+    .hamburger {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      border-radius: var(--radius-sm);
+    }
+    .hamburger:hover { color: var(--text-primary); background: var(--surface-hover); }
+    .hamburger svg { width: 18px; height: 18px; }
+
+    /* Mobile nav overlay */
+    .mobile-nav-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: var(--overlay);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      opacity: 0;
+      transition: opacity var(--transition-base);
+    }
+    .mobile-nav-overlay.open { display: flex; opacity: 1; }
+    .mobile-nav-panel {
+      width: 280px;
+      margin-left: auto;
+      background: var(--surface);
+      border-left: 1px solid var(--border);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .mobile-nav-panel a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      color: var(--text-secondary);
+      font-size: 14px;
+      font-weight: 500;
+      transition: color var(--transition-fast), background var(--transition-fast);
+    }
+    .mobile-nav-panel a:hover { color: var(--text-primary); background: var(--surface-hover); }
+    .mobile-nav-panel a svg { width: 16px; height: 16px; opacity: 0.6; }
+    .mobile-nav-close {
+      align-self: flex-end;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      border-radius: var(--radius-sm);
+      margin-bottom: 8px;
+    }
+    .mobile-nav-close:hover { background: var(--surface-hover); color: var(--text-primary); }
+    .mobile-nav-close svg { width: 18px; height: 18px; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-tertiary); }
+
+    /* ========================================
+       Shared Components
+       ======================================== */
+    .section { margin-bottom: 32px; }
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-card);
+      transition: background var(--transition-base), border-color var(--transition-base), box-shadow var(--transition-fast);
+    }
+    .card:hover {
+      box-shadow: var(--shadow-card-hover);
+    }
+
+    /* Flight category badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 10px;
+      border-radius: var(--radius-pill);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+    .badge .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .badge-vfr { background: rgba(34, 197, 94, 0.12); color: var(--vfr); }
+    .badge-vfr .dot { background: var(--vfr); }
+    .badge-mvfr { background: rgba(59, 130, 246, 0.12); color: var(--mvfr); }
+    .badge-mvfr .dot { background: var(--mvfr); }
+    .badge-ifr { background: rgba(239, 68, 68, 0.12); color: var(--ifr); }
+    .badge-ifr .dot { background: var(--ifr); }
+    .badge-lifr { background: rgba(168, 85, 247, 0.12); color: var(--lifr); }
+    .badge-lifr .dot { background: var(--lifr); }
+
+    .badge-go {
+      background: rgba(52, 211, 153, 0.12);
+      color: var(--success);
+    }
+    .badge-go .dot { background: var(--success); }
+    .badge-caution {
+      background: rgba(251, 191, 36, 0.12);
+      color: var(--warning);
+    }
+    .badge-caution .dot { background: var(--warning); }
+
+    /* ========================================
+       Trip Page Header
+       ======================================== */
+    .trip-page-header {
+      padding: 32px 0 0;
+    }
+    .trip-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .trip-title {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      color: var(--text-primary);
+    }
+    .trip-title-legs {
+      font-weight: 400;
+      color: var(--text-tertiary);
+      font-size: 20px;
+      margin-left: 8px;
+    }
+    .trip-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      border-radius: var(--radius-sm);
+      font-family: var(--font-sans);
+      font-size: 13px;
+      font-weight: 500;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
+      white-space: nowrap;
+    }
+    .btn:hover {
+      background: var(--surface-elevated);
+      border-color: var(--surface-hover);
+      color: var(--text-primary);
+      transform: translateY(-1px);
+    }
+    .btn:active { transform: translateY(0); }
+    .btn svg { width: 14px; height: 14px; }
+    .btn-danger {
+      border-color: rgba(248, 113, 113, 0.3);
+      color: var(--danger);
+    }
+    .btn-danger:hover {
+      background: rgba(248, 113, 113, 0.1);
+      border-color: rgba(248, 113, 113, 0.5);
+      color: var(--danger);
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      color: white;
+      border: none;
+      font-weight: 600;
+    }
+    .btn-primary:hover {
+      opacity: 0.9;
+      color: white;
+      transform: translateY(-1px);
+    }
+    .btn-primary-lg {
+      padding: 14px 28px;
+      font-size: 15px;
+      border-radius: var(--radius-md);
+      width: 100%;
+      justify-content: center;
+    }
+    .btn-sm {
+      padding: 4px 10px;
+      font-size: 12px;
+    }
+
+    /* ========================================
+       Legs Card
+       ======================================== */
+    .legs-card { padding: 0; overflow: hidden; }
+    .legs-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+    }
+    .legs-card-title {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+    }
+    .leg-row {
+      display: flex;
+      align-items: center;
+      padding: 12px 18px;
+      gap: 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      transition: background var(--transition-fast);
+    }
+    .leg-row:hover { background: var(--surface-elevated); }
+    .leg-row:last-of-type { border-bottom: none; }
+    .leg-number {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-tertiary);
+      width: 18px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .leg-route {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 140px;
+    }
+    .leg-icao {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .leg-arrow {
+      color: var(--text-tertiary);
+      display: flex;
+      align-items: center;
+    }
+    .leg-arrow svg { width: 14px; height: 14px; }
+    .leg-meta {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex: 1;
+    }
+    .leg-meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+    .leg-meta-label {
+      font-size: 10px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-tertiary);
+    }
+    .leg-meta-value {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+    .add-leg-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 18px;
+      border-top: 1px solid var(--border-subtle);
+      cursor: pointer;
+      color: var(--text-tertiary);
+      font-size: 13px;
+      font-weight: 500;
+      gap: 6px;
+      transition: background var(--transition-fast), color var(--transition-fast);
+    }
+    .add-leg-row:hover {
+      background: var(--surface-elevated);
+      color: var(--accent);
+    }
+    .add-leg-row svg { width: 14px; height: 14px; }
+
+    /* ========================================
+       ETD/ETA Summary Bar
+       ======================================== */
+    .etd-bar {
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+      margin-top: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+    }
+    .etd-item {
+      flex: 1;
+      padding: 14px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      border-right: 1px solid var(--border);
+    }
+    .etd-item:last-child { border-right: none; }
+    .etd-label {
+      font-size: 10px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-tertiary);
+    }
+    .etd-value {
+      font-family: var(--font-mono);
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .etd-sub {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-tertiary);
+      margin-top: -1px;
+    }
+
+    /* ========================================
+       Get Weather Button
+       ======================================== */
+    .get-weather-wrapper {
+      margin-top: 20px;
+    }
+
+    /* ========================================
+       Divider
+       ======================================== */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 32px 0;
+    }
+
+    /* ========================================
+       Trip Summary Card
+       ======================================== */
+    .trip-summary {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .trip-summary-left {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .trip-summary-status {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .go-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 18px;
+      border-radius: var(--radius-pill);
+      background: rgba(52, 211, 153, 0.15);
+      border: 1px solid rgba(52, 211, 153, 0.3);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--success);
+      letter-spacing: 0.05em;
+    }
+    .go-badge .dot-lg {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--success);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    .trip-summary-details {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .summary-detail {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+    .summary-detail-sep {
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: var(--text-tertiary);
+    }
+    .trip-summary-worst {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+    .trip-summary-right {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: flex-end;
+    }
+    .shift-label {
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-tertiary);
+    }
+    .shift-buttons {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .shift-btn {
+      padding: 5px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+    }
+    .shift-btn:hover {
+      background: var(--surface-elevated);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* ========================================
+       Timeline
+       ======================================== */
+    .timeline-card {
+      padding: 18px;
+      margin-top: 16px;
+    }
+    .timeline-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .timeline-bar-wrapper {
+      position: relative;
+      height: 40px;
+      background: var(--input-bg);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      overflow: hidden;
+    }
+    .timeline-segment {
+      position: absolute;
+      top: 6px;
+      height: 28px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 600;
+      color: white;
+      transition: opacity var(--transition-fast);
+    }
+    .timeline-segment:hover { opacity: 0.85; }
+    .timeline-now {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--danger);
+      z-index: 2;
+    }
+    .timeline-now-label {
+      position: absolute;
+      top: -18px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 9px;
+      font-weight: 600;
+      color: var(--danger);
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+    .timeline-hours {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 6px;
+    }
+    .timeline-hour {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-tertiary);
+    }
+
+    /* ========================================
+       Layer 1: Leg Summary Cards
+       ======================================== */
+    .leg-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    .leg-card {
+      padding: 18px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+    .leg-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.03), transparent 60%);
+      opacity: 0;
+      transition: opacity var(--transition-fast);
+    }
+    .leg-card:hover::before { opacity: 1; }
+    .leg-card:hover { transform: translateY(-1px); }
+    .leg-card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      position: relative;
+      z-index: 1;
+    }
+    .leg-card-route {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .leg-card-icao {
+      font-family: var(--font-mono);
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .leg-card-arrow {
+      color: var(--text-tertiary);
+      display: flex;
+      align-items: center;
+    }
+    .leg-card-arrow svg { width: 16px; height: 16px; }
+    .leg-card-endpoints {
+      display: flex;
+      gap: 24px;
+      position: relative;
+      z-index: 1;
+    }
+    .leg-card-endpoint {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .endpoint-label {
+      font-size: 10px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-tertiary);
+    }
+    .endpoint-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .endpoint-temp {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+    .leg-card-expand {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border-subtle);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-tertiary);
+      position: relative;
+      z-index: 1;
+      transition: color var(--transition-fast);
+    }
+    .leg-card:hover .leg-card-expand { color: var(--accent); }
+    .leg-card-expand svg { width: 12px; height: 12px; }
+
+    /* ========================================
+       Layer 2: Expanded Leg Detail
+       ======================================== */
+    .leg-detail { display: none; }
+    .leg-detail.open { display: block; }
+    .leg-detail-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .leg-detail-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .leg-detail-close {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: var(--radius-sm);
+      border: none;
+      background: transparent;
+      color: var(--text-tertiary);
+      cursor: pointer;
+      transition: background var(--transition-fast), color var(--transition-fast);
+    }
+    .leg-detail-close:hover { background: var(--surface-hover); color: var(--text-primary); }
+    .leg-detail-close svg { width: 16px; height: 16px; }
+    .leg-detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .airport-detail-card { padding: 20px; }
+    .airport-detail-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .airport-detail-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .airport-detail-icao {
+      font-family: var(--font-mono);
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .airport-detail-role {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-tertiary);
+      padding: 2px 8px;
+      border-radius: var(--radius-pill);
+      border: 1px solid var(--border);
+    }
+    .wx-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .wx-item {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      padding: 10px;
+      border-radius: var(--radius-sm);
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+    }
+    .wx-item-label {
+      font-size: 10px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-tertiary);
+    }
+    .wx-item-value {
+      font-family: var(--font-mono);
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .wx-item-value-sm {
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    /* Part 135 Compliance */
+    .compliance-section {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border-subtle);
+    }
+    .compliance-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .compliance-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+    }
+    .compliance-pass {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--success);
+      letter-spacing: 0.04em;
+    }
+    .margin-bar {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: 10px;
+    }
+    .margin-bar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .margin-bar-label {
+      font-size: 11px;
+      color: var(--text-tertiary);
+    }
+    .margin-bar-value {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+    .margin-bar-track {
+      height: 6px;
+      border-radius: 3px;
+      background: var(--input-bg);
+      overflow: hidden;
+    }
+    .margin-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width var(--transition-slow);
+    }
+    .source-agreement {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 12px;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+    .source-agreement svg { width: 14px; height: 14px; color: var(--success); flex-shrink: 0; }
+
+    /* Show Raw METAR toggle */
+    .raw-toggle {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 12px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-tertiary);
+      cursor: pointer;
+      transition: color var(--transition-fast);
+      background: none;
+      border: none;
+      font-family: var(--font-sans);
+      padding: 0;
+    }
+    .raw-toggle:hover { color: var(--accent); }
+    .raw-toggle svg { width: 12px; height: 12px; transition: transform var(--transition-fast); }
+    .raw-toggle.expanded svg { transform: rotate(180deg); }
+
+    /* ========================================
+       Layer 3: Collapsible Raw Data
+       ======================================== */
+    .collapsible {
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+    .collapsible-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      cursor: pointer;
+      user-select: none;
+      transition: background var(--transition-fast);
+    }
+    .collapsible-header:hover { background: var(--surface-elevated); }
+    .collapsible-header-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .collapsible-icon {
+      color: var(--text-tertiary);
+      display: flex;
+      align-items: center;
+    }
+    .collapsible-icon svg { width: 14px; height: 14px; }
+    .collapsible-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+    .collapsible-chevron {
+      color: var(--text-tertiary);
+      display: flex;
+      align-items: center;
+      transition: transform var(--transition-fast);
+    }
+    .collapsible-chevron svg { width: 14px; height: 14px; }
+    .collapsible.expanded .collapsible-chevron { transform: rotate(180deg); }
+    .collapsible-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height var(--transition-slow);
+    }
+    .collapsible.expanded .collapsible-body { max-height: 500px; }
+    .collapsible-content {
+      padding: 0 16px 16px;
+    }
+    .raw-metar {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.8;
+      color: var(--text-secondary);
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    /* Source comparison table */
+    .src-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    .src-table th {
+      text-align: left;
+      padding: 8px 12px;
+      font-weight: 600;
+      font-size: 10px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+      border-bottom: 1px solid var(--border);
+    }
+    .src-table td {
+      padding: 8px 12px;
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .src-table tr:last-child td { border-bottom: none; }
+    .src-table .src-name {
+      font-family: var(--font-sans);
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    /* ========================================
+       Footer
+       ======================================== */
+    .footer {
+      padding: 40px 0 32px;
+      text-align: center;
+      border-top: 1px solid var(--border);
+      margin-top: 32px;
+      position: relative;
+      z-index: 1;
+    }
+    .footer-text {
+      font-size: 12px;
+      color: var(--text-tertiary);
+    }
+    .footer-sources {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+    .footer-source {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-tertiary);
+      text-decoration: none;
+      transition: color var(--transition-fast);
+    }
+    .footer-source:hover { color: var(--accent); }
+    .footer-separator {
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: var(--text-tertiary);
+      opacity: 0.5;
+    }
+
+    /* ========================================
+       Responsive
+       ======================================== */
+    @media (max-width: 1024px) {
+      .leg-cards-grid { grid-template-columns: repeat(2, 1fr); }
+      .leg-detail-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 768px) {
+      .navbar-nav { display: none; }
+      .hamburger { display: flex; }
+      .clock { display: none; }
+      .trip-title { font-size: 22px; }
+      .trip-title-legs { font-size: 16px; }
+      .leg-cards-grid { grid-template-columns: 1fr; }
+      .etd-bar { flex-direction: column; }
+      .etd-item { border-right: none; border-bottom: 1px solid var(--border); }
+      .etd-item:last-child { border-bottom: none; }
+      .leg-meta { flex-wrap: wrap; gap: 12px; }
+      .wx-grid { grid-template-columns: repeat(2, 1fr); }
+      .trip-summary { flex-direction: column; }
+      .trip-summary-right { align-items: flex-start; }
+    }
+    @media (max-width: 480px) {
+      .container { padding: 0 16px; }
+      .trip-title { font-size: 18px; }
+      .trip-actions { gap: 4px; }
+      .btn { padding: 5px 10px; font-size: 12px; }
+      .wx-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==============================
+       Navbar
+       ============================== -->
+  <nav class="navbar">
+    <div class="container navbar-inner">
+      <a href="horizon-homepage.html" class="navbar-logo">
+        <span class="navbar-logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17.8 19.2L16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z" fill="white" stroke="none"/>
+          </svg>
+        </span>
+        Weather Aggregator
+      </a>
+      <div class="navbar-nav">
+        <a href="horizon-homepage.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          Single Airport
+        </a>
+        <a href="#" class="active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          Trip Planner
+        </a>
+        <a href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+          Map
+        </a>
+      </div>
+      <div class="navbar-right">
+        <div class="clock">
+          <span class="clock-zulu" id="clockZulu">14:32Z</span>
+          <span class="clock-separator">/</span>
+          <span id="clockLocal">09:32L</span>
+        </div>
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark/light mode" title="Toggle theme">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
+        <div class="avatar" title="User account">AG</div>
+        <button class="hamburger" id="hamburgerBtn" aria-label="Open menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile nav overlay -->
+  <div class="mobile-nav-overlay" id="mobileNav">
+    <div class="mobile-nav-panel">
+      <button class="mobile-nav-close" id="mobileNavClose" aria-label="Close menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <a href="horizon-homepage.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        Single Airport
+      </a>
+      <a href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        Trip Planner
+      </a>
+      <a href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+        Map
+      </a>
+    </div>
+  </div>
+
+  <!-- ==============================
+       Main Content
+       ============================== -->
+  <main>
+    <div class="container">
+
+      <!-- Trip Setup Section -->
+      <div class="trip-page-header animate-in">
+        <div class="trip-title-row">
+          <h1 class="trip-title">Northeast Shuttle<span class="trip-title-legs">(3 legs)</span></h1>
+          <div class="trip-actions">
+            <button class="btn btn-danger">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+              Delete
+            </button>
+            <button class="btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Export
+            </button>
+            <button class="btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Import
+            </button>
+            <button class="btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+              Save
+            </button>
+            <button class="btn btn-primary">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              New
+            </button>
+          </div>
+        </div>
+
+        <!-- Legs Card -->
+        <div class="card legs-card animate-in animate-in-delay-1">
+          <div class="legs-card-header">
+            <span class="legs-card-title">Legs</span>
+          </div>
+          <div class="leg-row">
+            <span class="leg-number">1</span>
+            <div class="leg-route">
+              <span class="leg-icao">KTEB</span>
+              <span class="leg-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+              <span class="leg-icao">KBOS</span>
+            </div>
+            <div class="leg-meta">
+              <div class="leg-meta-item">
+                <span class="leg-meta-label">ETD</span>
+                <span class="leg-meta-value">23 Feb 14:00Z</span>
+              </div>
+              <div class="leg-meta-item">
+                <span class="leg-meta-label">Flight Time</span>
+                <span class="leg-meta-value">1h 15m</span>
+              </div>
+            </div>
+          </div>
+          <div class="leg-row">
+            <span class="leg-number">2</span>
+            <div class="leg-route">
+              <span class="leg-icao">KBOS</span>
+              <span class="leg-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+              <span class="leg-icao">KJFK</span>
+            </div>
+            <div class="leg-meta">
+              <div class="leg-meta-item">
+                <span class="leg-meta-label">ETD</span>
+                <span class="leg-meta-value">23 Feb 16:30Z</span>
+              </div>
+              <div class="leg-meta-item">
+                <span class="leg-meta-label">Flight Time</span>
+                <span class="leg-meta-value">0h 55m</span>
+              </div>
+            </div>
+          </div>
+          <div class="leg-row">
+            <span class="leg-number">3</span>
+            <div class="leg-route">
+              <span class="leg-icao">KJFK</span>
+              <span class="leg-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+              <span class="leg-icao">KTEB</span>
+            </div>
+            <div class="leg-meta">
+              <div class="leg-meta-item">
+                <span class="leg-meta-label">ETD</span>
+                <span class="leg-meta-value">23 Feb 19:00Z</span>
+              </div>
+              <div class="leg-meta-item">
+                <span class="leg-meta-label">Flight Time</span>
+                <span class="leg-meta-value">0h 25m</span>
+              </div>
+            </div>
+          </div>
+          <div class="add-leg-row">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Leg
+          </div>
+        </div>
+
+        <!-- ETD/ETA Summary Bar -->
+        <div class="etd-bar animate-in animate-in-delay-2">
+          <div class="etd-item">
+            <span class="etd-label">ETD Origin</span>
+            <span class="etd-value">KTEB 14:00Z</span>
+            <span class="etd-sub">09:00L (EST)</span>
+          </div>
+          <div class="etd-item">
+            <span class="etd-label">ETA Final</span>
+            <span class="etd-value">KTEB 19:25Z</span>
+            <span class="etd-sub">14:25L (EST)</span>
+          </div>
+          <div class="etd-item">
+            <span class="etd-label">Total Flight Time</span>
+            <span class="etd-value">2h 35m</span>
+          </div>
+          <div class="etd-item">
+            <span class="etd-label">Trip Duration</span>
+            <span class="etd-value">5h 25m</span>
+          </div>
+        </div>
+
+        <!-- Get Weather Button -->
+        <div class="get-weather-wrapper animate-in animate-in-delay-3">
+          <button class="btn btn-primary btn-primary-lg">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg>
+            Get Weather for All Legs
+          </button>
+        </div>
+      </div>
+
+      <!-- ==============================
+           Weather Results
+           ============================== -->
+      <div class="divider"></div>
+
+      <!-- Trip Summary -->
+      <section class="section animate-in animate-in-delay-3">
+        <div class="section-label" style="margin-bottom: 12px;">Trip Summary</div>
+        <div class="card" style="padding: 20px;">
+          <div class="trip-summary">
+            <div class="trip-summary-left">
+              <div class="trip-summary-status">
+                <span class="go-badge"><span class="dot-lg"></span> GO</span>
+              </div>
+              <div class="trip-summary-details">
+                <span class="summary-detail">3/3 legs clear</span>
+                <span class="summary-detail-sep"></span>
+                <span class="summary-detail">High confidence</span>
+                <span class="summary-detail-sep"></span>
+                <span class="summary-detail">Strong source agreement</span>
+              </div>
+              <div class="trip-summary-worst">
+                Worst conditions:&nbsp; <strong>Leg 2</strong> &nbsp;
+                <span class="badge badge-mvfr"><span class="dot"></span> MVFR</span>
+              </div>
+            </div>
+            <div class="trip-summary-right">
+              <span class="shift-label">Shift Departure</span>
+              <div class="shift-buttons">
+                <button class="shift-btn">-2h</button>
+                <button class="shift-btn">-1h</button>
+                <button class="shift-btn">+1h</button>
+                <button class="shift-btn">+2h</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Timeline -->
+      <section class="section animate-in animate-in-delay-4">
+        <div class="card timeline-card">
+          <div class="timeline-card-header">
+            <span class="section-label">Timeline</span>
+          </div>
+          <div class="timeline-bar-wrapper">
+            <!-- Leg 1: 14:00Z - 15:15Z = ~14.3% to 32.1% of 13Z-20Z range (7h) -->
+            <div class="timeline-segment" style="left: 14.3%; width: 17.8%; background: var(--vfr);" title="Leg 1: KTEB-KBOS 14:00Z-15:15Z">L1</div>
+            <!-- Leg 2: 16:30Z - 17:25Z = ~50% to 63.3% -->
+            <div class="timeline-segment" style="left: 50%; width: 13.1%; background: var(--mvfr);" title="Leg 2: KBOS-KJFK 16:30Z-17:25Z">L2</div>
+            <!-- Leg 3: 19:00Z - 19:25Z = ~85.7% to 91.7% -->
+            <div class="timeline-segment" style="left: 85.7%; width: 6%; background: var(--vfr);" title="Leg 3: KJFK-KTEB 19:00Z-19:25Z">L3</div>
+            <!-- NOW marker at ~21.4% (14:30Z) -->
+            <div class="timeline-now" style="left: 21.4%;">
+              <span class="timeline-now-label">NOW</span>
+            </div>
+          </div>
+          <div class="timeline-hours">
+            <span class="timeline-hour">13Z</span>
+            <span class="timeline-hour">14Z</span>
+            <span class="timeline-hour">15Z</span>
+            <span class="timeline-hour">16Z</span>
+            <span class="timeline-hour">17Z</span>
+            <span class="timeline-hour">18Z</span>
+            <span class="timeline-hour">19Z</span>
+            <span class="timeline-hour">20Z</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Layer 1: Glanceable Leg Summary Cards -->
+      <section class="section animate-in animate-in-delay-4">
+        <div class="section-label" style="margin-bottom: 12px;">Leg Overview</div>
+        <div class="leg-cards-grid">
+
+          <!-- Leg 1 Card -->
+          <div class="card leg-card" onclick="toggleDetail(1)">
+            <div class="leg-card-top">
+              <div class="leg-card-route">
+                <span class="leg-card-icao">KTEB</span>
+                <span class="leg-card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+                <span class="leg-card-icao">KBOS</span>
+              </div>
+              <span class="badge badge-go"><span class="dot"></span> GO</span>
+            </div>
+            <div class="leg-card-endpoints">
+              <div class="leg-card-endpoint">
+                <span class="endpoint-label">Departure</span>
+                <div class="endpoint-row">
+                  <span class="badge badge-vfr" style="font-size:10px; padding: 2px 8px;"><span class="dot" style="width:5px;height:5px;"></span> VFR</span>
+                  <span class="endpoint-temp">72&deg;F</span>
+                </div>
+              </div>
+              <div class="leg-card-endpoint">
+                <span class="endpoint-label">Arrival</span>
+                <div class="endpoint-row">
+                  <span class="badge badge-vfr" style="font-size:10px; padding: 2px 8px;"><span class="dot" style="width:5px;height:5px;"></span> VFR</span>
+                  <span class="endpoint-temp">58&deg;F</span>
+                </div>
+              </div>
+            </div>
+            <div class="leg-card-expand">
+              View Details
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+          </div>
+
+          <!-- Leg 2 Card -->
+          <div class="card leg-card" onclick="toggleDetail(2)" style="border-color: rgba(59, 130, 246, 0.3);">
+            <div class="leg-card-top">
+              <div class="leg-card-route">
+                <span class="leg-card-icao">KBOS</span>
+                <span class="leg-card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+                <span class="leg-card-icao">KJFK</span>
+              </div>
+              <span class="badge badge-caution"><span class="dot"></span> GO</span>
+            </div>
+            <div class="leg-card-endpoints">
+              <div class="leg-card-endpoint">
+                <span class="endpoint-label">Departure</span>
+                <div class="endpoint-row">
+                  <span class="badge badge-vfr" style="font-size:10px; padding: 2px 8px;"><span class="dot" style="width:5px;height:5px;"></span> VFR</span>
+                  <span class="endpoint-temp">58&deg;F</span>
+                </div>
+              </div>
+              <div class="leg-card-endpoint">
+                <span class="endpoint-label">Arrival</span>
+                <div class="endpoint-row">
+                  <span class="badge badge-mvfr" style="font-size:10px; padding: 2px 8px;"><span class="dot" style="width:5px;height:5px;"></span> MVFR</span>
+                  <span class="endpoint-temp">55&deg;F</span>
+                </div>
+              </div>
+            </div>
+            <div class="leg-card-expand">
+              View Details
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+          </div>
+
+          <!-- Leg 3 Card -->
+          <div class="card leg-card" onclick="toggleDetail(3)">
+            <div class="leg-card-top">
+              <div class="leg-card-route">
+                <span class="leg-card-icao">KJFK</span>
+                <span class="leg-card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+                <span class="leg-card-icao">KTEB</span>
+              </div>
+              <span class="badge badge-go"><span class="dot"></span> GO</span>
+            </div>
+            <div class="leg-card-endpoints">
+              <div class="leg-card-endpoint">
+                <span class="endpoint-label">Departure</span>
+                <div class="endpoint-row">
+                  <span class="badge badge-mvfr" style="font-size:10px; padding: 2px 8px;"><span class="dot" style="width:5px;height:5px;"></span> MVFR</span>
+                  <span class="endpoint-temp">55&deg;F</span>
+                </div>
+              </div>
+              <div class="leg-card-endpoint">
+                <span class="endpoint-label">Arrival</span>
+                <div class="endpoint-row">
+                  <span class="badge badge-vfr" style="font-size:10px; padding: 2px 8px;"><span class="dot" style="width:5px;height:5px;"></span> VFR</span>
+                  <span class="endpoint-temp">70&deg;F</span>
+                </div>
+              </div>
+            </div>
+            <div class="leg-card-expand">
+              View Details
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Layer 2: Selected Leg Detail (Leg 2 expanded by default) -->
+      <section class="section leg-detail open" id="legDetail2">
+        <div class="leg-detail-header">
+          <div class="leg-detail-title">
+            <span>Leg 2 Detail</span>
+            <span class="badge badge-mvfr" style="font-size:10px;"><span class="dot" style="width:5px;height:5px;"></span> MVFR at Arrival</span>
+          </div>
+          <button class="leg-detail-close" onclick="closeDetail(2)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="leg-detail-grid">
+
+          <!-- Departure: KBOS -->
+          <div class="card airport-detail-card">
+            <div class="airport-detail-header">
+              <div class="airport-detail-left">
+                <span class="airport-detail-icao">KBOS</span>
+                <span class="airport-detail-role">Departure</span>
+              </div>
+              <span class="badge badge-vfr"><span class="dot"></span> VFR</span>
+            </div>
+            <div class="wx-grid">
+              <div class="wx-item">
+                <span class="wx-item-label">Temp</span>
+                <span class="wx-item-value">58&deg;F</span>
+              </div>
+              <div class="wx-item">
+                <span class="wx-item-label">Visibility</span>
+                <span class="wx-item-value">10 SM</span>
+              </div>
+              <div class="wx-item">
+                <span class="wx-item-label">Ceiling</span>
+                <span class="wx-item-value">4,500 ft</span>
+              </div>
+              <div class="wx-item">
+                <span class="wx-item-label">Wind</span>
+                <span class="wx-item-value">270/10kt</span>
+              </div>
+              <div class="wx-item">
+                <span class="wx-item-label">Pressure</span>
+                <span class="wx-item-value">29.92"</span>
+              </div>
+              <div class="wx-item">
+                <span class="wx-item-label">Gusts</span>
+                <span class="wx-item-value wx-item-value-sm" style="color: var(--text-tertiary);">None</span>
+              </div>
+            </div>
+            <div class="compliance-section">
+              <div class="compliance-header">
+                <span class="compliance-label">Part 135 Compliance</span>
+                <span class="compliance-pass">PASS</span>
+              </div>
+              <div class="margin-bar">
+                <div class="margin-bar-header">
+                  <span class="margin-bar-label">Visibility margin</span>
+                  <span class="margin-bar-value">10 SM / 1.5 SM req</span>
+                </div>
+                <div class="margin-bar-track">
+                  <div class="margin-bar-fill" style="width: 95%; background: var(--success);"></div>
+                </div>
+              </div>
+              <div class="margin-bar">
+                <div class="margin-bar-header">
+                  <span class="margin-bar-label">Ceiling margin</span>
+                  <span class="margin-bar-value">4,500 ft / 600 ft req</span>
+                </div>
+                <div class="margin-bar-track">
+                  <div class="margin-bar-fill" style="width: 92%; background: var(--success);"></div>
+                </div>
+              </div>
+            </div>
+            <div class="source-agreement">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              3/3 sources agree on VFR
+            </div>
+            <button class="raw-toggle" onclick="this.classList.toggle('expanded'); this.nextElementSibling.classList.toggle('show');">
+              Show Raw METAR
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="inline-raw" style="max-height:0;overflow:hidden;transition:max-height 0.3s ease;">
+              <div class="raw-metar" style="margin-top:8px;">KBOS 231556Z 27010KT 10SM FEW045 BKN065 14/06 A2992 RMK AO2 SLP132 T01440061</div>
+            </div>
+          </div>
+
+          <!-- Arrival: KJFK -->
+          <div class="card airport-detail-card">
+            <div class="airport-detail-header">
+              <div class="airport-detail-left">
+                <span class="airport-detail-icao">KJFK</span>
+                <span class="airport-detail-role">Arrival</span>
+              </div>
+              <span class="badge badge-mvfr"><span class="dot"></span> MVFR</span>
+            </div>
+            <div class="wx-grid">
+              <div class="wx-item">
+                <span class="wx-item-label">Temp</span>
+                <span class="wx-item-value">55&deg;F</span>
+              </div>
+              <div class="wx-item">
+                <span class="wx-item-label">Visibility</span>
+                <span class="wx-item-value" style="color: var(--mvfr);">4 SM</span>
+              </div>
+              <div class="wx-item">
+                <span class="wx-item-label">Ceiling</span>
+                <span class="wx-item-value" style="color: var(--mvfr);">2,800 ft</span>
+              </div>
+              <div class="wx-item">
+                <span class="wx-item-label">Wind</span>
+                <span class="wx-item-value">220/14kt</span>
+              </div>
+              <div class="wx-item">
+                <span class="wx-item-label">Pressure</span>
+                <span class="wx-item-value">29.88"</span>
+              </div>
+              <div class="wx-item">
+                <span class="wx-item-label">Gusts</span>
+                <span class="wx-item-value" style="color: var(--warning);">22 kt</span>
+              </div>
+            </div>
+            <div class="compliance-section">
+              <div class="compliance-header">
+                <span class="compliance-label">Part 135 Compliance</span>
+                <span class="compliance-pass">PASS</span>
+              </div>
+              <div class="margin-bar">
+                <div class="margin-bar-header">
+                  <span class="margin-bar-label">Visibility margin</span>
+                  <span class="margin-bar-value">4 SM / 1.5 SM req</span>
+                </div>
+                <div class="margin-bar-track">
+                  <div class="margin-bar-fill" style="width: 68%; background: var(--warning);"></div>
+                </div>
+              </div>
+              <div class="margin-bar">
+                <div class="margin-bar-header">
+                  <span class="margin-bar-label">Ceiling margin</span>
+                  <span class="margin-bar-value">2,800 ft / 600 ft req</span>
+                </div>
+                <div class="margin-bar-track">
+                  <div class="margin-bar-fill" style="width: 75%; background: var(--warning);"></div>
+                </div>
+              </div>
+            </div>
+            <div class="source-agreement">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              2/3 sources agree on MVFR (AWC: MVFR, Open-Meteo: MVFR, NWS: VFR)
+            </div>
+            <button class="raw-toggle" onclick="this.classList.toggle('expanded'); this.nextElementSibling.classList.toggle('show');">
+              Show Raw METAR
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="inline-raw" style="max-height:0;overflow:hidden;transition:max-height 0.3s ease;">
+              <div class="raw-metar" style="margin-top:8px;">KJFK 231556Z 22014G22KT 4SM BR BKN028 OVC045 13/10 A2988 RMK AO2 SLP118 T01280100</div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Layer 3: Raw Data Sections -->
+      <section class="section animate-in animate-in-delay-5">
+        <div class="section-label" style="margin-bottom: 12px;">Raw Data</div>
+
+        <!-- Raw METAR: KBOS -->
+        <div class="collapsible" id="rawMetarKBOS">
+          <div class="collapsible-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="collapsible-header-left">
+              <span class="collapsible-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              </span>
+              <span class="collapsible-title">Raw METAR: KBOS</span>
+            </div>
+            <span class="collapsible-chevron">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </span>
+          </div>
+          <div class="collapsible-body">
+            <div class="collapsible-content">
+              <div class="raw-metar">KBOS 231556Z 27010KT 10SM FEW045 BKN065 14/06 A2992 RMK AO2 SLP132 T01440061 53012</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Raw TAF: KBOS -->
+        <div class="collapsible" id="rawTafKBOS">
+          <div class="collapsible-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="collapsible-header-left">
+              <span class="collapsible-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              </span>
+              <span class="collapsible-title">Raw TAF: KBOS</span>
+            </div>
+            <span class="collapsible-chevron">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </span>
+          </div>
+          <div class="collapsible-body">
+            <div class="collapsible-content">
+              <div class="raw-metar">TAF KBOS 231130Z 2312/2418 27012KT P6SM FEW050 BKN070
+  FM231800 28015G25KT P6SM SCT040 BKN060
+  FM240000 30010KT P6SM FEW050
+  FM240600 33008KT P6SM SKC</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Source Comparison Table -->
+        <div class="collapsible" id="sourceComparison">
+          <div class="collapsible-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="collapsible-header-left">
+              <span class="collapsible-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+              </span>
+              <span class="collapsible-title">Source Comparison: KJFK</span>
+            </div>
+            <span class="collapsible-chevron">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </span>
+          </div>
+          <div class="collapsible-body">
+            <div class="collapsible-content">
+              <table class="src-table">
+                <thead>
+                  <tr>
+                    <th>Source</th>
+                    <th>Category</th>
+                    <th>Temp</th>
+                    <th>Vis</th>
+                    <th>Ceiling</th>
+                    <th>Wind</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="src-name">AWC (METAR)</td>
+                    <td><span class="badge badge-mvfr" style="font-size:10px;padding:2px 8px;"><span class="dot" style="width:5px;height:5px;"></span> MVFR</span></td>
+                    <td>13&deg;C</td>
+                    <td>4 SM</td>
+                    <td>2,800 ft</td>
+                    <td>220/14G22</td>
+                  </tr>
+                  <tr>
+                    <td class="src-name">Open-Meteo</td>
+                    <td><span class="badge badge-mvfr" style="font-size:10px;padding:2px 8px;"><span class="dot" style="width:5px;height:5px;"></span> MVFR</span></td>
+                    <td>12&deg;C</td>
+                    <td>3.5 SM</td>
+                    <td>2,600 ft</td>
+                    <td>215/12G20</td>
+                  </tr>
+                  <tr>
+                    <td class="src-name">NWS</td>
+                    <td><span class="badge badge-vfr" style="font-size:10px;padding:2px 8px;"><span class="dot" style="width:5px;height:5px;"></span> VFR</span></td>
+                    <td>14&deg;C</td>
+                    <td>5 SM</td>
+                    <td>3,200 ft</td>
+                    <td>220/13</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Raw METAR: KJFK -->
+        <div class="collapsible" id="rawMetarKJFK">
+          <div class="collapsible-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="collapsible-header-left">
+              <span class="collapsible-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              </span>
+              <span class="collapsible-title">Raw METAR: KJFK</span>
+            </div>
+            <span class="collapsible-chevron">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </span>
+          </div>
+          <div class="collapsible-body">
+            <div class="collapsible-content">
+              <div class="raw-metar">KJFK 231556Z 22014G22KT 4SM BR BKN028 OVC045 13/10 A2988 RMK AO2 SLP118 T01280100 53008</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Raw TAF: KJFK -->
+        <div class="collapsible" id="rawTafKJFK">
+          <div class="collapsible-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="collapsible-header-left">
+              <span class="collapsible-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              </span>
+              <span class="collapsible-title">Raw TAF: KJFK</span>
+            </div>
+            <span class="collapsible-chevron">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </span>
+          </div>
+          <div class="collapsible-body">
+            <div class="collapsible-content">
+              <div class="raw-metar">TAF KJFK 231130Z 2312/2418 22015G25KT 4SM BR BKN025 OVC040
+  FM231800 23012KT 5SM HZ SCT030 BKN050
+  FM240000 25010KT P6SM FEW040
+  FM240600 28008KT P6SM SKC</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div><!-- /container -->
+  </main>
+
+  <!-- ==============================
+       Footer
+       ============================== -->
+  <footer class="footer">
+    <div class="container">
+      <p class="footer-text">Data sourced from official aviation weather providers</p>
+      <div class="footer-sources">
+        <a href="#" class="footer-source">Aviation Weather Center</a>
+        <span class="footer-separator"></span>
+        <a href="#" class="footer-source">Open-Meteo</a>
+        <span class="footer-separator"></span>
+        <a href="#" class="footer-source">National Weather Service</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ==============================
+       JavaScript
+       ============================== -->
+  <script>
+    (function () {
+      'use strict';
+
+      // ---- Theme Toggle ----
+      var html = document.documentElement;
+      var themeToggle = document.getElementById('themeToggle');
+      var iconSun = themeToggle.querySelector('.icon-sun');
+      var iconMoon = themeToggle.querySelector('.icon-moon');
+
+      function setTheme(theme) {
+        html.setAttribute('data-theme', theme);
+        if (theme === 'dark') {
+          iconSun.style.display = 'block';
+          iconMoon.style.display = 'none';
+        } else {
+          iconSun.style.display = 'none';
+          iconMoon.style.display = 'block';
+        }
+        localStorage.setItem('horizon-theme', theme);
+      }
+
+      themeToggle.addEventListener('click', function () {
+        var current = html.getAttribute('data-theme');
+        setTheme(current === 'dark' ? 'light' : 'dark');
+      });
+
+      var saved = localStorage.getItem('horizon-theme');
+      setTheme(saved || 'dark');
+
+      // ---- Live Clock ----
+      function updateClock() {
+        var now = new Date();
+        var zuluH = String(now.getUTCHours()).padStart(2, '0');
+        var zuluM = String(now.getUTCMinutes()).padStart(2, '0');
+        var localH = String(now.getHours()).padStart(2, '0');
+        var localM = String(now.getMinutes()).padStart(2, '0');
+        document.getElementById('clockZulu').textContent = zuluH + ':' + zuluM + 'Z';
+        document.getElementById('clockLocal').textContent = localH + ':' + localM + 'L';
+      }
+      updateClock();
+      setInterval(updateClock, 10000);
+
+      // ---- Mobile Nav ----
+      var hamburgerBtn = document.getElementById('hamburgerBtn');
+      var mobileNav = document.getElementById('mobileNav');
+      var mobileNavClose = document.getElementById('mobileNavClose');
+
+      hamburgerBtn.addEventListener('click', function () {
+        mobileNav.classList.add('open');
+      });
+      mobileNavClose.addEventListener('click', function () {
+        mobileNav.classList.remove('open');
+      });
+      mobileNav.addEventListener('click', function (e) {
+        if (e.target === mobileNav) mobileNav.classList.remove('open');
+      });
+
+      // ---- Keyboard shortcuts ----
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') mobileNav.classList.remove('open');
+      });
+
+      // ---- Inline raw METAR toggle ----
+      var style = document.createElement('style');
+      style.textContent = '.inline-raw.show { max-height: 120px !important; }';
+      document.head.appendChild(style);
+
+    })();
+
+    // ---- Leg detail expand/collapse ----
+    function toggleDetail(legNum) {
+      var el = document.getElementById('legDetail' + legNum);
+      if (el) {
+        el.classList.toggle('open');
+        // Smooth scroll into view
+        if (el.classList.contains('open')) {
+          setTimeout(function () {
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }, 50);
+        }
+      }
+    }
+
+    function closeDetail(legNum) {
+      var el = document.getElementById('legDetail' + legNum);
+      if (el) el.classList.remove('open');
+    }
+  </script>
+</body>
+</html>

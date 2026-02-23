@@ -1,0 +1,1543 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weather Aggregator — Horizon Design</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* ========================================
+       CSS Custom Properties — Dark / Light
+       ======================================== */
+    :root {
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+
+      --radius-sm: 6px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --radius-pill: 20px;
+
+      --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+
+      /* Flight categories (constant) */
+      --vfr: #22C55E;
+      --mvfr: #3B82F6;
+      --ifr: #EF4444;
+      --lifr: #A855F7;
+
+      /* Status (constant) */
+      --success: #34D399;
+      --warning: #FBBF24;
+      --danger: #F87171;
+      --accent-primary: #38BDF8;
+      --accent-secondary: #818CF8;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0B1120;
+      --bg-gradient-start: #0B1120;
+      --bg-gradient-mid: #0E1629;
+      --bg-gradient-end: #0B1120;
+      --surface: #131D35;
+      --surface-elevated: #1A2744;
+      --surface-hover: #1E2D4A;
+      --text-primary: #E8ECF4;
+      --text-secondary: #8892A8;
+      --text-tertiary: #4F5B73;
+      --border: #1E2D4A;
+      --border-subtle: rgba(30, 45, 74, 0.6);
+      --accent: #38BDF8;
+      --accent-dim: rgba(56, 189, 248, 0.1);
+      --accent-secondary: #818CF8;
+      --input-bg: #0F1729;
+      --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+      --shadow-card-hover: 0 4px 16px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      --shadow-input: 0 1px 2px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+      --glass-bg: rgba(19, 29, 53, 0.7);
+      --glass-border: rgba(30, 45, 74, 0.5);
+      --overlay: rgba(11, 17, 32, 0.8);
+    }
+
+    [data-theme="light"] {
+      --bg: #F5F7FA;
+      --bg-gradient-start: #F5F7FA;
+      --bg-gradient-mid: #EDF0F7;
+      --bg-gradient-end: #F5F7FA;
+      --surface: #FFFFFF;
+      --surface-elevated: #F8FAFC;
+      --surface-hover: #F1F5F9;
+      --text-primary: #0F172A;
+      --text-secondary: #475569;
+      --text-tertiary: #94A3B8;
+      --border: #E2E8F0;
+      --border-subtle: rgba(226, 232, 240, 0.8);
+      --accent: #0284C7;
+      --accent-dim: rgba(2, 132, 199, 0.08);
+      --accent-secondary: #6366F1;
+      --input-bg: #FFFFFF;
+      --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.04);
+      --shadow-card-hover: 0 4px 16px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.06);
+      --shadow-input: 0 1px 2px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.04);
+      --glass-bg: rgba(255, 255, 255, 0.8);
+      --glass-border: rgba(226, 232, 240, 0.6);
+      --overlay: rgba(245, 247, 250, 0.8);
+    }
+
+    /* ========================================
+       Reset & Base
+       ======================================== */
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+      transition: background var(--transition-base), color var(--transition-base);
+    }
+
+    /* Subtle gradient background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(56, 189, 248, 0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 50%, rgba(129, 140, 248, 0.04) 0%, transparent 50%),
+        linear-gradient(180deg, var(--bg-gradient-start) 0%, var(--bg-gradient-mid) 50%, var(--bg-gradient-end) 100%);
+      pointer-events: none;
+      z-index: 0;
+      transition: background var(--transition-base);
+    }
+
+    /* ========================================
+       Page load animation
+       ======================================== */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .animate-in {
+      animation: fadeInUp 0.6s var(--transition-base) both;
+    }
+
+    .animate-in-delay-1 { animation-delay: 0.1s; }
+    .animate-in-delay-2 { animation-delay: 0.2s; }
+    .animate-in-delay-3 { animation-delay: 0.3s; }
+    .animate-in-delay-4 { animation-delay: 0.4s; }
+    .animate-in-delay-5 { animation-delay: 0.5s; }
+
+    /* ========================================
+       Layout container
+       ======================================== */
+    .container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ========================================
+       Navbar
+       ======================================== */
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(16px) saturate(180%);
+      -webkit-backdrop-filter: blur(16px) saturate(180%);
+      background: var(--glass-bg);
+      border-bottom: 1px solid var(--border-subtle);
+      transition: background var(--transition-base), border-color var(--transition-base);
+    }
+
+    .navbar-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+      gap: 16px;
+    }
+
+    .navbar-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text-primary);
+      font-weight: 700;
+      font-size: 15px;
+      letter-spacing: -0.02em;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .navbar-logo-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: var(--radius-sm);
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .navbar-logo-icon svg {
+      width: 16px;
+      height: 16px;
+      fill: white;
+    }
+
+    .navbar-nav {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .navbar-nav a {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 500;
+      transition: color var(--transition-fast), background var(--transition-fast);
+      white-space: nowrap;
+    }
+
+    .navbar-nav a:hover {
+      color: var(--text-primary);
+      background: var(--surface-hover);
+    }
+
+    .navbar-nav a.active {
+      color: var(--text-primary);
+      background: var(--surface);
+    }
+
+    .navbar-nav a svg {
+      width: 14px;
+      height: 14px;
+      opacity: 0.7;
+    }
+
+    .navbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .clock {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      letter-spacing: 0.02em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+
+    .clock-zulu {
+      color: var(--accent);
+    }
+
+    .clock-separator {
+      color: var(--text-tertiary);
+    }
+
+    .theme-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-sm);
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: color var(--transition-fast), background var(--transition-fast);
+    }
+
+    .theme-toggle:hover {
+      color: var(--text-primary);
+      background: var(--surface-hover);
+    }
+
+    .theme-toggle svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: white;
+      cursor: pointer;
+      transition: box-shadow var(--transition-fast);
+      flex-shrink: 0;
+    }
+
+    .avatar:hover {
+      box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent);
+    }
+
+    /* Mobile hamburger */
+    .hamburger {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      border-radius: var(--radius-sm);
+    }
+
+    .hamburger:hover {
+      color: var(--text-primary);
+      background: var(--surface-hover);
+    }
+
+    .hamburger svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* ========================================
+       Hero Section
+       ======================================== */
+    .hero {
+      text-align: center;
+      padding: 80px 0 56px;
+    }
+
+    .hero-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 14px;
+      border-radius: var(--radius-pill);
+      background: var(--accent-dim);
+      border: 1px solid rgba(56, 189, 248, 0.15);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 28px;
+    }
+
+    .hero-label-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--success);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .hero h1 {
+      font-size: 52px;
+      font-weight: 800;
+      letter-spacing: -0.035em;
+      line-height: 1.1;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+    }
+
+    .hero h1 .gradient-text {
+      background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-subtitle {
+      font-size: 17px;
+      font-weight: 400;
+      color: var(--text-secondary);
+      max-width: 480px;
+      margin: 0 auto 40px;
+      line-height: 1.6;
+    }
+
+    /* Search bar */
+    .search-wrapper {
+      max-width: 520px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .search-bar {
+      display: flex;
+      align-items: center;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-input);
+      overflow: hidden;
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    }
+
+    .search-bar:focus-within {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-dim), var(--shadow-input);
+    }
+
+    .search-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 0 0 16px;
+      color: var(--text-tertiary);
+    }
+
+    .search-icon svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .search-bar input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      padding: 14px 12px;
+      font-family: var(--font-sans);
+      font-size: 15px;
+      font-weight: 400;
+      color: var(--text-primary);
+      outline: none;
+    }
+
+    .search-bar input::placeholder {
+      color: var(--text-tertiary);
+    }
+
+    .search-bar input::-webkit-input-placeholder {
+      color: var(--text-tertiary);
+    }
+
+    .search-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 42px;
+      height: 42px;
+      margin: 3px;
+      border-radius: var(--radius-sm);
+      border: none;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      color: white;
+      cursor: pointer;
+      transition: opacity var(--transition-fast), transform var(--transition-fast);
+      flex-shrink: 0;
+    }
+
+    .search-btn:hover {
+      opacity: 0.9;
+      transform: scale(1.02);
+    }
+
+    .search-btn:active {
+      transform: scale(0.97);
+    }
+
+    .search-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .search-hint {
+      margin-top: 12px;
+      font-size: 12px;
+      color: var(--text-tertiary);
+    }
+
+    .search-hint kbd {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 20px;
+      height: 20px;
+      padding: 0 5px;
+      border-radius: 4px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      font-family: var(--font-sans);
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin: 0 2px;
+    }
+
+    /* ========================================
+       Section styling
+       ======================================== */
+    .section {
+      margin-bottom: 48px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+    }
+
+    .section-action {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-tertiary);
+      text-decoration: none;
+      cursor: pointer;
+      transition: color var(--transition-fast);
+      background: none;
+      border: none;
+      font-family: var(--font-sans);
+    }
+
+    .section-action:hover {
+      color: var(--accent);
+    }
+
+    /* ========================================
+       Favorites Grid
+       ======================================== */
+    .favorites-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .fav-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 18px;
+      box-shadow: var(--shadow-card);
+      cursor: pointer;
+      transition:
+        background var(--transition-fast),
+        border-color var(--transition-fast),
+        box-shadow var(--transition-fast),
+        transform var(--transition-fast);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .fav-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.03), transparent 60%);
+      opacity: 0;
+      transition: opacity var(--transition-fast);
+    }
+
+    .fav-card:hover {
+      background: var(--surface-elevated);
+      border-color: var(--surface-hover);
+      box-shadow: var(--shadow-card-hover);
+      transform: translateY(-1px);
+    }
+
+    .fav-card:hover::before {
+      opacity: 1;
+    }
+
+    .fav-card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .fav-card-icao {
+      font-family: var(--font-mono);
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
+    }
+
+    .fav-card-star {
+      color: var(--warning);
+      display: flex;
+      align-items: center;
+    }
+
+    .fav-card-star svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .fav-card-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 10px;
+      border-radius: var(--radius-pill);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      margin-bottom: 14px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .fav-card-badge .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .badge-vfr {
+      background: rgba(34, 197, 94, 0.12);
+      color: var(--vfr);
+    }
+    .badge-vfr .dot { background: var(--vfr); }
+
+    .badge-mvfr {
+      background: rgba(59, 130, 246, 0.12);
+      color: var(--mvfr);
+    }
+    .badge-mvfr .dot { background: var(--mvfr); }
+
+    .badge-ifr {
+      background: rgba(239, 68, 68, 0.12);
+      color: var(--ifr);
+    }
+    .badge-ifr .dot { background: var(--ifr); }
+
+    .badge-lifr {
+      background: rgba(168, 85, 247, 0.12);
+      color: var(--lifr);
+    }
+    .badge-lifr .dot { background: var(--lifr); }
+
+    .fav-card-data {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .fav-card-datum {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .fav-card-datum-label {
+      font-size: 10px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-tertiary);
+    }
+
+    .fav-card-datum-value {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    /* ========================================
+       Recent pills
+       ======================================== */
+    .recent-pills {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .recent-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: var(--radius-pill);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      text-decoration: none;
+      transition:
+        background var(--transition-fast),
+        border-color var(--transition-fast),
+        color var(--transition-fast),
+        box-shadow var(--transition-fast);
+    }
+
+    .recent-pill:hover {
+      background: var(--surface-elevated);
+      border-color: var(--surface-hover);
+      color: var(--text-primary);
+      box-shadow: var(--shadow-card);
+    }
+
+    .recent-pill svg {
+      width: 12px;
+      height: 12px;
+      opacity: 0.5;
+    }
+
+    /* ========================================
+       Quick Reference card
+       ======================================== */
+    .qref-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+      transition: background var(--transition-base), border-color var(--transition-base);
+    }
+
+    .qref-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      cursor: pointer;
+      user-select: none;
+      transition: background var(--transition-fast);
+    }
+
+    .qref-header:hover {
+      background: var(--surface-elevated);
+    }
+
+    .qref-header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .qref-header-icon {
+      color: var(--text-tertiary);
+      display: flex;
+      align-items: center;
+    }
+
+    .qref-header-icon svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .qref-header-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .qref-chevron {
+      color: var(--text-tertiary);
+      display: flex;
+      align-items: center;
+      transition: transform var(--transition-fast);
+    }
+
+    .qref-chevron svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .qref-card.expanded .qref-chevron {
+      transform: rotate(180deg);
+    }
+
+    .qref-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height var(--transition-slow);
+    }
+
+    .qref-card.expanded .qref-body {
+      max-height: 300px;
+    }
+
+    .qref-content {
+      padding: 0 18px 18px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .qref-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .qref-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 3px;
+    }
+
+    .qref-item-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .qref-item-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .qref-item-desc {
+      font-size: 11px;
+      color: var(--text-tertiary);
+      line-height: 1.5;
+    }
+
+    /* ========================================
+       Footer
+       ======================================== */
+    .footer {
+      padding: 40px 0 32px;
+      text-align: center;
+      border-top: 1px solid var(--border);
+      margin-top: 32px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .footer-text {
+      font-size: 12px;
+      color: var(--text-tertiary);
+    }
+
+    .footer-sources {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+
+    .footer-source {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-tertiary);
+      text-decoration: none;
+      transition: color var(--transition-fast);
+    }
+
+    .footer-source:hover {
+      color: var(--accent);
+    }
+
+    .footer-separator {
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: var(--text-tertiary);
+      opacity: 0.5;
+    }
+
+    /* ========================================
+       Responsive
+       ======================================== */
+    @media (max-width: 1024px) {
+      .favorites-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .qref-content {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .navbar-nav {
+        display: none;
+      }
+
+      .hamburger {
+        display: flex;
+      }
+
+      .clock {
+        display: none;
+      }
+
+      .hero {
+        padding: 56px 0 40px;
+      }
+
+      .hero h1 {
+        font-size: 32px;
+      }
+
+      .hero-subtitle {
+        font-size: 15px;
+      }
+
+      .favorites-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
+
+      .fav-card {
+        padding: 14px;
+      }
+
+      .fav-card-icao {
+        font-size: 16px;
+      }
+
+      .qref-content {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 0 16px;
+      }
+
+      .favorites-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero h1 {
+        font-size: 26px;
+      }
+
+      .fav-card-data {
+        gap: 12px;
+      }
+    }
+
+    /* ========================================
+       Mobile nav overlay
+       ======================================== */
+    .mobile-nav-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: var(--overlay);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      opacity: 0;
+      transition: opacity var(--transition-base);
+    }
+
+    .mobile-nav-overlay.open {
+      display: flex;
+      opacity: 1;
+    }
+
+    .mobile-nav-panel {
+      width: 280px;
+      margin-left: auto;
+      background: var(--surface);
+      border-left: 1px solid var(--border);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .mobile-nav-panel a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      color: var(--text-secondary);
+      font-size: 14px;
+      font-weight: 500;
+      transition: color var(--transition-fast), background var(--transition-fast);
+    }
+
+    .mobile-nav-panel a:hover {
+      color: var(--text-primary);
+      background: var(--surface-hover);
+    }
+
+    .mobile-nav-panel a svg {
+      width: 16px;
+      height: 16px;
+      opacity: 0.6;
+    }
+
+    .mobile-nav-close {
+      align-self: flex-end;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      border-radius: var(--radius-sm);
+      margin-bottom: 8px;
+    }
+
+    .mobile-nav-close:hover {
+      background: var(--surface-hover);
+      color: var(--text-primary);
+    }
+
+    .mobile-nav-close svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* Scrollbar styling */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--text-tertiary);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==============================
+       Navbar
+       ============================== -->
+  <nav class="navbar">
+    <div class="container navbar-inner">
+      <a href="#" class="navbar-logo">
+        <span class="navbar-logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17.8 19.2L16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z" fill="white" stroke="none"/>
+          </svg>
+        </span>
+        Weather Aggregator
+      </a>
+
+      <div class="navbar-nav">
+        <a href="#" class="active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          Single Airport
+        </a>
+        <a href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          Trip Planner
+        </a>
+        <a href="#">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+          Map
+        </a>
+      </div>
+
+      <div class="navbar-right">
+        <div class="clock">
+          <span class="clock-zulu" id="clockZulu">14:32Z</span>
+          <span class="clock-separator">/</span>
+          <span id="clockLocal">09:32L</span>
+        </div>
+
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark/light mode" title="Toggle theme">
+          <!-- Sun icon (shown in dark mode) -->
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+          <!-- Moon icon (shown in light mode) -->
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
+
+        <div class="avatar" title="User account">AG</div>
+
+        <button class="hamburger" id="hamburgerBtn" aria-label="Open menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <line x1="3" y1="12" x2="21" y2="12"/>
+            <line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile nav overlay -->
+  <div class="mobile-nav-overlay" id="mobileNav">
+    <div class="mobile-nav-panel">
+      <button class="mobile-nav-close" id="mobileNavClose" aria-label="Close menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+      <a href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        Single Airport
+      </a>
+      <a href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        Trip Planner
+      </a>
+      <a href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+        Map
+      </a>
+    </div>
+  </div>
+
+  <!-- ==============================
+       Hero Section
+       ============================== -->
+  <main>
+    <section class="hero container animate-in">
+      <div class="hero-label">
+        <span class="hero-label-dot"></span>
+        Part 135 Compliant
+      </div>
+      <h1>Aviation Weather<br><span class="gradient-text">Aggregator</span></h1>
+      <p class="hero-subtitle">Multi-source weather intelligence for Part 135 flight operations. METAR, TAF, forecasts, and compliance in one view.</p>
+
+      <div class="search-wrapper">
+        <div class="search-bar">
+          <span class="search-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          </span>
+          <input type="text" placeholder="Search by ICAO code (e.g. KJFK)" spellcheck="false" autocomplete="off" />
+          <button class="search-btn" aria-label="Search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </button>
+        </div>
+        <p class="search-hint">Press <kbd>Enter</kbd> to search or <kbd>/</kbd> to focus</p>
+      </div>
+    </section>
+
+    <!-- ==============================
+         Favorites Section
+         ============================== -->
+    <section class="section container animate-in animate-in-delay-2">
+      <div class="section-header">
+        <span class="section-label">Favorites</span>
+        <a href="#" class="section-action">Manage</a>
+      </div>
+
+      <div class="favorites-grid">
+        <!-- KJFK -->
+        <div class="fav-card">
+          <div class="fav-card-header">
+            <span class="fav-card-icao">KJFK</span>
+            <span class="fav-card-star">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            </span>
+          </div>
+          <div class="fav-card-badge badge-vfr">
+            <span class="dot"></span>
+            VFR
+          </div>
+          <div class="fav-card-data">
+            <div class="fav-card-datum">
+              <span class="fav-card-datum-label">Temp</span>
+              <span class="fav-card-datum-value">18&deg;C</span>
+            </div>
+            <div class="fav-card-datum">
+              <span class="fav-card-datum-label">Wind</span>
+              <span class="fav-card-datum-value">270/12kt</span>
+            </div>
+            <div class="fav-card-datum">
+              <span class="fav-card-datum-label">Vis</span>
+              <span class="fav-card-datum-value">10SM</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- KLAX -->
+        <div class="fav-card">
+          <div class="fav-card-header">
+            <span class="fav-card-icao">KLAX</span>
+            <span class="fav-card-star">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            </span>
+          </div>
+          <div class="fav-card-badge badge-mvfr">
+            <span class="dot"></span>
+            MVFR
+          </div>
+          <div class="fav-card-data">
+            <div class="fav-card-datum">
+              <span class="fav-card-datum-label">Temp</span>
+              <span class="fav-card-datum-value">15&deg;C</span>
+            </div>
+            <div class="fav-card-datum">
+              <span class="fav-card-datum-label">Wind</span>
+              <span class="fav-card-datum-value">250/08kt</span>
+            </div>
+            <div class="fav-card-datum">
+              <span class="fav-card-datum-label">Vis</span>
+              <span class="fav-card-datum-value">4SM</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- KORD -->
+        <div class="fav-card">
+          <div class="fav-card-header">
+            <span class="fav-card-icao">KORD</span>
+            <span class="fav-card-star">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            </span>
+          </div>
+          <div class="fav-card-badge badge-ifr">
+            <span class="dot"></span>
+            IFR
+          </div>
+          <div class="fav-card-data">
+            <div class="fav-card-datum">
+              <span class="fav-card-datum-label">Temp</span>
+              <span class="fav-card-datum-value">2&deg;C</span>
+            </div>
+            <div class="fav-card-datum">
+              <span class="fav-card-datum-label">Wind</span>
+              <span class="fav-card-datum-value">320/22G34</span>
+            </div>
+            <div class="fav-card-datum">
+              <span class="fav-card-datum-label">Vis</span>
+              <span class="fav-card-datum-value">1SM</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- KATL -->
+        <div class="fav-card">
+          <div class="fav-card-header">
+            <span class="fav-card-icao">KATL</span>
+            <span class="fav-card-star">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            </span>
+          </div>
+          <div class="fav-card-badge badge-lifr">
+            <span class="dot"></span>
+            LIFR
+          </div>
+          <div class="fav-card-data">
+            <div class="fav-card-datum">
+              <span class="fav-card-datum-label">Temp</span>
+              <span class="fav-card-datum-value">8&deg;C</span>
+            </div>
+            <div class="fav-card-datum">
+              <span class="fav-card-datum-label">Wind</span>
+              <span class="fav-card-datum-value">180/05kt</span>
+            </div>
+            <div class="fav-card-datum">
+              <span class="fav-card-datum-label">Vis</span>
+              <span class="fav-card-datum-value">&frac12;SM</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==============================
+         Recent Section
+         ============================== -->
+    <section class="section container animate-in animate-in-delay-3">
+      <div class="section-header">
+        <span class="section-label">Recent</span>
+        <button class="section-action" id="clearRecent">Clear</button>
+      </div>
+
+      <div class="recent-pills" id="recentPills">
+        <a href="#" class="recent-pill">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          KBOS
+        </a>
+        <a href="#" class="recent-pill">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          KSFO
+        </a>
+        <a href="#" class="recent-pill">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          KMIA
+        </a>
+        <a href="#" class="recent-pill">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          KDEN
+        </a>
+        <a href="#" class="recent-pill">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          KLAS
+        </a>
+      </div>
+    </section>
+
+    <!-- ==============================
+         Quick Reference Section
+         ============================== -->
+    <section class="section container animate-in animate-in-delay-4">
+      <div class="qref-card expanded" id="qrefCard">
+        <div class="qref-header" id="qrefToggle">
+          <div class="qref-header-left">
+            <span class="qref-header-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            </span>
+            <span class="qref-header-title">Flight Category Quick Reference</span>
+          </div>
+          <span class="qref-chevron">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </span>
+        </div>
+        <div class="qref-body">
+          <div class="qref-content">
+            <div class="qref-item">
+              <span class="qref-dot" style="background: var(--vfr);"></span>
+              <div class="qref-item-info">
+                <span class="qref-item-name">VFR</span>
+                <span class="qref-item-desc">Ceiling &gt; 3,000ft AGL<br>Visibility &gt; 5 SM</span>
+              </div>
+            </div>
+            <div class="qref-item">
+              <span class="qref-dot" style="background: var(--mvfr);"></span>
+              <div class="qref-item-info">
+                <span class="qref-item-name">MVFR</span>
+                <span class="qref-item-desc">Ceiling 1,000 - 3,000ft<br>Visibility 3 - 5 SM</span>
+              </div>
+            </div>
+            <div class="qref-item">
+              <span class="qref-dot" style="background: var(--ifr);"></span>
+              <div class="qref-item-info">
+                <span class="qref-item-name">IFR</span>
+                <span class="qref-item-desc">Ceiling 500 - 999ft<br>Visibility 1 - 3 SM</span>
+              </div>
+            </div>
+            <div class="qref-item">
+              <span class="qref-dot" style="background: var(--lifr);"></span>
+              <div class="qref-item-info">
+                <span class="qref-item-name">LIFR</span>
+                <span class="qref-item-desc">Ceiling &lt; 500ft AGL<br>Visibility &lt; 1 SM</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ==============================
+       Footer
+       ============================== -->
+  <footer class="footer animate-in animate-in-delay-5">
+    <div class="container">
+      <p class="footer-text">Data sourced from official aviation weather providers</p>
+      <div class="footer-sources">
+        <a href="#" class="footer-source">Aviation Weather Center</a>
+        <span class="footer-separator"></span>
+        <a href="#" class="footer-source">Open-Meteo</a>
+        <span class="footer-separator"></span>
+        <a href="#" class="footer-source">National Weather Service</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ==============================
+       JavaScript
+       ============================== -->
+  <script>
+    (function () {
+      'use strict';
+
+      // ---- Theme Toggle ----
+      const html = document.documentElement;
+      const themeToggle = document.getElementById('themeToggle');
+      const iconSun = themeToggle.querySelector('.icon-sun');
+      const iconMoon = themeToggle.querySelector('.icon-moon');
+
+      function setTheme(theme) {
+        html.setAttribute('data-theme', theme);
+        if (theme === 'dark') {
+          iconSun.style.display = 'block';
+          iconMoon.style.display = 'none';
+        } else {
+          iconSun.style.display = 'none';
+          iconMoon.style.display = 'block';
+        }
+        localStorage.setItem('horizon-theme', theme);
+      }
+
+      themeToggle.addEventListener('click', function () {
+        const current = html.getAttribute('data-theme');
+        setTheme(current === 'dark' ? 'light' : 'dark');
+      });
+
+      // Load saved theme (default dark)
+      const saved = localStorage.getItem('horizon-theme');
+      if (saved) {
+        setTheme(saved);
+      } else {
+        setTheme('dark');
+      }
+
+      // ---- Live Clock ----
+      function updateClock() {
+        const now = new Date();
+        const zuluH = String(now.getUTCHours()).padStart(2, '0');
+        const zuluM = String(now.getUTCMinutes()).padStart(2, '0');
+        const localH = String(now.getHours()).padStart(2, '0');
+        const localM = String(now.getMinutes()).padStart(2, '0');
+        document.getElementById('clockZulu').textContent = zuluH + ':' + zuluM + 'Z';
+        document.getElementById('clockLocal').textContent = localH + ':' + localM + 'L';
+      }
+
+      updateClock();
+      setInterval(updateClock, 10000);
+
+      // ---- Quick Reference Expand/Collapse ----
+      const qrefCard = document.getElementById('qrefCard');
+      const qrefToggle = document.getElementById('qrefToggle');
+
+      qrefToggle.addEventListener('click', function () {
+        qrefCard.classList.toggle('expanded');
+      });
+
+      // ---- Clear Recent ----
+      const clearRecent = document.getElementById('clearRecent');
+      const recentPills = document.getElementById('recentPills');
+
+      clearRecent.addEventListener('click', function (e) {
+        e.preventDefault();
+        const pills = recentPills.querySelectorAll('.recent-pill');
+        pills.forEach(function (pill, i) {
+          pill.style.transition = 'opacity 0.3s ease ' + (i * 0.05) + 's, transform 0.3s ease ' + (i * 0.05) + 's';
+          pill.style.opacity = '0';
+          pill.style.transform = 'scale(0.9)';
+        });
+        setTimeout(function () {
+          recentPills.innerHTML = '<span style="font-size:13px;color:var(--text-tertiary);">No recent searches</span>';
+        }, 400);
+      });
+
+      // ---- Mobile Nav ----
+      var hamburgerBtn = document.getElementById('hamburgerBtn');
+      var mobileNav = document.getElementById('mobileNav');
+      var mobileNavClose = document.getElementById('mobileNavClose');
+
+      hamburgerBtn.addEventListener('click', function () {
+        mobileNav.classList.add('open');
+      });
+
+      mobileNavClose.addEventListener('click', function () {
+        mobileNav.classList.remove('open');
+      });
+
+      mobileNav.addEventListener('click', function (e) {
+        if (e.target === mobileNav) {
+          mobileNav.classList.remove('open');
+        }
+      });
+
+      // ---- Keyboard shortcut: "/" to focus search ----
+      document.addEventListener('keydown', function (e) {
+        if (e.key === '/' && document.activeElement.tagName !== 'INPUT') {
+          e.preventDefault();
+          var input = document.querySelector('.search-bar input');
+          if (input) input.focus();
+        }
+        if (e.key === 'Escape') {
+          mobileNav.classList.remove('open');
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
