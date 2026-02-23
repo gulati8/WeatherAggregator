@@ -54,7 +54,8 @@ Live at: https://weather.gulatilabs.me
 - **Prod:** `docker compose -f docker-compose.prod.yml up -d`
 
 ### Tests
-- **No tests exist yet.** No test framework installed.
+- **Test:** `npm run test` (Vitest — 55 tests across Part 135 checker and weather aggregator)
+- **Test Watch:** `npm run test:watch`
 
 ## Code Style
 
@@ -154,9 +155,7 @@ Push to `main` triggers `.github/workflows/deploy.yml`:
 
 **Merging to main auto-deploys to production.**
 
-## Known Issues
+## Testing
 
-- README says port 3001, code uses 3002
-- Part 135 alternate check is simplified (uses current conditions, not TAF)
-- AVWX weather source configured in types/config but not implemented
-- Airport country hardcoded to 'US'
+- **Framework:** Vitest (`npm run test` / `npm run test:watch`)
+- **Tests:** `backend/src/services/__tests__/` — Part 135 checker (45 tests), weather aggregator (10 tests)

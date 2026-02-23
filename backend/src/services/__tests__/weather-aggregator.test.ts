@@ -10,6 +10,9 @@ vi.mock('../aviation-weather', () => ({
   aviationWeatherService: {
     getMetarAndTaf: vi.fn(),
     getMetar: vi.fn(),
+    getRecentMetars: vi.fn().mockResolvedValue([]),
+    getPireps: vi.fn().mockResolvedValue([]),
+    getAirSigmets: vi.fn().mockResolvedValue([]),
   },
 }));
 
