@@ -36,6 +36,7 @@ const DEFAULT_LAYERS: WeatherLayer[] = [
   { id: 'nexrad', label: 'NEXRAD Radar', group: 'Radar & Precipitation', url: 'https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/nexrad-n0q-900913/{z}/{x}/{y}.png', attribution: 'Iowa State Mesonet', opacity: 0.5, enabled: true },
   { id: 'echo-tops', label: 'Echo Tops', group: 'Radar & Precipitation', url: 'https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/nexrad-eet/{z}/{x}/{y}.png', attribution: 'Iowa State Mesonet', opacity: 0.5, enabled: false },
   { id: 'precip-1h', label: 'Precip (1hr)', group: 'Radar & Precipitation', url: 'https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/q2-n1p/{z}/{x}/{y}.png', attribution: 'Iowa State Mesonet', opacity: 0.5, enabled: false },
+  { id: 'precip-global', label: 'Precipitation (Global)', group: 'Weather Overlays', url: '/api/map/owm/precipitation_new/{z}/{x}/{y}.png', attribution: 'OpenWeatherMap', opacity: 0.5, enabled: false },
   { id: 'clouds', label: 'Clouds', group: 'Weather Overlays', url: '/api/map/owm/clouds_new/{z}/{x}/{y}.png', attribution: 'OpenWeatherMap', opacity: 0.5, enabled: false },
   { id: 'temp', label: 'Temperature', group: 'Weather Overlays', url: '/api/map/owm/temp_new/{z}/{x}/{y}.png', attribution: 'OpenWeatherMap', opacity: 0.5, enabled: false },
   { id: 'wind', label: 'Wind', group: 'Weather Overlays', url: '/api/map/owm/wind_new/{z}/{x}/{y}.png', attribution: 'OpenWeatherMap', opacity: 0.5, enabled: false },

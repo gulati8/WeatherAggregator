@@ -4,7 +4,7 @@ import { config } from '../config';
 
 const router = Router();
 
-const ALLOWED_OWM_LAYERS = ['clouds_new', 'temp_new', 'wind_new', 'pressure_new'];
+const ALLOWED_OWM_LAYERS = ['clouds_new', 'precipitation_new', 'temp_new', 'wind_new', 'pressure_new'];
 
 // GET /api/map/owm/:layer/:z/:x/:y.png — proxy OWM tiles to hide API key
 router.get('/owm/:layer/:z/:x/:y.png', (req, res) => {
