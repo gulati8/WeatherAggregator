@@ -5,6 +5,7 @@ import { weatherApi } from '../api/client';
 import { UnifiedWeatherData, FlightCategory } from '../types/weather';
 import FlightCategoryBadge from '../components/FlightCategoryBadge';
 import AirportAutocomplete from '../components/AirportAutocomplete';
+import { useFavorites } from '../hooks/useWeather';
 import { formatVisibility, formatCeiling, formatWindSpeed } from '../utils/formatters';
 import 'leaflet/dist/leaflet.css';
 
@@ -20,7 +21,7 @@ const FLIGHT_CATEGORY_COLORS: Record<FlightCategory, string> = {
   LIFR: '#a855f7',
 };
 
-const DEFAULT_AIRPORTS = ['KJFK', 'KLAX', 'KORD', 'KATL', 'KDFW'];
+const FALLBACK_AIRPORTS: string[] = [];
 
 interface WeatherLayer {
   id: string;
@@ -66,6 +67,7 @@ function MapBounds({ airports }: { airports: MapAirport[] }) {
 
 function MapView() {
   const navigate = useNavigate();
+  const { favorites, addFavorite, removeFavorite, isFavorite } = useFavorites();
   const [airports, setAirports] = useState<MapAirport[]>([]);
   const [searchValue, setSearchValue] = useState('');
   const [loading, setLoading] = useState(false);
@@ -106,25 +108,33 @@ function MapView() {
     }
   }, []);
 
-  // Load default airports on mount
-  const loadDefaults = useCallback(async () => {
-    if (initialLoaded) return;
-    setInitialLoaded(true);
+  // Load favorite airports when favorites change
+  useEffect(() => {
+    const airportsToLoad = favorites.length > 0 ? favorites : FALLBACK_AIRPORTS;
+    if (airportsToLoad.length === 0) {
+      setInitialLoaded(true);
+      return;
+    }
+
+    // Only load airports we don't already have
+    const existing = new Set(airports.map((a) => a.icao));
+    const toFetch = airportsToLoad.filter((icao) => !existing.has(icao));
+
+    if (toFetch.length === 0 && !initialLoaded) {
+      setInitialLoaded(true);
+      return;
+    }
+    if (toFetch.length === 0) return;
+
     setLoading(true);
+    setInitialLoaded(true);
 
-    const results = await Promise.all(
-      DEFAULT_AIRPORTS.map((icao) => fetchAirportWeather(icao))
-    );
-
-    const validResults = results.filter((r): r is MapAirport => r !== null);
-    setAirports(validResults);
-    setLoading(false);
-  }, [initialLoaded, fetchAirportWeather]);
-
-  // Load defaults when component mounts
-  useState(() => {
-    loadDefaults();
-  });
+    Promise.all(toFetch.map((icao) => fetchAirportWeather(icao))).then((results) => {
+      const valid = results.filter((r): r is MapAirport => r !== null);
+      setAirports((prev) => [...prev, ...valid]);
+      setLoading(false);
+    });
+  }, [favorites, fetchAirportWeather]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Add airport via search
   const handleSearch = async (e: FormEvent) => {
@@ -385,12 +395,25 @@ function MapView() {
                         </div>
                       )}
                     </div>
-                    <button
-                      onClick={() => navigate(`/weather/${airport.icao}`)}
-                      className="mt-3 w-full px-3 py-1.5 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors"
-                    >
-                      Full Weather Details
-                    </button>
+                    <div className="mt-3 flex gap-2">
+                      <button
+                        onClick={() => navigate(`/weather/${airport.icao}`)}
+                        className="flex-1 px-3 py-1.5 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors"
+                      >
+                        Details
+                      </button>
+                      <button
+                        onClick={() => isFavorite(airport.icao) ? removeFavorite(airport.icao) : addFavorite(airport.icao)}
+                        className={`px-3 py-1.5 text-sm rounded transition-colors ${
+                          isFavorite(airport.icao)
+                            ? 'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        }`}
+                        title={isFavorite(airport.icao) ? 'Remove from favorites' : 'Add to favorites'}
+                      >
+                        {isFavorite(airport.icao) ? '\u2605' : '\u2606'}
+                      </button>
+                    </div>
                   </div>
                 </Popup>
               </CircleMarker>
