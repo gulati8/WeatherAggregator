@@ -11,6 +11,7 @@ import usersRoutes from './routes/users';
 import favoritesRoutes from './routes/favorites';
 import preferencesRoutes from './routes/preferences';
 import airportsRoutes from './routes/airports';
+import mapLayersRoutes from './routes/map-layers';
 import { airportSearch } from './services/airport-search';
 
 const app = express();
@@ -46,6 +47,7 @@ app.use('/api/users', usersRoutes);
 app.use('/api/favorites', favoritesRoutes);
 app.use('/api/preferences', preferencesRoutes);
 app.use('/api/airports', airportsRoutes);
+app.use('/api/map', mapLayersRoutes);
 
 // Error handling
 app.use(

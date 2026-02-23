@@ -1,4 +1,4 @@
-import { useState, useCallback, FormEvent } from 'react';
+import { useState, useCallback, useRef, useEffect, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from 'react-leaflet';
 import { weatherApi } from '../api/client';
@@ -21,6 +21,26 @@ const FLIGHT_CATEGORY_COLORS: Record<FlightCategory, string> = {
 };
 
 const DEFAULT_AIRPORTS = ['KJFK', 'KLAX', 'KORD', 'KATL', 'KDFW'];
+
+interface WeatherLayer {
+  id: string;
+  label: string;
+  group: string;
+  url: string;
+  attribution: string;
+  opacity: number;
+  enabled: boolean;
+}
+
+const DEFAULT_LAYERS: WeatherLayer[] = [
+  { id: 'nexrad', label: 'NEXRAD Radar', group: 'Radar & Precipitation', url: 'https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/nexrad-n0q-900913/{z}/{x}/{y}.png', attribution: 'Iowa State Mesonet', opacity: 0.5, enabled: true },
+  { id: 'echo-tops', label: 'Echo Tops', group: 'Radar & Precipitation', url: 'https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/nexrad-eet/{z}/{x}/{y}.png', attribution: 'Iowa State Mesonet', opacity: 0.5, enabled: false },
+  { id: 'precip-1h', label: 'Precip (1hr)', group: 'Radar & Precipitation', url: 'https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/q2-n1p/{z}/{x}/{y}.png', attribution: 'Iowa State Mesonet', opacity: 0.5, enabled: false },
+  { id: 'clouds', label: 'Clouds', group: 'Weather Overlays', url: '/api/map/owm/clouds_new/{z}/{x}/{y}.png', attribution: 'OpenWeatherMap', opacity: 0.5, enabled: false },
+  { id: 'temp', label: 'Temperature', group: 'Weather Overlays', url: '/api/map/owm/temp_new/{z}/{x}/{y}.png', attribution: 'OpenWeatherMap', opacity: 0.5, enabled: false },
+  { id: 'wind', label: 'Wind', group: 'Weather Overlays', url: '/api/map/owm/wind_new/{z}/{x}/{y}.png', attribution: 'OpenWeatherMap', opacity: 0.5, enabled: false },
+  { id: 'pressure', label: 'Pressure', group: 'Weather Overlays', url: '/api/map/owm/pressure_new/{z}/{x}/{y}.png', attribution: 'OpenWeatherMap', opacity: 0.5, enabled: false },
+];
 
 // Component to recenter map when airports change
 function MapBounds({ airports }: { airports: MapAirport[] }) {
@@ -50,8 +70,30 @@ function MapView() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [initialLoaded, setInitialLoaded] = useState(false);
-  const [showRadar, setShowRadar] = useState(true);
-  const [radarOpacity, setRadarOpacity] = useState(0.5);
+  const [layers, setLayers] = useState<WeatherLayer[]>(DEFAULT_LAYERS);
+  const [layersPanelOpen, setLayersPanelOpen] = useState(false);
+  const layersPanelRef = useRef<HTMLDivElement>(null);
+
+  // Close layers panel on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (layersPanelRef.current && !layersPanelRef.current.contains(e.target as Node)) {
+        setLayersPanelOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const toggleLayer = (id: string) => {
+    setLayers((prev) => prev.map((l) => l.id === id ? { ...l, enabled: !l.enabled } : l));
+  };
+
+  const setLayerOpacity = (id: string, opacity: number) => {
+    setLayers((prev) => prev.map((l) => l.id === id ? { ...l, opacity } : l));
+  };
+
+  const enabledCount = layers.filter((l) => l.enabled).length;
 
   // Fetch weather for an airport
   const fetchAirportWeather = useCallback(async (icao: string): Promise<MapAirport | null> => {
@@ -126,7 +168,7 @@ function MapView() {
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)]">
       {/* Search bar */}
-      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3">
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 relative z-[1001]">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center gap-3">
           <form onSubmit={handleSearch} className="flex items-center gap-2">
             <AirportAutocomplete
@@ -181,28 +223,65 @@ function MapView() {
             })}
           </div>
 
-          {/* Radar toggle */}
-          <div className="flex items-center gap-2 text-xs">
-            <label className="flex items-center gap-1.5 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={showRadar}
-                onChange={(e) => setShowRadar(e.target.checked)}
-                className="w-3.5 h-3.5 rounded accent-green-500"
-              />
-              <span className="text-gray-700 dark:text-gray-300 font-medium">NEXRAD Radar</span>
-            </label>
-            {showRadar && (
-              <input
-                type="range"
-                min={0.1}
-                max={0.9}
-                step={0.1}
-                value={radarOpacity}
-                onChange={(e) => setRadarOpacity(parseFloat(e.target.value))}
-                className="w-20 h-1.5 accent-green-500"
-                title={`Opacity: ${Math.round(radarOpacity * 100)}%`}
-              />
+          {/* Layers button + panel */}
+          <div className="relative" ref={layersPanelRef}>
+            <button
+              onClick={() => setLayersPanelOpen(!layersPanelOpen)}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+              </svg>
+              Layers
+              {enabledCount > 0 && (
+                <span className="bg-blue-600 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px]">
+                  {enabledCount}
+                </span>
+              )}
+            </button>
+
+            {layersPanelOpen && (
+              <div className="absolute right-0 top-full mt-2 w-72 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50 py-2">
+                {['Radar & Precipitation', 'Weather Overlays'].map((group) => (
+                  <div key={group}>
+                    <div className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+                      {group}
+                    </div>
+                    {layers.filter((l) => l.group === group).map((layer) => (
+                      <div key={layer.id} className="px-3 py-1.5">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={layer.enabled}
+                            onChange={() => toggleLayer(layer.id)}
+                            className="w-3.5 h-3.5 rounded accent-blue-500"
+                          />
+                          <span className="text-xs text-gray-700 dark:text-gray-300 font-medium flex-1">
+                            {layer.label}
+                          </span>
+                          <span className="text-[10px] text-gray-400 dark:text-gray-500">
+                            {layer.attribution}
+                          </span>
+                        </label>
+                        {layer.enabled && (
+                          <div className="flex items-center gap-2 mt-1 ml-6">
+                            <span className="text-[10px] text-gray-400 w-7">{Math.round(layer.opacity * 100)}%</span>
+                            <input
+                              type="range"
+                              min={0.1}
+                              max={0.9}
+                              step={0.1}
+                              value={layer.opacity}
+                              onChange={(e) => setLayerOpacity(layer.id, parseFloat(e.target.value))}
+                              className="flex-1 h-1 accent-blue-500"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
             )}
           </div>
 
@@ -241,14 +320,15 @@ function MapView() {
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
 
-          {showRadar && (
+          {layers.filter((l) => l.enabled).map((layer) => (
             <TileLayer
-              url="https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/nexrad-n0q-900913/{z}/{x}/{y}.png"
-              attribution='&copy; <a href="https://mesonet.agron.iastate.edu/">Iowa State Mesonet</a> NEXRAD'
-              opacity={radarOpacity}
+              key={layer.id}
+              url={layer.url}
+              attribution={`&copy; ${layer.attribution}`}
+              opacity={layer.opacity}
               zIndex={10}
             />
-          )}
+          ))}
 
           <MapBounds airports={airports} />
 

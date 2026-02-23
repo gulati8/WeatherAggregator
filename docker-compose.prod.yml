@@ -39,6 +39,7 @@ services:
       DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/weatheraggregator
       REDIS_URL: redis://redis:6379
       JWT_SECRET: ${JWT_SECRET}
+      OWM_API_KEY: ${OWM_API_KEY:-}
     depends_on:
       postgres:
         condition: service_healthy

@@ -20,6 +20,9 @@ export const config = {
     refreshTokenExpiry: '7d',
     bcryptRounds: 12,
   },
+  owm: {
+    apiKey: process.env.OWM_API_KEY || '',
+  },
   apis: {
     aviationWeather: {
       baseUrl: 'https://aviationweather.gov/api/data',

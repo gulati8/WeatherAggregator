@@ -40,6 +40,7 @@ services:
       DATABASE_URL: postgres://postgres:devpassword@postgres:5432/weatheraggregator
       REDIS_URL: redis://redis:6379
       JWT_SECRET: dev-jwt-secret-change-in-production
+      OWM_API_KEY: ${OWM_API_KEY:-}
     volumes:
       - ./backend/src:/app/src
       - ./backend/package.json:/app/package.json
