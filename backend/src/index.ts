@@ -40,6 +40,11 @@ app.get('/health', async (_req, res) => {
   });
 });
 
+// Version endpoint
+app.get('/api/version', (_req, res) => {
+  res.json({ version: '1.0.0', name: 'WeatherAggregator' });
+});
+
 // API routes
 app.use('/api/weather', weatherRoutes);
 app.use('/api/trip', tripRoutes);
